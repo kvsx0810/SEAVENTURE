@@ -1,0 +1,16 @@
+<svg overflow="visible" style="display: block;" width="202.035" height="267" viewBox="0 0 202.035 267" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 46 top">
+<path id="Union_3" d="M118 174L117.994 174.181C117.768 177.963 110.47 181 101.5 181C92.5297 181 85.2318 177.963 85.0059 174.181L85 174V98H118V174Z" fill="url(#paint4_linear_0_17t)"/>
+<circle id="Ellipse 9" cx="101.017" cy="62.4666" r="62.4666" fill="url(#paint5_linear_0_17t)"/>
+</g>
+<defs>
+<linearGradient id="paint4_linear_0_17t" x1="120.5" y1="153.5" x2="90.5" y2="162.5" gradientUnits="userSpaceOnUse">
+<stop stop-color="#0A69CC"/>
+<stop offset="1" stop-color="#021427"/>
+</linearGradient>
+<linearGradient id="paint5_linear_0_17t" x1="130" y1="8.6938e-07" x2="101" y2="100.5" gradientUnits="userSpaceOnUse">
+<stop stop-color="#C9F2EE"/>
+<stop offset="1" stop-color="#ED8495"/>
+</linearGradient>
+</defs>
+</svg>

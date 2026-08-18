@@ -1,0 +1,407 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #021427;
+  overflow: hidden;
+  font-family: 'Alata', sans-serif;
+}
+
+.stage {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #021427;
+}
+
+.slide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  aspect-ratio: 1920 / 1080;
+  width: min(100vw, calc(100vh * 1920 / 1080));
+  height: min(100vh, calc(100vw * 1080 / 1920));
+  overflow: hidden;
+  background: #021427;
+  container-type: inline-size;
+}
+
+.header {
+  position: absolute;
+  z-index: 10;
+  margin: 0;
+  color: #e3fae0;
+  font-family: 'Alata', sans-serif;
+  font-weight: 400;
+  font-size: 1.0417cqw;
+  line-height: 1.25;
+}
+
+.header--left {
+  left: 0.3646%;
+  top: 0.3704%;
+  width: 48.8021%;
+}
+
+.header--right {
+  right: 0.7813%;
+  top: 0.463%;
+  width: 39.8438%;
+  text-align: right;
+}
+
+.machine {
+  position: absolute;
+  left: 4.5313%;
+  top: 0;
+  width: 90.8854%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+}
+
+.logo {
+  position: absolute;
+  left: 26.9271%;
+  top: 9.9074%;
+  width: 4.4885%;
+  height: 7.5%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.title-box {
+  position: absolute;
+  left: 30.3646%;
+  top: 33.8889%;
+  width: 39.2708%;
+  height: 14.4444%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title-box img {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.joystick-btn {
+  position: absolute;
+  top: 64.7222%;
+  width: 10.5227%;
+  height: 24.7222%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.joystick-btn:hover:not(.is-disabled) .joystick-part {
+  filter: brightness(1.15);
+}
+
+.joystick-btn:focus-visible {
+  outline: 3px solid #98e7df;
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+.joystick-btn.is-disabled {
+  cursor: default;
+}
+
+.joystick-btn--left {
+  left: 24.8958%;
+}
+
+.joystick-btn--right {
+  left: 63.6458%;
+}
+
+.joystick-part {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Pivot sits where the stick plugs into the base disc, so the ball
+   swings but the stick's foot stays anchored over the base. */
+.joystick-top {
+  transform-origin: 50% 66.7%;
+}
+
+.joystick-btn.is-pushing-right .joystick-top {
+  animation: pushRight 0.42s ease;
+}
+
+.joystick-btn.is-pushing-left .joystick-top {
+  animation: pushLeft 0.42s ease;
+}
+
+.joystick-btn.is-refusing .joystick-top {
+  animation: refuse 0.3s ease;
+}
+
+@keyframes pushRight {
+  0% { transform: rotate(0deg); }
+  55% { transform: rotate(24deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes pushLeft {
+  0% { transform: rotate(0deg); }
+  55% { transform: rotate(-24deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes refuse {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(8deg); }
+  60% { transform: rotate(-8deg); }
+}
+
+.arcade-button {
+  position: absolute;
+  left: 44.2708%;
+  top: 80.8333%;
+  width: 10.4688%;
+  height: 8.269%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.screen-list {
+  position: absolute;
+  left: 50%;
+  top: 30.2778%;
+  transform: translateX(-50%);
+  margin: 0;
+  width: max-content;
+  font-family: 'Alata', sans-serif;
+  font-weight: 400;
+  font-size: 1.6667cqw;
+  line-height: 2.9688cqw;
+  color: #063e79;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.screen-list p {
+  margin: 0;
+}
+
+.screen-date {
+  position: absolute;
+  left: 50%;
+  top: 68.9815%;
+  transform: translateX(-50%);
+  margin: 0;
+  width: max-content;
+  font-family: 'Alata', sans-serif;
+  font-weight: 400;
+  font-size: 1.0417cqw;
+  color: #063e79;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Big bold gradient heading, e.g. "SDG 14 TARGETS" / "CREDIT" / "REFERENCE" */
+.screen-heading {
+  position: absolute;
+  left: 50%;
+  top: 22.9599%;
+  transform: translateX(-50%);
+  margin: 0;
+  width: max-content;
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 3.125cqw;
+  line-height: 4.4792cqw;
+  letter-spacing: -0.09375cqw;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background-image: linear-gradient(-73.64deg, #021427 1.65%, #07488d 98.35%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Higher position for the heading on pages without a body paragraph below, e.g. Credit/Reference */
+.screen-heading--top {
+  top: 15.1389%;
+}
+
+/* Two-line variant of the bold heading, e.g. "SDG GOAL 14 / (LIFE BELOW WATER)" */
+.screen-heading-lines {
+  position: absolute;
+  left: 50%;
+  top: 22.9599%;
+  transform: translateX(-50%);
+  margin: 0;
+  width: max-content;
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 3.125cqw;
+  line-height: 4.4792cqw;
+  letter-spacing: -0.09375cqw;
+  text-align: center;
+  text-transform: uppercase;
+  background-image: linear-gradient(-73.64deg, #021427 1.65%, #07488d 98.35%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.screen-heading-lines p {
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Centered block anchored to its own midpoint, e.g. the SDG 14 goal statement */
+.screen-subtext-centered {
+  position: absolute;
+  left: 50%;
+  top: 53.7083%;
+  transform: translate(-50%, -50%);
+  width: 38.75%;
+  margin: 0;
+  font-family: 'Alata', sans-serif;
+  font-weight: 400;
+  font-size: 2.0833cqw;
+  line-height: 2.9167cqw;
+  color: #042b54;
+  text-align: center;
+}
+
+/* Left-aligned body paragraph under a heading, e.g. SDG target text */
+.screen-body {
+  position: absolute;
+  left: 27.1875%;
+  top: 32.963%;
+  width: 45.0521%;
+  margin: 0;
+  font-family: 'Alata', sans-serif;
+  font-weight: 400;
+  font-size: 1.6667cqw;
+  line-height: 2.9688cqw;
+  color: #042b54;
+  text-align: left;
+}
+
+/* Centered italic quote */
+.screen-quote {
+  position: absolute;
+  left: 50%;
+  top: 29.6296%;
+  transform: translateX(-50%);
+  width: 41.1979%;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-style: italic;
+  font-size: 2.8646cqw;
+  line-height: 2.9688cqw;
+  color: #021427;
+  text-align: center;
+}
+
+.screen-quote-author {
+  position: absolute;
+  left: 65.0261%;
+  top: 47.1296%;
+  transform: translateX(-50%);
+  margin: 0;
+  width: max-content;
+  font-family: 'Alata', sans-serif;
+  font-weight: 400;
+  font-size: 1.6667cqw;
+  color: #042b54;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Centered two-line italic black heading, e.g. section dividers */
+.screen-title-italic {
+  position: absolute;
+  left: 50%;
+  top: 32.3148%;
+  transform: translateX(-50%);
+  margin: 0;
+  width: max-content;
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  font-size: 2.8646cqw;
+  line-height: 2.9688cqw;
+  color: #042b54;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.screen-title-italic p {
+  margin: 0;
+}
+
+/* Full-width left-aligned paragraph starting near the top, e.g. slide 24 */
+.screen-paragraph {
+  position: absolute;
+  left: 50%;
+  top: 19.8148%;
+  transform: translateX(-50%);
+  width: 44.7396%;
+  margin: 0;
+  font-family: 'Alata', sans-serif;
+  font-weight: 400;
+  font-size: 1.6667cqw;
+  line-height: 2.9688cqw;
+  color: #063e79;
+  text-align: left;
+}
+
+/* Centered bold team name under the "CREDIT" heading */
+.screen-team-name {
+  position: absolute;
+  left: 50%;
+  top: 23.3306%;
+  transform: translateX(-50%);
+  margin: 0;
+  width: max-content;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 2.6042cqw;
+  line-height: 4.4792cqw;
+  letter-spacing: -0.078125cqw;
+  color: #063e79;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.screen-list--credit {
+  top: 33.0528%;
+}

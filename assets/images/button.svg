@@ -1,0 +1,22 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="201" height="89.3052" viewBox="0 0 201 89.3052" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 45">
+<path id="Union" d="M201 70.8384H200.98C199.97 81.0694 155.371 89.3052 100.5 89.3052C45.6286 89.3052 1.02999 81.0694 0.0195312 70.8384H0V34.6157H201V70.8384Z" fill="url(#paint0_linear_0_55)"/>
+<ellipse id="Ellipse 11" cx="100.5" cy="34.2605" rx="100.5" ry="18.8215" fill="url(#paint1_linear_0_55)"/>
+<path id="Union_2" d="M177.562 35.7856L177.556 35.936C177.023 42.2811 142.729 47.3999 100.501 47.3999C57.942 47.3999 23.4403 42.2006 23.4385 35.7866V15.6851H177.562V35.7856Z" fill="#ED8495"/>
+<ellipse id="Ellipse 10" cx="100.789" cy="15.6848" rx="76.9719" ry="15.6848" fill="url(#paint2_linear_0_55)"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_55" x1="-63.6107" y1="62.1586" x2="201" y2="61.9604" gradientUnits="userSpaceOnUse">
+<stop stop-color="#086E9B"/>
+<stop offset="1" stop-color="#BBE8FB"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_55" x1="0" y1="34.2605" x2="201" y2="34.2605" gradientUnits="userSpaceOnUse">
+<stop stop-color="#BBE8FB"/>
+<stop offset="1" stop-color="#98E7DF"/>
+</linearGradient>
+<linearGradient id="paint2_linear_0_55" x1="101.08" y1="-5.51874" x2="100.535" y2="31.3616" gradientUnits="userSpaceOnUse">
+<stop stop-color="#C9F2EE"/>
+<stop offset="1" stop-color="#F8CED5"/>
+</linearGradient>
+</defs>
+</svg>
