@@ -50,14 +50,17 @@ body {
   container-type: inline-size;
 }
 
+/* Pinned to .stage (the real viewport) directly, not .slide -- so it
+   never scales, crops, or dims with the cabinet composition underneath.
+   z-index is above everything, including the popup overlay. */
 .header {
   position: absolute;
-  z-index: 10;
+  z-index: 1000;
   margin: 0;
   color: #e3fae0;
   font-family: 'Alata', sans-serif;
   font-weight: 400;
-  font-size: 1.0417cqw;
+  font-size: 1.0417vw;
   line-height: 1.25;
 }
 
