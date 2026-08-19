@@ -3,36 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SEAVENTURE — Title Slide</title>
+<title>SEAVENTURE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alata&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alata&family=Inter:ital,wght@0,400;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Real screen shape traced from Figma (node 163:11, "Vector 23"),
+       normalized against the full 1920x1080 slide so every .screen-*
+       class's existing percentages line up unmodified -- see the
+       comment above .screen-clip in styles.css. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <clipPath id="seaventureScreenClip" clipPathUnits="objectBoundingBox">
+        <path d="M0.716372 0.072818 C0.542292 0.028474 0.403045 0.037152 0.281961 0.07143 C0.264523 0.076366 0.250223 0.098892 0.246347 0.129517 C0.222969 0.314248 0.234411 0.527606 0.247312 0.651549 C0.250686 0.68397 0.26538 0.708487 0.283702 0.713598 C0.468838 0.765238 0.635556 0.739696 0.717803 0.713665 C0.733749 0.708618 0.746661 0.688134 0.750686 0.660244 C0.774236 0.497095 0.771283 0.263819 0.751352 0.126055 C0.747166 0.09712 0.733008 0.077056 0.716372 0.072818 Z" />
+      </clipPath>
+    </defs>
+  </svg>
+
   <main class="stage">
-    <section class="slide" aria-label="SEAVENTURE title slide">
+    <section class="slide" aria-label="SEAVENTURE">
       <p class="header header--left">RMIT University Vietnam, Saigon South Campus, School of Communication and Design, Digital Media Program</p>
       <p class="header header--right">COMM2754-2026-S2-A2w08-Seaventure-DesignDocuments</p>
 
       <img class="machine" src="assets/images/machine.svg" alt="" draggable="false">
       <img class="logo" src="assets/images/logo.svg" alt="Seaventure logo" draggable="false">
 
-      <div class="title-box">
-        <img src="assets/images/SEAVENTURE.svg" alt="SEAVENTURE" draggable="false">
+      <div class="screen-clip">
+        <div class="screen-content" id="screenContent"><!-- current page/carousel panel injected by app.js --></div>
       </div>
 
-      <button type="button" class="joystick-btn joystick-btn--left" aria-label="Previous page">
+      <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-frame">
+          <iframe id="popupIframe" title="Selected generative art piece" loading="lazy"></iframe>
+          <div class="popup-placeholder" id="popupPlaceholder">
+            <p class="ph-title" id="popupTitle">Placeholder</p>
+            <p class="ph-note">No project folder wired up yet -- set this entry's <code>src</code> in app.js once the member's code/ folder is added to the repo.</p>
+          </div>
+          <button type="button" class="popup-close" id="popupClose" aria-label="Close">&times;</button>
+        </div>
+      </div>
+
+      <button type="button" class="joystick-btn joystick-btn--left" id="joyLeft" aria-label="Previous / browse left">
         <img class="joystick-part" src="assets/images/joystick-left-base.svg" alt="" draggable="false">
         <img class="joystick-part joystick-top" src="assets/images/joystick-left-top.svg" alt="" draggable="false">
       </button>
-      <button type="button" class="joystick-btn joystick-btn--right" data-href="sdg14.html" aria-label="Next page">
+      <button type="button" class="joystick-btn joystick-btn--right" id="joyRight" aria-label="Next / browse right">
         <img class="joystick-part" src="assets/images/joystick-right-base.svg" alt="" draggable="false">
         <img class="joystick-part joystick-top" src="assets/images/joystick-right-top.svg" alt="" draggable="false">
       </button>
-      <img class="arcade-button" src="assets/images/button.svg" alt="" draggable="false">
+
+      <button type="button" class="arcade-button-btn" id="arcadeButton" aria-label="Select">
+        <img class="btn-base" src="assets/images/base.svg" alt="" draggable="false">
+        <img class="btn-dome" src="assets/images/dome.svg" alt="" draggable="false">
+      </button>
     </section>
   </main>
-  <script src="nav.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

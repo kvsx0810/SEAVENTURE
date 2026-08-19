@@ -28,12 +28,9 @@ body {
 
 .slide {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  aspect-ratio: 1920 / 1080;
-  width: min(100vw, calc(100vh * 1920 / 1080));
-  height: min(100vh, calc(100vw * 1080 / 1920));
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   background: #021427;
   container-type: inline-size;
@@ -405,3 +402,254 @@ body {
 .screen-list--credit {
   top: 33.0528%;
 }
+
+/* ============================================================
+   Single-page shell: one persistent cabinet, content swapped
+   inside the curved screen via app.js instead of one .html per
+   slide. The clip-path below is the real "Vector 23" screen
+   shape traced from Figma (node 163:11), normalized against the
+   full 1920x1080 slide -- so every .screen-* class above keeps
+   working unmodified (their percentages were already authored
+   against the full slide, confirmed against Figma directly for
+   .title-box) and just gets cropped to the curved glass instead
+   of spilling past it.
+   ============================================================ */
+
+.screen-clip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  clip-path: url(#seaventureScreenClip);
+}
+
+.screen-content {
+  position: absolute;
+  inset: 0;
+}
+
+.page-panel {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+}
+
+.page-panel.is-leaving-left  { opacity: 0; transform: translateX(-6%); }
+.page-panel.is-leaving-right { opacity: 0; transform: translateX(6%); }
+.page-panel.is-enter-from-left  { opacity: 0; transform: translateX(-6%); transition: none; }
+.page-panel.is-enter-from-right { opacity: 0; transform: translateX(6%); transition: none; }
+
+/* -- game-select carousel: each item is its own full-screen panel -- */
+.carousel-item {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2%;
+  text-align: center;
+}
+
+.carousel-item .item-emoji {
+  font-size: 8cqw;
+  line-height: 1;
+}
+
+.carousel-item .item-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 2.6cqw;
+  text-transform: uppercase;
+  letter-spacing: 0.05cqw;
+  color: #021427;
+}
+
+.carousel-item .item-hint {
+  font-family: 'Alata', sans-serif;
+  font-size: 1.1cqw;
+  color: #063e79;
+  opacity: 0.75;
+}
+
+.carousel-item.kind-exit .item-emoji,
+.carousel-item.kind-exit .item-label { color: #063e79; }
+
+.select-track.is-spinning .carousel-item { transition: none; }
+
+/* -- idle prompt shown on the game-select page before browsing -- */
+.idle-prompt {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5%;
+}
+
+.idle-prompt .prompt-label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 3.2cqw;
+  letter-spacing: -0.05cqw;
+  text-align: center;
+  text-transform: uppercase;
+  color: #021427;
+  animation: promptPulse 1.6s ease-in-out infinite;
+}
+
+.idle-prompt .prompt-hint {
+  font-family: 'Alata', sans-serif;
+  font-size: 1.4cqw;
+  color: #063e79;
+  opacity: 0.8;
+}
+
+@keyframes promptPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* -- arcade center button: base (static) + dome (presses down) -- */
+.arcade-button-btn {
+  position: absolute;
+  left: 44.2708%;
+  top: 80.8333%;
+  width: 10.4688%;
+  height: 8.269%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  z-index: 6;
+}
+
+.arcade-button-btn .btn-base {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.arcade-button-btn .btn-dome {
+  position: absolute;
+  left: 11.44%;
+  top: 0;
+  width: 77.11%;
+  height: 64.86%;
+  pointer-events: none;
+  user-select: none;
+  transform-origin: 50% 100%;
+}
+
+.arcade-button-btn:hover .btn-dome { filter: brightness(1.1); }
+
+.arcade-button-btn.is-pressed .btn-dome {
+  animation: domePress 0.22s ease;
+}
+
+@keyframes domePress {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(22%); }
+  100% { transform: translateY(0); }
+}
+
+/* -- popup: fullscreen-ish 16:9 reveal for a selected generative art
+   piece, dims the whole cabinet (this is the one place allowed to
+   break out of the curved-screen clip) -- */
+.popup-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 20, 39, 0);
+  pointer-events: none;
+  transition: background 0.35s ease;
+}
+
+.popup-overlay.is-open {
+  display: flex;
+  background: rgba(2, 20, 39, 0.86);
+  pointer-events: auto;
+}
+
+.popup-frame {
+  position: relative;
+  width: 82%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 0.6cqw;
+  box-shadow: 0 0 4cqw rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  transform: scale(0.92);
+  opacity: 0;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.popup-overlay.is-open .popup-frame {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.popup-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: none;
+}
+
+.popup-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1cqw;
+  font-family: 'Alata', sans-serif;
+  color: #e3fae0;
+  text-align: center;
+  padding: 0 2cqw;
+}
+
+.popup-placeholder .ph-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 2.4cqw;
+  text-transform: uppercase;
+}
+
+.popup-placeholder .ph-note {
+  font-size: 1.2cqw;
+  opacity: 0.7;
+  max-width: 70%;
+}
+
+.popup-close {
+  position: absolute;
+  top: 1.5%;
+  right: 1.5%;
+  width: 2.8cqw;
+  height: 2.8cqw;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #e3fae0;
+  font-family: 'Alata', sans-serif;
+  font-size: 1.6cqw;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.popup-close:hover { background: rgba(255, 255, 255, 0.24); }
