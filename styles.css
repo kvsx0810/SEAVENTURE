@@ -96,6 +96,9 @@ body {
   height: 7.5%;
   pointer-events: none;
   user-select: none;
+  /* sits partly over the curved glass -- full-bleed carousel thumbnails
+     paint later in the DOM (.screen-clip) and would otherwise cover it */
+  z-index: 4;
 }
 
 .title-box {
