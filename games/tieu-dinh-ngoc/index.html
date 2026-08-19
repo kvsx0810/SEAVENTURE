@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Coral Reef</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Google Fonts (Inter Black + Alata, used by the "reef has gone silent" banner) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alata&family=Inter:wght@900&display=swap">
+
+  <!-- p5.js -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"
+  ></script>
+
+  <!-- p5.sound (adds loadSound/SoundFile, needed for the ambient + bubble loops) -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/addons/p5.sound.min.js"
+  ></script>
+
+  <!-- Your JS -->
+  <script src="sketch.js" defer></script>
+</head>
+
+<body>
+
+  <div id="scene">
+
+    <!-- BACKGROUND -->
+    <img
+      class="background"
+      src="assets/images/background.png"
+      alt=""
+    >
+
+    <!-- SOUND TOGGLE (browsers block audio until the user interacts once) -->
+    <button id="sound-toggle" type="button" aria-pressed="false" aria-label="Toggle sound">
+      <img id="sound-toggle-icon" src="assets/images/speaker-x.svg" alt="">
+    </button>
+
+  </div>
+
+</body>
+</html>

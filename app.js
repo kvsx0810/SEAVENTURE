@@ -64,8 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const CAROUSEL = [
     { id: 'exit-start', kind: 'exit' },
     { id: 'random', kind: 'random' },
-    { id: 'member1', kind: 'game', label: 'Member 1', emoji: '\u{1F41F}', src: null },
-    { id: 'member2', kind: 'game', label: 'Member 2', emoji: '\u{1F420}', src: null },
+    { id: 'kieu-phuong', kind: 'game', label: 'Kiều Phương', thumb: 'assets/images/KieuPhuongThumbnail.png', src: 'games/kieu-phuong/index.html' },
+    { id: 'tieu-dinh-ngoc', kind: 'game', label: 'Tiêu Dĩnh Ngọc', thumb: 'assets/images/TieuDinhNgocThumbnail.png', src: 'games/tieu-dinh-ngoc/index.html' },
     { id: 'member3', kind: 'game', label: 'Member 3', emoji: '\u{1F991}', src: null },
     { id: 'member4', kind: 'game', label: 'Member 4', emoji: '\u{1F421}', src: null },
     { id: 'member5', kind: 'game', label: 'Member 5', emoji: '\u{1F988}', src: null },
@@ -124,13 +124,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderCarouselItem(item) {
     if (item.kind === 'exit') {
       return '<div class="carousel-item kind-exit"><div class="item-emoji">&#8617;</div>' +
-        '<div class="item-label">Exit</div><div class="item-hint">back to browsing</div></div>';
+        '<div class="item-label">Exit</div></div>';
     }
     if (item.kind === 'random') {
       return '<div class="carousel-item kind-random"><div class="item-emoji">?</div>' +
-        '<div class="item-label">Random</div><div class="item-hint">center button to spin</div></div>';
+        '<div class="item-label">Random</div></div>';
     }
-    return '<div class="carousel-item kind-game"><div class="item-emoji">' + item.emoji + '</div>' +
+    var thumbHtml = item.thumb
+      ? '<img class="item-thumb" src="' + item.thumb + '" alt="">'
+      : '<div class="item-emoji">' + item.emoji + '</div>';
+    return '<div class="carousel-item kind-game">' + thumbHtml +
       '<div class="item-label">' + item.label + '</div></div>';
   }
 

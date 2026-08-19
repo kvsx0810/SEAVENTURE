@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mr. Bartholomew Fishington's Ocean Cleanup</title>
+<style>
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#021427; }
+  #viewport {width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+  #stage {position: relative; width: 1920px; height: 1080px; flex: 0 0 1920; flex-shrink: 0; transform-origin: center center; overflow: hidden; cursor: pointer;
+}
+  .layer { position:absolute; top:0; left:0; width:1920px; height:1080px; pointer-events:none; }
+  .sprite { position:absolute; user-select:none; -webkit-user-drag:none; pointer-events:auto; }
+  #hud {
+    position:absolute; top:20px; left:20px; z-index:100; pointer-events:none; display:none;
+    font-family:'Omnes','Omnes Bold',Arial,sans-serif; font-weight:700; font-size:30px;
+    color:#021427; 
+  }
+  #loading {
+    position:absolute; top:0; left:0; width:100%; height:100%; z-index:999;
+    align-items:center; justify-content:center; background:#021423;
+    font-family:'Alata', Arial,sans-serif; font-weight:700; font-size:40px; color:#cfe9ff;
+  }
+  img { display:block; }
+</style>
+</head>
+<body>
+<div id="viewport">
+  <div id="stage">
+    <div id="hud"></div>
+    <div id="loading">Loading...</div>
+  </div>
+</div>
+
+<script>
+const STAGE_W = 1920, STAGE_H = 1080;
+const IMG = 'images/';
+const SLOT_BOX_W = 735, SLOT_BOX_H = 464;
+const FISH_SPEED = 110;
+
+const FISH_COUNT = 18, TRASH_COUNT = 21;
+const fishNames  = Array.from({length:FISH_COUNT},  (_,i)=>`fish_${String(i+1).padStart(2,'0')}.png`);
+const trashNames = Array.from({length:TRASH_COUNT}, (_,i)=>`trash_${String(i+1).padStart(2,'0')}.png`);
+
+const SWIM_BOX = { left:360, right:STAGE_W-360, top:STAGE_H/2, bottom:STAGE_H-70 };
+const CORAL_RECTS = [
+  { x:0, y:STAGE_H-436, w:360, h:436 },
+  { x:STAGE_W-360, y:STAGE_H-436, w:360, h:436 }
+];
+
+function overlapsCoral(x,y,w,h){
+  return CORAL_RECTS.some(r=> x<r.x+r.w && x+w>r.x && y<r.y+r.h && y+h>r.y);
+}
+function rectOverlap(x,y,w,h,f){
+  return x<f.x+f.w && x+w>f.x && y<f.y+f.h && y+h>f.y;
+}
+function fitBox(nw, nh, bw, bh){
+  const scale = Math.min(bw/nw, bh/nh);
+  return { w: nw*scale, h: nh*scale };
+}
+function rotatedBox(w, h, angleDeg){
+  const r = angleDeg*Math.PI/180;
+  const bbW = Math.abs(w*Math.cos(r)) + Math.abs(h*Math.sin(r));
+  const bbH = Math.abs(w*Math.sin(r)) + Math.abs(h*Math.cos(r));
+  return { bbW, bbH };
+}
+function rotatedXBounds(w, bbW){
+  return { minX:(bbW-w)/2, maxX:STAGE_W - w/2 - bbW/2 };
+}
+function rotatedYBounds(h, bbH){
+  return { minY:(bbH-h)/2, maxY:STAGE_H - h/2 - bbH/2 };
+}
+const randRange = (a,b)=> a + Math.random()*(b-a);
+
+// ---------------- stage helpers ----------------
+const stage = document.getElementById('stage');
+const hud = document.getElementById('hud');
+
+function fitStage(){
+  const scale = Math.min(
+    window.innerWidth / STAGE_W,
+    window.innerHeight / STAGE_H
+  );
+
+  stage.style.transform = `scale(${scale})`;
+}
+
+window.addEventListener('resize', fitStage);
+
+let timers=[], intervals=[], cleanupFns=[];
+function clearStage(){
+  cleanupFns.forEach(fn=>{ try{ fn(); } catch(e){} });
+  cleanupFns=[];
+  timers.forEach(clearTimeout); timers=[];
+  intervals.forEach(clearInterval); intervals=[];
+  [...stage.children].forEach(c=>{ if(c!==hud) c.remove(); });
+  hud.style.display='none';
+  stage.onclick=null;
+}
+function makeImg(src, cls){
+  const el = document.createElement('img');
+  el.src = src; el.className = cls || 'sprite'; el.draggable = false;
+  el.onerror = ()=> console.warn('Missing image asset (check filename/path):', src);
+  stage.appendChild(el);
+  return el;
+}
+
+// ---------------- asset preloading + synchronous size lookup ----------------
+const imageCache = {};
+function dims(src){
+  const im = imageCache[src];
+  return im ? { w: im.naturalWidth, h: im.naturalHeight } : { w:100, h:100 };
+}
+function preload(list){
+  return Promise.all(list.map(src=> new Promise(res=>{
+    const im = new Image();
+    im.onload = ()=>{ imageCache[src] = im; res(true); };
+    im.onerror = ()=> res(false);
+    im.src = src;
+  })));
+}
+
+// ---------------- 1. start screen ----------------
+function showStart(){
+  clearStage();
+  makeImg(IMG+'game_start.png','layer');
+  stage.onclick = ()=> showRandomize();
+}
+
+// ---------------- 2. random_char_01 -> 02 -> slot machine ----------------
+function showRandomize(){
+  clearStage();
+  makeImg(IMG+'random_char_01.png','layer');
+  timers.push(setTimeout(startCharTwo, 1000));
+}
+function startCharTwo(){
+  const bg = stage.querySelector('.layer');
+  bg.src = IMG+'random_char_02.png';
+  const src0 = IMG+fishNames[0];
+  const el = makeImg(src0);
+  fitSlotFish(el, src0);
+  runSlotMachine(el, 0, 28, Math.floor(Math.random()*fishNames.length));
+}
+function fitSlotFish(el, src){
+  const d = dims(src);
+  const { w, h } = fitBox(d.w, d.h, SLOT_BOX_W, SLOT_BOX_H);
+  el.style.width = w+'px'; el.style.height = h+'px';
+  el.style.left = (STAGE_W-w)/2+'px'; el.style.top = (STAGE_H-h)/2+'px';
+}
+function runSlotMachine(el, ticks, total, chosenIndex){
+  const src = IMG + fishNames[Math.floor(Math.random()*fishNames.length)];
+  el.src = src; fitSlotFish(el, src);
+  if(ticks+1 < total){
+    const delay = 40 + Math.pow((ticks+1)/total, 2)*360;
+    timers.push(setTimeout(()=>runSlotMachine(el, ticks+1, total, chosenIndex), delay));
+  } else finishSlot(el, chosenIndex);
+}
+function finishSlot(el, chosenIndex){
+  const src = IMG + fishNames[chosenIndex];
+  el.src = src; fitSlotFish(el, src);
+  stage.onclick = ()=> showGamePhase(src);
+}
+
+// ---------------- 3. main game phase ----------------
+function showGamePhase(src){
+  clearStage();
+  const bg = makeImg(IMG+'game_background.png','layer');
+  const state = { alive:true, bg, src };
+  cleanupFns.push(()=> state.alive=false);
+  const fish = createSwimFish(src, state);
+  timers.push(setTimeout(()=> showPopup(state, fish), 2000));
+}
+function createSwimFish(src, state){
+  const el = makeImg(src);
+  const fish = { el, w:0, h:0, x:0, y:0, tx:0, ty:0, facing:1 };
+  const scale = randRange(0.67, 1.5);
+  const d = dims(src);
+  fish.w = d.w*scale; fish.h = d.h*scale;
+  el.style.width = fish.w+'px'; el.style.height = fish.h+'px';
+  placeInSwimBox(fish);
+  pickSwimTarget(fish);
+  requestAnimationFrame(t=> stepFish(fish, state, t));
+  return fish;
+}
+function placeInSwimBox(fish){
+  fish.x = randRange(SWIM_BOX.left, SWIM_BOX.right - fish.w);
+  fish.y = randRange(SWIM_BOX.top, SWIM_BOX.bottom - fish.h);
+}
+function pickSwimTarget(fish){
+  fish.tx = randRange(SWIM_BOX.left, SWIM_BOX.right - fish.w);
+  fish.ty = randRange(SWIM_BOX.top, SWIM_BOX.bottom - fish.h);
+}
+function stepFish(fish, state, now){
+  if(!state.alive) return;
+  const dt = fish.last ? (now-fish.last)/1000 : 0.016; fish.last = now;
+  moveTowardTarget(fish, dt);
+  fish.el.style.left = fish.x+'px'; fish.el.style.top = fish.y+'px';
+  fish.el.style.transform = `scaleX(${fish.facing})`;
+  requestAnimationFrame(t=> stepFish(fish, state, t));
+}
+function moveTowardTarget(fish, dt){
+  const dx = fish.tx-fish.x, dy = fish.ty-fish.y, dist = Math.hypot(dx,dy);
+  if(dist < 6){ pickSwimTarget(fish); return; }
+  fish.x += (dx/dist)*FISH_SPEED*dt;
+  fish.y += (dy/dist)*FISH_SPEED*dt;
+  fish.facing = dx >= 0 ? 1 : -1;
+}
+
+// ---------------- instruction popup ----------------
+function showPopup(state, fish){
+  const popup = makeImg(IMG+'instruction_pop-up.png','layer');
+  popup.style.zIndex = 50;
+  stage.onclick = ()=>{ popup.remove(); stage.onclick=null; beginTrashChallenge(state, fish); };
+}
+
+// ---------------- trash challenge ----------------
+function beginTrashChallenge(state, fish){
+  const ch = { missCount:0, spawning:true, ended:false, active:new Set(), timeLeft:30, fish, state };
+  hud.style.display = 'block';
+  updateHud(ch);
+  ch.countdown = setInterval(()=> tickCountdown(ch), 1000);
+  intervals.push(ch.countdown);
+  spawnLoop(ch);
+  requestAnimationFrame(t=> trashLoop(ch, t));
+}
+function updateHud(ch){
+  hud.textContent = `Time: ${Math.max(ch.timeLeft,0)}  |  Missed: ${ch.missCount}/5`;
+}
+function tickCountdown(ch){
+  ch.timeLeft--; updateHud(ch);
+  if(ch.timeLeft <= 0){ ch.spawning=false; clearInterval(ch.countdown); checkEnd(ch); }
+}
+function spawnLoop(ch){
+  if(!ch.spawning || ch.ended) return;
+  const frac = 1 - Math.max(ch.timeLeft,0)/30;
+  const count = 1 + Math.floor(frac*2);
+  for(let i=0;i<count;i++) spawnTrashPiece(ch);
+  timers.push(setTimeout(()=> spawnLoop(ch), 1800 - 1600*frac*frac));
+}
+function spawnTrashPiece(ch){
+  const name = trashNames[Math.floor(Math.random()*trashNames.length)];
+  const el = makeImg(IMG+name);
+  const data = makeTrashData(el, IMG+name);
+  el.addEventListener('click', e=> onTrashClick(e, ch, data));
+  ch.active.add(data);
+}
+function makeTrashData(el, src){
+  const scale = randRange(0.5, 2), angle = randRange(0, 360);
+  const d = dims(src);
+  const data = { el, w:d.w*scale, h:d.h*scale, y:-160, angle, vy:randRange(140,260) };
+  el.style.width = data.w+'px'; el.style.height = data.h+'px';
+  el.style.transform = `rotate(${angle}deg)`;
+  const { minX, maxX } = rotatedXBounds(data.w, rotatedBox(data.w, data.h, angle).bbW);
+  Object.assign(data, { minX, maxX, x: randRange(minX,maxX), vx: randRange(-40,40) });
+  el.style.left = data.x+'px'; el.style.top = data.y+'px';
+  return data;
+}
+function onTrashClick(e, ch, data){
+  e.stopPropagation();
+  if(data.el.dataset.state === 'missed') return;
+  data.el.remove(); ch.active.delete(data);
+  checkEnd(ch);
+}
+function trashLoop(ch, now){
+  if(!ch.state.alive || ch.ended) return;
+  const dt = ch.tLast ? (now-ch.tLast)/1000 : 0.016; ch.tLast = now;
+  ch.active.forEach(d=> stepTrash(d, ch, dt));
+  requestAnimationFrame(t=> trashLoop(ch, t));
+}
+function stepTrash(d, ch, dt){
+  d.x += d.vx*dt; d.y += d.vy*dt;
+  if(d.x < d.minX || d.x > d.maxX) d.vx *= -1;
+  d.x = Math.max(d.minX, Math.min(d.maxX, d.x));
+  d.el.style.left = d.x+'px'; d.el.style.top = d.y+'px';
+  if(d.y > STAGE_H) handleMiss(d, ch);
+}
+function handleMiss(d, ch){
+  d.el.dataset.state = 'missed'; d.el.remove(); ch.active.delete(d);
+  ch.missCount++; updateHud(ch);
+  if(ch.missCount > 5){ triggerLose(ch); return; }
+  checkEnd(ch);
+}
+function checkEnd(ch){
+  if(ch.ended) return;
+  if(!ch.spawning && ch.active.size === 0){
+    ch.ended = true; clearInterval(ch.countdown);
+    if(ch.missCount <= 5) triggerWin(ch);
+  }
+}
+
+// ---------------- lose scene ----------------
+function triggerLose(ch){
+  if(ch.ended) return;
+
+  ch.ended = true;
+  ch.spawning = false;
+  clearInterval(ch.countdown);
+
+  hud.style.display = 'none';
+  ch.state.alive = false;
+
+  const leftover = [...ch.active];
+
+  // Show lose popup immediately
+  const losePopup = makeImg(IMG+'lose.png','layer');
+  losePopup.style.zIndex = 100;
+
+  // Keep popup for 5 seconds, then enter lose scene
+  timers.push(setTimeout(()=>{
+    losePopup.remove();
+    enterLoseScene(ch, leftover);
+  }, 5000));
+}
+function enterLoseScene(ch, leftover){
+  ch.state.bg.src = IMG+'game_background_lose.png';
+  ch.fish.el.remove();
+  const target = Math.floor(randRange(10, 18)); // 10-18 pieces total
+  const kept = leftover.slice(0, target);
+  leftover.slice(target).forEach(d=> d.el.remove());
+  const filler = Array.from({length: Math.max(0, target-kept.length)}, makeFillerPiece);
+  startFloatingTrash([...kept, ...filler]);
+}
+function makeFillerPiece(){
+  const name = trashNames[Math.floor(Math.random()*trashNames.length)];
+  const el = makeImg(IMG+name);
+  return { el, src: IMG+name, scale: randRange(0.5, 1.6), angle: randRange(0, 360) };
+}
+function startFloatingTrash(items){
+  const ref = { alive:true };
+  cleanupFns.push(()=> ref.alive = false);
+  const floaters = items.map(makeFloater);
+  requestAnimationFrame(t=> floatLoop(floaters, ref, t));
+}
+function makeFloater(item){
+  const el = item.el;
+  const w = item.scale != null ? dims(item.src).w*item.scale : item.w;
+  const h = item.scale != null ? dims(item.src).h*item.scale : item.h;
+  el.style.width = w+'px'; el.style.height = h+'px';
+  el.style.transform = `rotate(${item.angle}deg)`;
+  el.style.pointerEvents = 'none';
+  return finishFloater(el, w, h, item.angle);
+}
+function finishFloater(el, w, h, angle){
+  const { bbW, bbH } = rotatedBox(w, h, angle);
+  const bounds = { ...rotatedXBounds(w, bbW), ...rotatedYBounds(h, bbH) };
+  const pos = randomSafeSpot(w, h, bounds);
+  el.style.left = pos.x+'px'; el.style.top = pos.y+'px';
+  return { el, bounds, baseX:pos.x, baseY:pos.y, phase:randRange(0,Math.PI*2), amp:randRange(6,12), speed:randRange(0.3,0.7) };
+}
+function randomSafeSpot(w, h, bounds){
+  let x, y, tries = 0;
+  do{ x = randRange(bounds.minX, bounds.maxX); y = randRange(bounds.minY, bounds.maxY); tries++; }
+  while(overlapsCoral(x,y,w,h) && tries < 30);
+  return { x, y };
+}
+function floatLoop(floaters, ref, now){
+  if(!ref.alive) return;
+  if(!ref.start) ref.start = now;
+  const t = (now-ref.start)/1000;
+  floaters.forEach(f=> updateFloater(f, t));
+  requestAnimationFrame(n=> floatLoop(floaters, ref, n));
+}
+function updateFloater(f, t){
+  const x = f.baseX + Math.sin(t*f.speed+f.phase)*f.amp;
+  const y = f.baseY + Math.cos(t*f.speed*0.8+f.phase)*f.amp;
+  f.el.style.left = Math.max(f.bounds.minX, Math.min(f.bounds.maxX, x))+'px';
+  f.el.style.top  = Math.max(f.bounds.minY, Math.min(f.bounds.maxY, y))+'px';
+}
+
+// ---------------- win scene ----------------
+function triggerWin(ch){
+  ch.active.forEach(d=> d.el.remove());
+  ch.active.clear();
+
+  hud.style.display = 'none';
+  ch.state.alive = false;
+  ch.fish.el.remove();
+
+  // Show win popup immediately
+  const winPopup = makeImg(IMG+'win.png','layer');
+  winPopup.style.zIndex = 100;
+
+  // Keep popup for 5 seconds, then enter win scene
+  timers.push(setTimeout(()=>{
+    winPopup.remove();
+    spawnWinFish(ch.state.src);
+  }, 5000));
+}
+
+function spawnWinFish(src){
+
+  const count = 6 + Math.floor(Math.random() * 4); // 6–9 fish
+  const fishes = [];
+
+  for(let i = 0; i < count; i++){
+
+    // 0.5x → 2x size
+    const scale = randRange(0.25, 1.5);
+
+    const fish = makeWinFish(src, scale, fishes);
+
+    fishes.push(fish);
+  }
+
+  const ref = { alive:true, last:null };
+
+  cleanupFns.push(() => {
+    ref.alive = false;
+  });
+
+  requestAnimationFrame(t => winLoop(fishes, ref, t));
+}
+
+
+// ---------------- create fish ----------------
+
+function makeWinFish(src, scale, existing){
+
+  const el = makeImg(src);
+  const d = dims(src);
+
+  const w = d.w * scale;
+  const h = d.h * scale;
+
+  el.style.width = w + 'px';
+  el.style.height = h + 'px';
+
+  const pos = findSafeFishPosition(w, h, existing);
+
+  el.style.left = pos.x + 'px';
+  el.style.top = pos.y + 'px';
+
+  return {
+
+    el,
+
+    x: pos.x,
+    y: pos.y,
+
+    w,
+    h,
+
+    // Slow natural swimming speed
+    maxSpeed: randRange(25, 45),
+
+    // Smooth acceleration
+    acceleration: randRange(15, 25),
+
+    velocityX: 0,
+    velocityY: 0,
+
+    dir: Math.random() < 0.5 ? -1 : 1,
+
+    // First destination
+    targetX: randomFishX(w),
+    targetY: randomFishY(h),
+
+    // Fish won't constantly change direction
+    targetTimer: randRange(5, 9),
+
+    // Personal space
+    padding: 10
+  };
+}
+
+
+// ---------------- valid fish positions ----------------
+
+function randomFishX(w){
+  return randRange(10, STAGE_W - w - 10);
+}
+
+function randomFishY(h){
+  return randRange(10, STAGE_H - h - 10);
+}
+
+
+function isInForbiddenArea(x, y, w, h){
+
+  return CORAL_RECTS.some(rect => {
+
+    return (
+      x < rect.x + rect.w &&
+      x + w > rect.x &&
+      y < rect.y + rect.h &&
+      y + h > rect.y
+    );
+
+  });
+}
+
+
+function findSafeFishPosition(w, h, existing){
+
+  for(let attempt = 0; attempt < 500; attempt++){
+
+    const x = randomFishX(w);
+    const y = randomFishY(h);
+
+    // Don't place inside coral
+    if(isInForbiddenArea(x, y, w, h)){
+      continue;
+    }
+
+    // Don't place on another fish
+    let touchingFish = false;
+
+    for(const other of existing){
+
+      const gap = 10;
+
+      if(
+        x < other.x + other.w + gap &&
+        x + w + gap > other.x &&
+        y < other.y + other.h + gap &&
+        y + h + gap > other.y
+      ){
+        touchingFish = true;
+        break;
+      }
+    }
+
+    if(!touchingFish){
+      return { x, y };
+    }
+  }
+
+  // Extremely unlikely fallback
+  return {
+    x: STAGE_W / 2 - w / 2,
+    y: STAGE_H / 2 - h / 2
+  };
+}
+
+
+// ---------------- main animation ----------------
+
+function winLoop(fishes, ref, now){
+
+  if(!ref.alive){
+    return;
+  }
+
+  // Prevent giant time jumps when browser lags
+  const dt = ref.last
+    ? Math.min((now - ref.last) / 1000, 0.033)
+    : 0.016;
+
+  ref.last = now;
+
+  for(const fish of fishes){
+
+    updateWinFish(fish, fishes, dt);
+  }
+
+  for(const fish of fishes){
+
+    renderFish(fish);
+  }
+
+  requestAnimationFrame(t => winLoop(fishes, ref, t));
+}
+
+
+// ---------------- fish movement ----------------
+
+function updateWinFish(fish, fishes, dt){
+
+  fish.targetTimer -= dt;
+
+
+  // Pick a new destination
+  if(fish.targetTimer <= 0){
+
+    fish.targetTimer = randRange(5, 9);
+
+    let targetFound = false;
+
+    for(let attempt = 0; attempt < 30; attempt++){
+
+      const tx = randomFishX(fish.w);
+      const ty = randomFishY(fish.h);
+
+      if(!isInForbiddenArea(tx, ty, fish.w, fish.h)){
+
+        fish.targetX = tx;
+        fish.targetY = ty;
+
+        targetFound = true;
+        break;
+      }
+    }
+
+    // There is NO central fallback anymore.
+    // Fish are allowed to choose the whole screen.
+  }
+
+
+  // Distance to destination
+  const dx = fish.targetX - fish.x;
+  const dy = fish.targetY - fish.y;
+
+  const distance = Math.hypot(dx, dy);
+
+
+  // Desired direction
+  let desiredX = 0;
+  let desiredY = 0;
+
+  if(distance > 5){
+
+    desiredX = dx / distance;
+    desiredY = dy / distance;
+  }
+
+
+  // ---------------- fish separation ----------------
+
+  let separationX = 0;
+  let separationY = 0;
+
+  for(const other of fishes){
+
+    if(other === fish){
+      continue;
+    }
+
+    const centerAX = fish.x + fish.w / 2;
+    const centerAY = fish.y + fish.h / 2;
+
+    const centerBX = other.x + other.w / 2;
+    const centerBY = other.y + other.h / 2;
+
+    const diffX = centerAX - centerBX;
+    const diffY = centerAY - centerBY;
+
+    const dist = Math.hypot(diffX, diffY);
+
+    // Keep distance based on fish size
+    const desiredDistance =
+      Math.max(fish.w, fish.h, other.w, other.h) * 0.65 + 30;
+
+    if(dist > 0 && dist < desiredDistance){
+
+      const strength =
+        (desiredDistance - dist) / desiredDistance;
+
+      separationX += (diffX / dist) * strength;
+      separationY += (diffY / dist) * strength;
+    }
+  }
+
+
+  // Combine swimming direction + separation
+  desiredX += separationX * 2.5;
+  desiredY += separationY * 2.5;
+
+
+  // Normalize
+  const desiredLength =
+    Math.hypot(desiredX, desiredY);
+
+  if(desiredLength > 0){
+
+    desiredX /= desiredLength;
+    desiredY /= desiredLength;
+  }
+
+
+  // ---------------- smooth acceleration ----------------
+
+  const targetVX =
+    desiredX * fish.maxSpeed;
+
+  const targetVY =
+    desiredY * fish.maxSpeed;
+
+
+  fish.velocityX +=
+    (targetVX - fish.velocityX) *
+    fish.acceleration *
+    dt;
+
+  fish.velocityY +=
+    (targetVY - fish.velocityY) *
+    fish.acceleration *
+    dt;
+
+
+  // ---------------- move ----------------
+
+  fish.x += fish.velocityX * dt;
+  fish.y += fish.velocityY * dt;
+
+
+  // ---------------- screen boundaries ----------------
+
+  if(fish.x < 0){
+
+    fish.x = 0;
+    fish.velocityX = Math.abs(fish.velocityX);
+    fish.targetX = randomFishX(fish.w);
+  }
+
+  if(fish.x + fish.w > STAGE_W){
+
+    fish.x = STAGE_W - fish.w;
+    fish.velocityX = -Math.abs(fish.velocityX);
+    fish.targetX = randomFishX(fish.w);
+  }
+
+  if(fish.y < 0){
+
+    fish.y = 0;
+    fish.velocityY = Math.abs(fish.velocityY);
+    fish.targetY = randomFishY(fish.h);
+  }
+
+  if(fish.y + fish.h > STAGE_H){
+
+    fish.y = STAGE_H - fish.h;
+    fish.velocityY = -Math.abs(fish.velocityY);
+    fish.targetY = randomFishY(fish.h);
+  }
+
+
+  // ---------------- forbidden coral zones ----------------
+
+  keepFishOutOfCoral(fish);
+  
+
+  // Direction of fish
+  if(Math.abs(fish.velocityX) > 2){
+
+    fish.dir =
+      fish.velocityX > 0 ? 1 : -1;
+  }
+}
+
+
+// ---------------- coral collision ----------------
+
+function keepFishOutOfCoral(fish){
+
+  for(const rect of CORAL_RECTS){
+
+    if(!rectOverlap(
+      fish.x,
+      fish.y,
+      fish.w,
+      fish.h,
+      rect
+    )){
+      continue;
+    }
+
+
+    // How deeply does the fish overlap?
+    const pushLeft =
+      fish.x + fish.w - rect.x;
+
+    const pushRight =
+      rect.x + rect.w - fish.x;
+
+    const pushUp =
+      fish.y + fish.h - rect.y;
+
+    const pushDown =
+      rect.y + rect.h - fish.y;
+
+
+    const smallest =
+      Math.min(
+        pushLeft,
+        pushRight,
+        pushUp,
+        pushDown
+      );
+
+
+    // Push fish out through the closest edge
+
+    if(smallest === pushLeft){
+
+      fish.x = rect.x - fish.w;
+      fish.velocityX = -Math.abs(fish.velocityX);
+
+    }
+    else if(smallest === pushRight){
+
+      fish.x = rect.x + rect.w;
+      fish.velocityX = Math.abs(fish.velocityX);
+
+    }
+    else if(smallest === pushUp){
+
+      fish.y = rect.y - fish.h;
+      fish.velocityY = -Math.abs(fish.velocityY);
+
+    }
+    else {
+
+      fish.y = rect.y + rect.h;
+      fish.velocityY = Math.abs(fish.velocityY);
+    }
+  }
+}
+
+
+// ---------------- render ----------------
+
+function renderFish(fish){
+
+  fish.el.style.left =
+    fish.x + 'px';
+
+  fish.el.style.top =
+    fish.y + 'px';
+
+  fish.el.style.transform =
+    `scaleX(${fish.dir})`;
+}
+
+
+// ---------------- boot ----------------
+const ALL_ASSETS = [
+  'game_start.png','random_char_01.png','random_char_02.png','game_background.png',
+  'game_background_lose.png','instruction_pop-up.png', ...fishNames, ...trashNames
+].map(n=> IMG+n);
+
+fitStage();
+preload(ALL_ASSETS).then(()=>{
+  const l = document.getElementById('loading');
+  if(l) l.remove();
+  showStart();
+});
+// F5 restarts everything naturally - no localStorage/sessionStorage is used.
+</script>
+</body>
+</html>

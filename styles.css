@@ -498,6 +498,13 @@ body {
   line-height: 1;
 }
 
+.carousel-item .item-thumb {
+  max-width: 100%;
+  max-height: 60%;
+  object-fit: contain;
+  border-radius: 0.8cqw;
+}
+
 .carousel-item .item-label {
   width: 100%;
   margin: 0;
@@ -509,15 +516,18 @@ body {
   color: #021427;
 }
 
-.carousel-item .item-hint {
-  font-family: 'Alata', sans-serif;
-  font-size: 1.1cqw;
-  color: #063e79;
-  opacity: 0.75;
-}
-
 .carousel-item.kind-exit .item-emoji,
 .carousel-item.kind-exit .item-label { color: #063e79; }
+
+/* Random's "?" and label match the gradient text treatment used
+   elsewhere (screen-heading, the idle prompt) instead of a flat color. */
+.carousel-item.kind-random .item-emoji,
+.carousel-item.kind-random .item-label {
+  background-image: linear-gradient(-73.64deg, #021427 1.65%, #07488d 98.35%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
 
 .select-track.is-spinning .carousel-item { transition: none; }
 
