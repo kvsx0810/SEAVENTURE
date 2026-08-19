@@ -736,6 +736,10 @@ body {
   right: 1.5%;
   width: 2.8cqw;
   height: 2.8cqw;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.12);

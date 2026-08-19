@@ -22,7 +22,7 @@
     src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"
   ></script>
 
-  <!-- p5.sound (adds loadSound/SoundFile, needed for the ambient + bubble loops) -->
+  <!-- p5.sound (adds loadSound/SoundFile, needed for the ambient + one-shot sounds) -->
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/addons/p5.sound.min.js"
   ></script>
@@ -49,19 +49,19 @@
 
   </div>
 
-  <!-- #scene is a fixed 1920x1080 stage; scale it to fit whatever viewport
-       it's shown in (a full browser window, or a small popup iframe) so it
-       never needs to scroll -- same technique as the Kieu Phuong game. -->
+  <!-- Scales #scene to whatever the largest size is that still fits the
+       viewport while keeping its 1920x1080 (16:9) box intact — so the page
+       never has to scroll or letterbox, it just shrinks/grows as one piece.
+       Plain JS, independent of p5 (which only draws inside the already-sized
+       canvas) so it also applies before/without the p5 script ever loading. -->
   <script>
-    (function () {
-      var scene = document.getElementById('scene');
-      function fitScene() {
-        var scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-        scene.style.transform = 'scale(' + scale + ')';
-      }
-      window.addEventListener('resize', fitScene);
-      fitScene();
-    })();
+    function fitScene() {
+      var scene = document.getElementById("scene");
+      var scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      scene.style.transform = "translate(-50%, -50%) scale(" + scale + ")";
+    }
+    window.addEventListener("resize", fitScene);
+    fitScene();
   </script>
 
 </body>
