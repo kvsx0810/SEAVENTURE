@@ -136,13 +136,13 @@ img[alt="Background"] {
   transform: translate(-50%, -50%);
 }
  
-/* Sinh vật: sẽ sáng lên khi ghép đúng sinh vật, tối đi khi ghép đúng CO2/company */
+/* creature bright */
 .creature {
   transition: filter 0.6s ease;
   filter: brightness(1) saturate(1) grayscale(0);
 }
  
-/* ===== Khu vực game: nằm trong bggame ===== */
+/* game */
 .bggame {
   position: absolute;
   top: 50%;
@@ -159,7 +159,7 @@ img[alt="Background"] {
   user-select: none;
 }
  
-/* Lưới 4x4 thẻ bài, đặt chồng lên giữa bggame, co giãn theo màn hình bằng vmin */
+/* 4x4 */
 .card-grid {
   position: absolute;
   top: 50%;
@@ -221,7 +221,7 @@ img[alt="Background"] {
 }
  
 .card.matched .card-face.card-back img {
-  filter: drop-shadow(0 0 0.8vmin rgba(255, 255, 255, 0.85));
+  filter: drop-shadow(0 0 0.3vmin rgba(255, 255, 255, 0.85));
 }
  
 .card.wrong .card-inner {
@@ -229,12 +229,12 @@ img[alt="Background"] {
 }
  
 @keyframes shake {
-  0%, 100% { transform: rotateY(0deg) translateX(0); }
-  25% { transform: rotateY(0deg) translateX(-1vmin); }
-  75% { transform: rotateY(0deg) translateX(1vmin); }
+  0%, 100% { transform: rotateY(180deg) translateX(0); }
+  25% { transform: rotateY(180deg) translateX(-1vmin); }
+  75% { transform: rotateY(180deg) translateX(1vmin); }
 }
 
-/* ===== Ẩn phần tử trước khi bấm Start ===== */
+/* hide game */
 .hidden {
   display: none !important;
 }
@@ -266,7 +266,7 @@ img[alt="Background"] {
   transform: scale(0.97);
 }
 
-/* ===== Thanh đo độ pH ===== */
+/* pH */
 .ph-bar-container {
   position: fixed;
   top: 3vmin;

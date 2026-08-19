@@ -30,9 +30,9 @@ let soundOn = false;
 
 const UNDERWATER_VOLUME = 0.28; // background bed — present but not the loudest thing
 const RUSTLING_PAPER_VOLUME = 0.09; // coral "rustle"/sway — still light, just less buried
-const BUBBLE_BREATH_VOLUME = 0.09; // fires very often, so kept light (see note above)
+const BUBBLE_BREATH_VOLUME = 0.045; // fires very often, so kept light (see note above)
 const BUBBLE_BREATH_CHANCE = 0.55; // only some exhales actually play a sound
-const BUBBLE_EATING_VOLUME = 0.18; // rarer event, allowed to read a bit clearer
+const BUBBLE_EATING_VOLUME = 0.09; // rarer event, allowed to read a bit clearer
 const DIE_CORAL_VOLUME = 0.5; // a coral dying is a notable beat — let it stand out
 const CLICK_VOLUME = 0.4;
 
