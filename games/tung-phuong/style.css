@@ -8,6 +8,13 @@ html, body {
   align-items: center;
   justify-content: center;
 }
+/* p5 appends the canvas inside this empty <main> -- display:contents
+   drops main's own box so the canvas becomes body's effective flex
+   child, which is what makes the scale-transform below actually shrink
+   its contribution to body's scrollable area instead of overflowing */
+main {
+  display: contents;
+}
 canvas {
   display: block;
   flex-shrink: 0;
