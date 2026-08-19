@@ -1,0 +1,9 @@
+<svg width="1920" height="626" viewBox="0 0 1920 626" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect id="Sea" width="1920" height="626" fill="url(#paint0_linear_0_1)"/>
+<defs>
+<linearGradient id="paint0_linear_0_1" x1="960" y1="0" x2="960" y2="626" gradientUnits="userSpaceOnUse">
+<stop stop-color="#11AEF3"/>
+<stop offset="1" stop-color="#BBE8FB"/>
+</linearGradient>
+</defs>
+</svg>

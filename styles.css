@@ -77,6 +77,18 @@ body {
   text-align: right;
 }
 
+/* Very subtle darkening strip along the real viewport's top edge, purely
+   to keep the pinned header text readable over whatever's behind it --
+   sits below the header (z-index) but above the cabinet composition. */
+.top-vignette {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 9%;
+  z-index: 900;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+
 .machine {
   position: absolute;
   left: 4.5313%;
@@ -232,21 +244,6 @@ body {
   margin: 0;
 }
 
-.screen-date {
-  position: absolute;
-  left: 50%;
-  top: 68.9815%;
-  transform: translateX(-50%);
-  margin: 0;
-  width: max-content;
-  font-family: 'Alata', sans-serif;
-  font-weight: 400;
-  font-size: 1.0417cqw;
-  color: #063e79;
-  text-align: center;
-  white-space: nowrap;
-}
-
 /* Big bold gradient heading, e.g. "SDG 14 TARGETS" / "CREDIT" / "REFERENCE" */
 .screen-heading {
   position: absolute;
@@ -399,6 +396,23 @@ body {
 }
 
 /* Full-width left-aligned paragraph starting near the top, e.g. slide 24 */
+/* Reference page: a single wrapping citation (not the short nowrap name
+   list .screen-list uses for the Credit page) */
+.screen-reference {
+  position: absolute;
+  left: 50%;
+  top: 30.2778%;
+  transform: translateX(-50%);
+  width: 50%;
+  margin: 0;
+  font-family: 'Alata', sans-serif;
+  font-weight: 400;
+  font-size: 1.6667cqw;
+  line-height: 2.9688cqw;
+  color: #063e79;
+  text-align: left;
+}
+
 .screen-paragraph {
   position: absolute;
   left: 50%;

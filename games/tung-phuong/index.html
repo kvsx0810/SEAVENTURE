@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.10/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.10/addons/p5.sound.min.js"></script>
+    
+    
+    
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8" />
+
+  </head>
+  <body>
+    <main>
+    </main>
+    <script src="sketch.js"></script>
+    <!-- fixed 1920x1080 canvas -- scale it to fit whatever viewport it's
+         shown in (a full browser window, or a small popup iframe) -->
+    <script>
+      (function () {
+        function fitCanvas() {
+          var canvas = document.querySelector('canvas');
+          if (!canvas) { requestAnimationFrame(fitCanvas); return; }
+          function apply() {
+            var scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            canvas.style.transform = 'scale(' + scale + ')';
+          }
+          apply();
+          window.addEventListener('resize', apply);
+        }
+        fitCanvas();
+      })();
+    </script>
+  </body>
+</html>

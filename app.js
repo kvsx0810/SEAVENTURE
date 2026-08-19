@@ -9,8 +9,9 @@
 // pulled and confirmed -- do not guess a page's layout ahead of that.
 //
 // CAROUSEL is the game-select sub-mode entered from the 'game-select'
-// page: Exit at both ends, Random right after the first Exit, then one
-// full-curved-screen panel per member's game (placeholders for now).
+// page: a looping ring of Random, one full-curved-screen panel per
+// member's game, then a single Exit stop -- the joystick wraps around
+// both ends instead of stopping.
 
 document.addEventListener('DOMContentLoaded', () => {
   const screenContent = document.getElementById('screenContent');
@@ -59,22 +60,23 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 'reference', render: renderReference }
   ];
 
-  // PLACEHOLDER entries -- set `src` to "games/<name>/index.html" once each
-  // member's project folder is added to the repo.
+  // All 5 members wired up with their real project + thumbnail. Single
+  // Exit entry -- navigation loops (see goCarousel), so there's no need
+  // for a bookend at both ends anymore.
   const CAROUSEL = [
-    { id: 'exit-start', kind: 'exit' },
     { id: 'random', kind: 'random' },
     { id: 'kieu-phuong', kind: 'game', label: 'Kiều Phương', thumb: 'assets/images/KieuPhuongThumbnail.png', src: 'games/kieu-phuong/index.html' },
+    { id: 'tung-phuong', kind: 'game', label: 'Tùng Phương', thumb: 'assets/images/TungPhuongThumbnail.png', src: 'games/tung-phuong/index.html' },
+    { id: 'pham-hoai-an', kind: 'game', label: 'Phạm Hoài An', thumb: 'assets/images/AnPhamThumbnail.png', src: 'games/pham-hoai-an/index.html' },
+    { id: 'tuan-hung', kind: 'game', label: 'Trịnh Tuấn Hưng', thumb: 'assets/images/TuanHungThumbnail.png', src: 'games/tuan-hung/index.html' },
     { id: 'tieu-dinh-ngoc', kind: 'game', label: 'Tiêu Dĩnh Ngọc', thumb: 'assets/images/TieuDinhNgocThumbnail.png', src: 'games/tieu-dinh-ngoc/index.html' },
-    { id: 'member3', kind: 'game', label: 'Member 3', emoji: '\u{1F991}', src: null },
-    { id: 'member4', kind: 'game', label: 'Member 4', emoji: '\u{1F421}', src: null },
-    { id: 'member5', kind: 'game', label: 'Member 5', emoji: '\u{1F988}', src: null },
-    { id: 'exit-end', kind: 'exit' }
+    { id: 'exit', kind: 'exit' }
   ];
+  const CAROUSEL_ENTRY_INDEX = CAROUSEL.findIndex((it) => it.kind === 'random');
 
   let mode = 'page'; // 'page' | 'carousel' | 'spinning'
   let pageIndex = 0;
-  let carouselIndex = 2; // first real game when entering the carousel
+  let carouselIndex = CAROUSEL_ENTRY_INDEX; // lands on Random when entering the carousel
 
   function renderTitle() {
     return '<div class="title-box"><img src="assets/images/SEAVENTURE.svg" alt="SEAVENTURE" draggable="false"></div>';
@@ -112,8 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderReference() {
     return '<p class="screen-heading screen-heading--top">REFERENCE</p>' +
-      '<div class="screen-list">' + CREDIT_LIST.map((line) => '<p>' + line + '</p>').join('') + '</div>' +
-      '<p class="screen-date">21/8/2026</p>';
+      '<p class="screen-reference">Stevenson A (2012) Robert Swan OBE: &ldquo;The greatest threat to our planet is the belief that someone else will save it&rdquo;, HuffPost website, accessed 19 August 2026. https://www.huffpost.com/entry/robert-swan-antarctica_b_1315047</p>';
   }
 
   function renderGameSelectIdle() {
@@ -179,17 +180,17 @@ document.addEventListener('DOMContentLoaded', () => {
     swapPanel(PAGES[pageIndex].render(), delta > 0 ? 'next' : 'prev');
   }
 
+  // Wraps around at both ends instead of refusing -- the carousel is a
+  // loop (Exit is just one stop on it, not a boundary).
   function goCarousel(delta, btn) {
-    const next = carouselIndex + delta;
-    if (next < 0 || next >= CAROUSEL.length) { playRefuse(btn); return; }
     if (!playPush(btn, delta > 0)) return;
-    carouselIndex = next;
+    carouselIndex = (carouselIndex + delta + CAROUSEL.length) % CAROUSEL.length;
     swapPanel(renderCarouselItem(CAROUSEL[carouselIndex]), delta > 0 ? 'next' : 'prev');
   }
 
   function enterCarousel() {
     mode = 'carousel';
-    carouselIndex = 2;
+    carouselIndex = CAROUSEL_ENTRY_INDEX;
     swapPanel(renderCarouselItem(CAROUSEL[carouselIndex]), 'next');
   }
 
@@ -206,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalTicks = 12 + Math.floor(Math.random() * 4);
     let delay = 55;
     const gameIndices = CAROUSEL.map((it, i) => i).filter((i) => CAROUSEL[i].kind === 'game');
-    const flickerPool = [1].concat(gameIndices);
+    const flickerPool = [CAROUSEL_ENTRY_INDEX].concat(gameIndices);
 
     function renderInstant(index) {
       screenContent.innerHTML = '<div class="page-panel">' + renderCarouselItem(CAROUSEL[index]) + '</div>';

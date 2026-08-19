@@ -1,0 +1,317 @@
+* { box-sizing: border-box; }
+ 
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+}
+
+body {
+font-family: "apotek", sans-serif;
+font-weight: 700;
+font-style: normal;
+}
+ 
+img[alt="Background"] {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  object-position: center;
+}
+ 
+.light {
+  position: absolute;
+  top: 30%;
+  left: 73%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Reu-1 {
+  position: absolute;
+  top: 82%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Reu-2 {
+  position: absolute;
+  top: 79%;
+  left: 43%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Rock-3 {
+  position: absolute;
+  top: 83%;
+  left: 36%;
+  transform: translate(-50%, -50%);
+}
+ 
+.So {
+  position: absolute;
+  top: 93%;
+  left: 42%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Crab-1 {
+  position: absolute;
+  top: 90%;
+  left: 76%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Reu {
+  position: absolute;
+  top: 68%;
+  left: 10%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Rock-2 {
+  position: absolute;
+  top: 88%;
+  left: 8%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Reu4-1 {
+  position: absolute;
+  top: 78%;
+  left: 3%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Sanho {
+  position: absolute;
+  top: 82%;
+  left: 13%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Reu4 {
+  position: absolute;
+  top: 67%;
+  left: 95%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Reu2 {
+  position: absolute;
+  top: 80%;
+  left: 90%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Sanho3 {
+  position: absolute;
+  top: 90%;
+  left: 88%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Rock-1 {
+  position: absolute;
+  top: 95%;
+  left: 95%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Rock {
+  position: absolute;
+  top: 95%;
+  left: 22%;
+  transform: translate(-50%, -50%);
+}
+ 
+.Crab {
+  position: absolute;
+  top: 92%;
+  left: 20%;
+  transform: translate(-50%, -50%);
+}
+ 
+/* Sinh vật: sẽ sáng lên khi ghép đúng sinh vật, tối đi khi ghép đúng CO2/company */
+.creature {
+  transition: filter 0.6s ease;
+  filter: brightness(1) saturate(1) grayscale(0);
+}
+ 
+/* ===== Khu vực game: nằm trong bggame ===== */
+.bggame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+ 
+.bggame-img {
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+ 
+/* Lưới 4x4 thẻ bài, đặt chồng lên giữa bggame, co giãn theo màn hình bằng vmin */
+.card-grid {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 1.4vmin;
+  width: 62vmin;
+  aspect-ratio: 0.86;
+}
+ 
+.card {
+  position: relative;
+  cursor: pointer;
+  aspect-ratio: 0.86;
+  perspective: 800px;
+}
+ 
+.card.matched {
+  cursor: default;
+}
+ 
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+ 
+.card.flipped .card-inner,
+.card.matched .card-inner {
+  transform: rotateY(180deg);
+}
+ 
+.card:not(.flipped):not(.matched):hover .card-inner {
+  transform: scale(1.06);
+}
+ 
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 16%;
+  overflow: hidden;
+}
+ 
+.card-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+ 
+.card-back {
+  transform: rotateY(180deg);
+}
+ 
+.card.matched .card-face.card-back img {
+  filter: drop-shadow(0 0 0.8vmin rgba(255, 255, 255, 0.85));
+}
+ 
+.card.wrong .card-inner {
+  animation: shake 0.4s;
+}
+ 
+@keyframes shake {
+  0%, 100% { transform: rotateY(0deg) translateX(0); }
+  25% { transform: rotateY(0deg) translateX(-1vmin); }
+  75% { transform: rotateY(0deg) translateX(1vmin); }
+}
+
+/* ===== Ẩn phần tử trước khi bấm Start ===== */
+.hidden {
+  display: none !important;
+}
+
+/* start */
+.start-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  background: rgba(0, 20, 40, 0.18);
+}
+
+.start-btn {
+  width: min(28vmin, 260px);
+  cursor: pointer;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.start-btn:hover {
+  transform: scale(1.07);
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+
+.start-btn:active {
+  transform: scale(0.97);
+}
+
+/* ===== Thanh đo độ pH ===== */
+.ph-bar-container {
+  position: fixed;
+  top: 3vmin;
+  left: 3vmin;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8vmin;
+  padding: 1.4vmin 1.8vmin;
+  border-radius: 1.4vmin;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(6px);
+}
+
+.ph-label {
+  font-family: Apotek, sans-serif;
+  font-weight: 700;
+  font-size: 1.6vmin;
+  letter-spacing: 0.1vmin;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.ph-bar {
+  width: 22vmin;
+  height: 2.2vmin;
+  border-radius: 1.1vmin;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+}
+
+.ph-fill {
+  height: 100%;
+  width: 100%;
+  border-radius: 1.1vmin;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  transition: width 0.6s ease, background 0.6s ease;
+}
+
+.floating-bubble {
+  position: fixed;
+  z-index: 3;
+  pointer-events: none;
+  user-select: none;
+  object-fit: contain;
+}
