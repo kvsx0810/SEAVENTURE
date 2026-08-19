@@ -26,11 +26,19 @@ body {
   background: #021427;
 }
 
+/* Scale the whole 1920x1080 composition as one rigid unit (never distort
+   per-axis) and letterbox any leftover space -- the bars are invisible
+   since .stage shares this exact background color. Desktop/laptop monitors
+   only (16:9, 16:10, ultrawide, 4:3 etc. all just get more/less letterbox);
+   phone/tablet portrait is explicitly out of scope. */
 .slide {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  aspect-ratio: 1920 / 1080;
+  width: min(100vw, calc(100vh * 1920 / 1080));
+  height: min(100vh, calc(100vw * 1080 / 1920));
   overflow: hidden;
   background: #021427;
   container-type: inline-size;
@@ -511,7 +519,10 @@ body {
   letter-spacing: -0.05cqw;
   text-align: center;
   text-transform: uppercase;
-  color: #021427;
+  background-image: linear-gradient(-73.64deg, #021427 1.65%, #07488d 98.35%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
   animation: promptPulse 1.6s ease-in-out infinite;
 }
 
@@ -528,12 +539,18 @@ body {
 }
 
 /* -- arcade center button: base (static) + dome (presses down) -- */
+/* Base's own box matches base.svg's true aspect ratio (201x73.866, from
+   Figma node 279:1640) -- it was previously stretched to the OLD combined
+   button.svg's taller aspect ratio, which is what made the button look
+   oddly placed. Dome is positioned in base-relative % from Figma node
+   279:1639: it protrudes above the base's own top edge (negative top),
+   which is correct -- that's the dome's natural overlap with the rim. */
 .arcade-button-btn {
   position: absolute;
-  left: 44.2708%;
-  top: 80.8333%;
+  left: 44.2675%;
+  top: 82.2643%;
   width: 10.4688%;
-  height: 8.269%;
+  height: 6.8394%;
   margin: 0;
   padding: 0;
   border: none;
@@ -553,10 +570,10 @@ body {
 
 .arcade-button-btn .btn-dome {
   position: absolute;
-  left: 11.44%;
-  top: 0;
-  width: 77.11%;
-  height: 64.86%;
+  left: 11.6617%;
+  top: -20.8811%;
+  width: 76.7776%;
+  height: 64.1703%;
   pointer-events: none;
   user-select: none;
   transform-origin: 50% 100%;
@@ -570,7 +587,7 @@ body {
 
 @keyframes domePress {
   0% { transform: translateY(0); }
-  40% { transform: translateY(22%); }
+  40% { transform: translateY(16%); }
   100% { transform: translateY(0); }
 }
 

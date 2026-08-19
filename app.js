@@ -117,8 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderGameSelectIdle() {
-    return '<div class="idle-prompt"><p class="prompt-label">Press start</p>' +
-      '<p class="prompt-hint">to browse the crew&rsquo;s generative art</p></div>';
+    return '<div class="idle-prompt"><p class="prompt-label">Red button</p>' +
+      '<p class="prompt-hint">To browse game</p></div>';
   }
 
   function renderCarouselItem(item) {
