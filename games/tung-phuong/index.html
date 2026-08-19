@@ -18,9 +18,13 @@
          shown in (a full browser window, or a small popup iframe) -->
     <script>
       (function () {
+        // setTimeout, not requestAnimationFrame -- rAF can be throttled/
+        // paused in an iframe that isn't the actively-rendering tab (e.g.
+        // an automation-driven or backgrounded popup), which would leave
+        // this polling loop stuck and the canvas never scaled.
         function fitCanvas() {
           var canvas = document.querySelector('canvas');
-          if (!canvas) { requestAnimationFrame(fitCanvas); return; }
+          if (!canvas) { setTimeout(fitCanvas, 50); return; }
           function apply() {
             var scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
             canvas.style.transform = 'scale(' + scale + ')';
