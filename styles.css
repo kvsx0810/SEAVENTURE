@@ -483,6 +483,8 @@ body {
   top: 4.2578%;
   width: 53.4489%;
   height: 70.0926%;
+  padding: 0 6%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -497,6 +499,8 @@ body {
 }
 
 .carousel-item .item-label {
+  width: 100%;
+  margin: 0;
   font-family: 'Inter', sans-serif;
   font-weight: 900;
   font-size: 3.2cqw;
@@ -524,6 +528,8 @@ body {
   top: 4.2578%;
   width: 53.4489%;
   height: 70.0926%;
+  padding: 0 6%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -532,9 +538,11 @@ body {
 }
 
 .idle-prompt .prompt-label {
+  width: 100%;
+  margin: 0;
   font-family: 'Inter', sans-serif;
   font-weight: 900;
-  font-size: 4.2cqw;
+  font-size: 3.4cqw;
   letter-spacing: -0.05cqw;
   text-align: center;
   text-transform: uppercase;
@@ -546,8 +554,11 @@ body {
 }
 
 .idle-prompt .prompt-hint {
+  width: 100%;
+  margin: 0;
   font-family: 'Alata', sans-serif;
   font-size: 1.4cqw;
+  text-align: center;
   color: #063e79;
   opacity: 0.8;
 }
