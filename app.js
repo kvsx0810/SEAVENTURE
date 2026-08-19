@@ -130,10 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return '<div class="carousel-item kind-random"><div class="item-emoji">?</div>' +
         '<div class="item-label">Random</div></div>';
     }
-    var thumbHtml = item.thumb
-      ? '<img class="item-thumb" src="' + item.thumb + '" alt="">'
-      : '<div class="item-emoji">' + item.emoji + '</div>';
-    return '<div class="carousel-item kind-game">' + thumbHtml +
+    if (item.thumb) {
+      return '<div class="carousel-item kind-game has-thumb"><img class="item-thumb-full" src="' + item.thumb + '" alt="' + item.label + '"></div>';
+    }
+    return '<div class="carousel-item kind-game"><div class="item-emoji">' + item.emoji + '</div>' +
       '<div class="item-label">' + item.label + '</div></div>';
   }
 
