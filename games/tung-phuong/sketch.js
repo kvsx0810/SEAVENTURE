@@ -31,27 +31,27 @@ let ambient4;
 let audioStarted = false;
 
 function preload() {
-  gradient = loadImage('/images/gradient.png');
-  head = loadImage('/images/head.png');
-  left = loadImage('/images/left.png');
-  right = loadImage('/images/right.png');
+  gradient = loadImage('images/gradient.png');
+  head = loadImage('images/head.png');
+  left = loadImage('images/left.png');
+  right = loadImage('images/right.png');
 
-  fishImgs.push(loadImage('/images/fish1.png'));
-  fishImgs.push(loadImage('/images/fish2.png'));
-  fishImgs.push(loadImage('/images/fish3.png'));
+  fishImgs.push(loadImage('images/fish1.png'));
+  fishImgs.push(loadImage('images/fish2.png'));
+  fishImgs.push(loadImage('images/fish3.png'));
 
-  light = loadImage('/images/light.png');
-  mid = loadImage('/images/mid.png');
-  dark = loadImage('/images/dark.png');
+  light = loadImage('images/light.png');
+  mid = loadImage('images/mid.png');
+  dark = loadImage('images/dark.png');
 
-  starImg = loadImage('/images/star.png');
-  coralImg = loadImage('/images/coral.png');
-  seaweedImg = loadImage('/images/seaweed.png');
+  starImg = loadImage('images/star.png');
+  coralImg = loadImage('images/coral.png');
+  seaweedImg = loadImage('images/seaweed.png');
 
-  ambient1 = loadSound('/sounds/clothes_hook.wav');
-  ambient2 = loadSound('/sounds/wind_chime.wav');
-  ambient3 = loadSound('/sounds/water_splash.wav');
-  ambient4 = loadSound('/sounds/water_drop.wav');
+  ambient1 = loadSound('sounds/clothes_hook.wav');
+  ambient2 = loadSound('sounds/wind_chime.wav');
+  ambient3 = loadSound('sounds/water_splash.wav');
+  ambient4 = loadSound('sounds/water_drop.wav');
 }
 
 function setup() {
