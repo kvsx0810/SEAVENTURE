@@ -23,10 +23,40 @@ document.addEventListener('DOMContentLoaded', () => {
   const popupTitle = document.getElementById('popupTitle');
   const popupClose = document.getElementById('popupClose');
 
+  // SDG 14.1-14.5 target statements, pulled verbatim from Figma (nodes
+  // 180:203, 180:284, 180:363, 180:445, 180:544). `top` is each instance's
+  // own vertical position -- Figma's own layout drifts a few px per target
+  // depending on how many lines the statement wraps to.
+  const SDG_TARGETS = [
+    { top: 32.9630, text: '14.1 By 2025, prevent and significantly reduce marine pollution of all kinds, in particular from land-based activities, including marine debris and nutrient pollution.' },
+    { top: 32.0417, text: '14.2 By 2020, sustainably manage and protect marine and coastal ecosystems to avoid significant adverse impacts, including by strengthening their resilience, and take action for their restoration in order to achieve healthy and productive oceans.' },
+    { top: 32.9630, text: '14.3 Minimize and address the impacts of ocean acidification, including through enhanced scientific cooperation at all levels.' },
+    { top: 32.9630, text: '14.4 Effectively regulate harvesting and end overfishing, illegal, unreported and unregulated fishing and destructive fishing practices' },
+    { top: 32.9630, text: '14.5 By 2020, conserve at least 10 per cent of coastal and marine areas, consistent with national and international law and based on the best available scientific information.' }
+  ];
+
+  const CREDIT_LIST = [
+    'Hồ Kiều Phương - S4109320',
+    'Trịnh Tuấn Hưng - S4123995',
+    'Trần Tùng Phương - S4113612',
+    'Phạm Hoài An - S4012478',
+    'Tiêu Dĩnh Ngọc - S4088312'
+  ];
+
   const PAGES = [
     { id: 'title', render: renderTitle },
-    { id: 'game-select', render: renderGameSelectIdle, isGameSelect: true }
-    // more pages land here once their Figma link has been pulled + confirmed
+    { id: 'sdg14-overview', render: renderSdgOverview },
+    { id: 'quote', render: renderQuote },
+    { id: 'sdg14-1', render: () => renderTarget(SDG_TARGETS[0]) },
+    { id: 'sdg14-2', render: () => renderTarget(SDG_TARGETS[1]) },
+    { id: 'sdg14-3', render: () => renderTarget(SDG_TARGETS[2]) },
+    { id: 'sdg14-4', render: () => renderTarget(SDG_TARGETS[3]) },
+    { id: 'sdg14-5', render: () => renderTarget(SDG_TARGETS[4]) },
+    { id: 'cta', render: renderCta },
+    { id: 'paragraph', render: renderParagraph },
+    { id: 'game-select', render: renderGameSelectIdle, isGameSelect: true },
+    { id: 'credit', render: renderCredit },
+    { id: 'reference', render: renderReference }
   ];
 
   // PLACEHOLDER entries -- set `src` to "games/<name>/index.html" once each
@@ -48,6 +78,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderTitle() {
     return '<div class="title-box"><img src="assets/images/SEAVENTURE.svg" alt="SEAVENTURE" draggable="false"></div>';
+  }
+
+  function renderSdgOverview() {
+    return '<div class="screen-heading-lines"><p>SDG GOAL 14</p><p>(LIFE BELOW WATER)</p></div>' +
+      '<p class="screen-subtext-centered">Conserve and sustainably use the oceans, seas and marine resources for sustainable development</p>';
+  }
+
+  function renderQuote() {
+    return '<p class="screen-quote">&ldquo; The greatest threat to our planet is the belief that someone else will save it &rdquo;</p>' +
+      '<p class="screen-quote-author">Robert Swan</p>';
+  }
+
+  function renderTarget(target) {
+    return '<p class="screen-heading">SDG 14 TARGETS</p>' +
+      '<p class="screen-body" style="top:' + target.top + '%">' + target.text + '</p>';
+  }
+
+  function renderCta() {
+    return '<div class="screen-title-italic"><p>Change everyday habits</p><p>to protect ocean health</p></div>';
+  }
+
+  function renderParagraph() {
+    return '<p class="screen-paragraph">&ldquo;The greatest threat to our planet is the belief that someone else will save it&rdquo; reminds us that protecting the ocean starts with individual action. SDG 14 addresses issues such as pollution, overfishing, ocean acidification, and ecosystem loss, all of which are affected by our everyday choices. Small changes in how we consume, use resources, and manage waste can collectively make a difference. Change everyday habits to protect ocean health.</p>';
+  }
+
+  function renderCredit() {
+    return '<p class="screen-heading screen-heading--top">CREDIT</p>' +
+      '<p class="screen-team-name">Ngã 5 Chuồng Chó</p>' +
+      '<div class="screen-list screen-list--credit" style="color:#042b54">' +
+      CREDIT_LIST.map((line) => '<p>' + line + '</p>').join('') + '</div>';
+  }
+
+  function renderReference() {
+    return '<p class="screen-heading screen-heading--top">REFERENCE</p>' +
+      '<div class="screen-list">' + CREDIT_LIST.map((line) => '<p>' + line + '</p>').join('') + '</div>' +
+      '<p class="screen-date">21/8/2026</p>';
   }
 
   function renderGameSelectIdle() {

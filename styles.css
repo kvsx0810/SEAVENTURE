@@ -296,12 +296,17 @@ body {
   text-align: center;
 }
 
-/* Left-aligned body paragraph under a heading, e.g. SDG target text */
+/* Centered body paragraph under the "SDG 14 TARGETS" heading, e.g. each
+   14.1-14.5 target statement (node 180:203 etc.) -- top is set per instance
+   inline since it drifts a few px per target depending on line count in
+   Figma's own layout; centering/width/font here are shared and confirmed
+   consistent across all five. */
 .screen-body {
   position: absolute;
-  left: 27.1875%;
-  top: 32.963%;
-  width: 45.0521%;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 32.9630%;
+  width: 47.0313%;
   margin: 0;
   font-family: 'Alata', sans-serif;
   font-weight: 400;
@@ -311,51 +316,59 @@ body {
   text-align: left;
 }
 
-/* Centered italic quote */
+/* Centered italic quote -- values pulled directly from Figma (node 180:124),
+   corrected from an earlier estimate that didn't match (wrong top/weight/
+   size/line-height, missing letter-spacing) */
 .screen-quote {
   position: absolute;
   left: 50%;
-  top: 29.6296%;
+  top: 25.5509%;
   transform: translateX(-50%);
   width: 41.1979%;
   margin: 0;
   font-family: 'Inter', sans-serif;
-  font-weight: 700;
+  font-weight: 900;
   font-style: italic;
-  font-size: 2.8646cqw;
-  line-height: 2.9688cqw;
-  color: #021427;
+  font-size: 3.125cqw;
+  line-height: 4.4792cqw;
+  letter-spacing: -0.09375cqw;
+  color: #042b54;
   text-align: center;
 }
 
 .screen-quote-author {
   position: absolute;
-  left: 65.0261%;
-  top: 47.1296%;
+  left: 65.1302%;
+  top: 51.2963%;
   transform: translateX(-50%);
   margin: 0;
   width: max-content;
   font-family: 'Alata', sans-serif;
   font-weight: 400;
   font-size: 1.6667cqw;
+  line-height: 2.9688cqw;
   color: #042b54;
   text-align: center;
   white-space: nowrap;
 }
 
-/* Centered two-line italic black heading, e.g. section dividers */
+/* Centered two-line italic black heading, e.g. section dividers -- values
+   pulled directly from Figma (node 189:89), corrected from an earlier
+   estimate that didn't match (wrong top/size/line-height, missing
+   letter-spacing) */
 .screen-title-italic {
   position: absolute;
   left: 50%;
-  top: 32.3148%;
+  top: 30.8361%;
   transform: translateX(-50%);
   margin: 0;
   width: max-content;
   font-family: 'Inter', sans-serif;
   font-weight: 900;
   font-style: italic;
-  font-size: 2.8646cqw;
-  line-height: 2.9688cqw;
+  font-size: 3.125cqw;
+  line-height: 4.4792cqw;
+  letter-spacing: -0.09375cqw;
   color: #042b54;
   text-align: center;
   white-space: nowrap;
