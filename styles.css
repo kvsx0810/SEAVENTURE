@@ -27,18 +27,24 @@ body {
 }
 
 /* Scale the whole 1920x1080 composition as one rigid unit (never distort
-   per-axis) and letterbox any leftover space -- the bars are invisible
-   since .stage shares this exact background color. Desktop/laptop monitors
-   only (16:9, 16:10, ultrawide, 4:3 etc. all just get more/less letterbox);
-   phone/tablet portrait is explicitly out of scope. */
+   per-axis) -- COVER the viewport instead of fitting inside it (max(), not
+   min()), so .slide always fully fills the window with zero letterbox bars.
+   The internal 16:9 coordinate system (every %-based position, the screen
+   clip-path, button placement) stays exactly correct either way since
+   .slide itself is still rendered at a true 16:9 ratio -- it's just scaled
+   up and center-cropped by .stage's overflow:hidden on non-16:9 windows,
+   trimming the outer decorative edges rather than shrinking to fit and
+   leaving a visible boundary against the background. Desktop/laptop
+   monitors only (16:9, 16:10, ultrawide, 4:3 etc.); phone/tablet portrait
+   is explicitly out of scope. */
 .slide {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   aspect-ratio: 1920 / 1080;
-  width: min(100vw, calc(100vh * 1920 / 1080));
-  height: min(100vh, calc(100vw * 1080 / 1920));
+  width: max(100vw, calc(100vh * 1920 / 1080));
+  height: max(100vh, calc(100vw * 1080 / 1920));
   overflow: hidden;
   background: #021427;
   container-type: inline-size;
@@ -463,10 +469,17 @@ body {
 .page-panel.is-enter-from-left  { opacity: 0; transform: translateX(-6%); transition: none; }
 .page-panel.is-enter-from-right { opacity: 0; transform: translateX(6%); transition: none; }
 
-/* -- game-select carousel: each item is its own full-screen panel -- */
+/* -- game-select carousel: each item is its own full-screen panel --
+   Centered on the CURVED SCREEN's own bounding box (from the clip-path
+   trace), not the full slide -- the curve's top cap makes its visual
+   center sit above the slide's geometric center, so centering on inset:0
+   (the full slide) put content noticeably too low relative to the glass. */
 .carousel-item {
   position: absolute;
-  inset: 0;
+  left: 23.2846%;
+  top: 4.2578%;
+  width: 53.4489%;
+  height: 70.0926%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -476,14 +489,14 @@ body {
 }
 
 .carousel-item .item-emoji {
-  font-size: 8cqw;
+  font-size: 10cqw;
   line-height: 1;
 }
 
 .carousel-item .item-label {
   font-family: 'Inter', sans-serif;
   font-weight: 900;
-  font-size: 2.6cqw;
+  font-size: 3.2cqw;
   text-transform: uppercase;
   letter-spacing: 0.05cqw;
   color: #021427;
@@ -504,7 +517,10 @@ body {
 /* -- idle prompt shown on the game-select page before browsing -- */
 .idle-prompt {
   position: absolute;
-  inset: 0;
+  left: 23.2846%;
+  top: 4.2578%;
+  width: 53.4489%;
+  height: 70.0926%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -515,7 +531,7 @@ body {
 .idle-prompt .prompt-label {
   font-family: 'Inter', sans-serif;
   font-weight: 900;
-  font-size: 3.2cqw;
+  font-size: 4.2cqw;
   letter-spacing: -0.05cqw;
   text-align: center;
   text-transform: uppercase;

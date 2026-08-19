@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderGameSelectIdle() {
-    return '<div class="idle-prompt"><p class="prompt-label">Red button</p>' +
+    return '<div class="idle-prompt"><p class="prompt-label">Press the red button</p>' +
       '<p class="prompt-hint">To browse game</p></div>';
   }
 
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         '<div class="item-label">Exit</div><div class="item-hint">back to browsing</div></div>';
     }
     if (item.kind === 'random') {
-      return '<div class="carousel-item kind-random"><div class="item-emoji">\u{1F3B2}</div>' +
+      return '<div class="carousel-item kind-random"><div class="item-emoji">?</div>' +
         '<div class="item-label">Random</div><div class="item-hint">center button to spin</div></div>';
     }
     return '<div class="carousel-item kind-game"><div class="item-emoji">' + item.emoji + '</div>' +
