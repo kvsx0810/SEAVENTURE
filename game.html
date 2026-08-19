@@ -3,32 +3,328 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SEAVENTURE — Slide 25</title>
+<title>SEAVENTURE — Game Select</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alata&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alata&family=Inter:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<style>
+  /* ---- game-select — scoped to this page only, not in the shared styles.css ---- */
+
+  .game-screen {
+    position: absolute;
+    left: 20.5729%;
+    top: 0%;
+    width: 58.3333%;
+    height: 78.4259%;
+    overflow: hidden;
+    border-radius: 0 0 1.5cqw 1.5cqw;
+    background: #021427;
+    container-type: inline-size;
+  }
+
+  .game-screen > section {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .game-screen.mode-idle .screen-idle,
+  .game-screen.mode-select .screen-select {
+    display: flex;
+  }
+
+  /* -- idle prompt -- */
+  .screen-idle {
+    flex-direction: column;
+    gap: 1.5cqw;
+  }
+
+  .screen-idle .prompt-label {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 3.2cqw;
+    letter-spacing: -0.05cqw;
+    text-align: center;
+    text-transform: uppercase;
+    color: #98e7df;
+  }
+
+  .screen-idle .prompt-hint {
+    font-family: 'Alata', sans-serif;
+    font-size: 1.6cqw;
+    color: #5ed9cd;
+    opacity: 0.8;
+  }
+
+  @keyframes promptPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  .screen-idle .prompt-label { animation: promptPulse 1.6s ease-in-out infinite; }
+
+  /* -- select carousel -- */
+  .screen-select {
+    flex-direction: column;
+    gap: 2cqw;
+  }
+
+  .select-heading {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.8cqw;
+    letter-spacing: 0.1cqw;
+    text-transform: uppercase;
+    color: #98e7df;
+  }
+
+  .select-track-viewport {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .select-track {
+    display: flex;
+    align-items: center;
+    gap: 1.6cqw;
+    transition: transform 0.28s ease;
+    will-change: transform;
+  }
+
+  .select-track.is-spinning {
+    transition: transform 0.09s linear;
+  }
+
+  .game-card {
+    flex: none;
+    width: 17cqw;
+    height: 17cqw;
+    border-radius: 1cqw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6cqw;
+    background: #063e79;
+    border: 0.25cqw solid transparent;
+    opacity: 0.55;
+    transform: scale(0.82);
+    transition: opacity 0.28s ease, transform 0.28s ease, border-color 0.28s ease;
+  }
+
+  .game-card.is-current {
+    opacity: 1;
+    transform: scale(1);
+    border-color: #98e7df;
+    box-shadow: 0 0 1.4cqw rgba(152, 231, 223, 0.6);
+  }
+
+  .game-card .card-thumb {
+    width: 60%;
+    aspect-ratio: 1;
+    border-radius: 0.6cqw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.4cqw;
+  }
+
+  .game-card .card-label {
+    font-family: 'Alata', sans-serif;
+    font-size: 1.15cqw;
+    color: #e3fae0;
+    text-align: center;
+    padding: 0 0.5cqw;
+  }
+
+  .select-footer {
+    font-family: 'Alata', sans-serif;
+    font-size: 1.1cqw;
+    color: #5ed9cd;
+    opacity: 0.75;
+    text-align: center;
+  }
+
+  /* -- popup: covers the whole slide, dims the cabinet behind it -- */
+  .popup-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2, 20, 39, 0);
+    pointer-events: none;
+    transition: background 0.35s ease;
+  }
+
+  .popup-overlay.is-open {
+    display: flex;
+    background: rgba(2, 20, 39, 0.86);
+    pointer-events: auto;
+  }
+
+  .popup-frame {
+    position: relative;
+    width: 82%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: 0.6cqw;
+    box-shadow: 0 0 4cqw rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    transform: scale(0.92);
+    opacity: 0;
+    transition: transform 0.35s ease, opacity 0.35s ease;
+  }
+
+  .popup-overlay.is-open .popup-frame {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .popup-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: none;
+  }
+
+  .popup-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1cqw;
+    font-family: 'Alata', sans-serif;
+    color: #e3fae0;
+    text-align: center;
+    padding: 0 2cqw;
+  }
+
+  .popup-placeholder .ph-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 2.4cqw;
+    text-transform: uppercase;
+  }
+
+  .popup-placeholder .ph-note {
+    font-size: 1.2cqw;
+    opacity: 0.7;
+    max-width: 70%;
+  }
+
+  .popup-close {
+    position: absolute;
+    top: 1.5%;
+    right: 1.5%;
+    width: 2.8cqw;
+    height: 2.8cqw;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.12);
+    color: #e3fae0;
+    font-family: 'Alata', sans-serif;
+    font-size: 1.6cqw;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .popup-close:hover { background: rgba(255, 255, 255, 0.24); }
+
+  /* -- make the decorative arcade button clickable -- */
+  .arcade-button-btn {
+    position: absolute;
+    left: 44.2708%;
+    top: 80.8333%;
+    width: 10.4688%;
+    height: 8.269%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    z-index: 6;
+  }
+
+  .arcade-button-btn img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .arcade-button-btn:hover img { filter: brightness(1.15); }
+
+  .arcade-button-btn.is-pressed img {
+    animation: buttonPress 0.22s ease;
+  }
+
+  @keyframes buttonPress {
+    0% { transform: translateY(0); }
+    40% { transform: translateY(6%); }
+    100% { transform: translateY(0); }
+  }
+</style>
 </head>
 <body>
   <main class="stage">
-    <section class="slide" aria-label="Slide 25">
+    <section class="slide" aria-label="SEAVENTURE game select">
       <p class="header header--left">RMIT University Vietnam, Saigon South Campus, School of Communication and Design, Digital Media Program</p>
       <p class="header header--right">COMM2754-2026-S2-A2w08-Seaventure-DesignDocuments</p>
 
       <img class="machine" src="assets/images/machine.svg" alt="" draggable="false">
       <img class="logo" src="assets/images/logo.svg" alt="Seaventure logo" draggable="false">
 
-      <button type="button" class="joystick-btn joystick-btn--left" data-href="paragraph.html" aria-label="Previous page">
+      <!-- screen: idle prompt <-> game select carousel -->
+      <div class="game-screen mode-idle" id="gameScreen">
+        <section class="screen-idle">
+          <p class="prompt-label">Press start</p>
+          <p class="prompt-hint">to browse the crew's generative art</p>
+        </section>
+
+        <section class="screen-select">
+          <p class="select-heading" id="selectHeading">Choose a piece</p>
+          <div class="select-track-viewport">
+            <div class="select-track" id="selectTrack"><!-- cards injected by JS --></div>
+          </div>
+          <p class="select-footer">◀ ▶ browse · center button select</p>
+        </section>
+      </div>
+
+      <!-- popup: fullscreen-ish 16:9 reveal, dims everything behind it -->
+      <div class="popup-overlay" id="popupOverlay">
+        <div class="popup-frame">
+          <iframe id="popupIframe" title="Selected generative art piece" loading="lazy"></iframe>
+          <div class="popup-placeholder" id="popupPlaceholder">
+            <p class="ph-title" id="popupTitle">Placeholder</p>
+            <p class="ph-note">No project folder wired up yet — set this entry's <code>src</code> in game-select.js once the member's code/ folder is added to the repo.</p>
+          </div>
+          <button type="button" class="popup-close" id="popupClose" aria-label="Close">×</button>
+        </div>
+      </div>
+
+      <button type="button" class="joystick-btn joystick-btn--left" data-href="paragraph.html" aria-label="Previous / browse left" id="joyLeft">
         <img class="joystick-part" src="assets/images/joystick-left-base.svg" alt="" draggable="false">
         <img class="joystick-part joystick-top" src="assets/images/joystick-left-top.svg" alt="" draggable="false">
       </button>
-      <button type="button" class="joystick-btn joystick-btn--right" data-href="credit.html" aria-label="Next page">
+      <button type="button" class="joystick-btn joystick-btn--right" data-href="credit.html" aria-label="Next / browse right" id="joyRight">
         <img class="joystick-part" src="assets/images/joystick-right-base.svg" alt="" draggable="false">
         <img class="joystick-part joystick-top" src="assets/images/joystick-right-top.svg" alt="" draggable="false">
       </button>
-      <img class="arcade-button" src="assets/images/button.svg" alt="" draggable="false">
+
+      <button type="button" class="arcade-button-btn" id="arcadeButton" aria-label="Select">
+        <img src="assets/images/button.svg" alt="" draggable="false">
+      </button>
     </section>
   </main>
-  <script src="nav.js"></script>
+  <script src="game-select.js"></script>
 </body>
 </html>
