@@ -93,10 +93,7 @@ canvas {
 ====================================================== */
 
 #sound-toggle {
-  /* fixed to the browser viewport (not #scene) so it's always reachable
-     even when the 1920x1080 scene is bigger than the window and centered
-     with overflow — an absolutely-positioned corner element inside it can
-     end up scrolled out of reach */
+   
   position: fixed;
 
   left: 32px;

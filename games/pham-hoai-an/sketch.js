@@ -1,26 +1,120 @@
-// ===== Cấu hình bộ bài =====
-// Mỗi entry: { type, count } -> số cặp (pairs), ảnh mặt sau lấy theo type
-// crab: 1 cặp | so: 1 cặp | sanho: 2 cặp | co2: 2 cặp | company: 2 cặp => 8 cặp = 16 lá
+
 const CARD_CONFIG = [
-  { type: "crab",    image: "Image\\crab card.png",    pairs: 1, isCreature: true  },
-  { type: "so",      image: "Image\\so card.png",      pairs: 1, isCreature: true  },
-  { type: "sanho",   image: "Image\\sanho card.png",   pairs: 2, isCreature: true  },
-  { type: "co2",     image: "Image\\co2 card.png",     pairs: 2, isCreature: false },
-  { type: "company", image: "Image\\company card.png", pairs: 2, isCreature: false },
+  { type: "crab",    image: "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-crab-card.png",    pairs: 1, isCreature: true  },
+  { type: "so",      image: "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-so-card.png",      pairs: 1, isCreature: true  },
+  { type: "sanho",   image: "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-sanho-card.png",   pairs: 2, isCreature: true  },
+  { type: "co2",     image: "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-co2-card.png",     pairs: 2, isCreature: false },
+  { type: "company", image: "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-company-card.png", pairs: 2, isCreature: false },
 ];
 
-const FRONT_IMAGE = "Image\\front card.png"; // mặt úp (chưa lật)
+const FRONT_IMAGE = "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-front-card.png"; 
 
-// ===== Trạng thái game =====
-let flippedCards = [];   // các thẻ đang lật, tối đa 2
-let lockBoard = false;   // khoá không cho click khi đang kiểm tra 2 lá
-let ecoLevel = 0;        // mức độ "sức khoẻ" đại dương: + sinh vật, - ô nhiễm
+
+const SOUND_PATHS = {
+  button: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Button.wav",
+  card: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Card.wav",
+  bubble: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Bubble.wav",
+  correct: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Correct.wav",
+  incorrect: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Incorrect.wav",
+  breakingBone: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Breaking-bone.wav",
+};
+
+
+const BUTTON_SOUND_VOLUME = 0.7;  
+const CARD_SOUND_VOLUME   = 0.6;  
+const CORRECT_SOUND_VOLUME      = 0.3;  
+const INCORRECT_SOUND_VOLUME    = 0.6;   
+const BREAKING_BONE_SOUND_VOLUME = 0.7;  
+
+
+const BUBBLE_SOUND_MIN_VOLUME = 0.01; 
+const BUBBLE_SOUND_MAX_VOLUME = 0.05; 
+
+
+const BUBBLE_SOUND_MIN_GAP = 1000;
+const BUBBLE_SOUND_MAX_GAP = 1600; 
+
+
+
+
+const buttonSoundEl = new Audio(SOUND_PATHS.button);
+buttonSoundEl.volume = BUTTON_SOUND_VOLUME;
+
+const cardSoundEl = new Audio(SOUND_PATHS.card);
+cardSoundEl.volume = CARD_SOUND_VOLUME;
+
+
+const correctSoundEl = new Audio(SOUND_PATHS.correct);
+correctSoundEl.volume = CORRECT_SOUND_VOLUME;
+
+const incorrectSoundEl = new Audio(SOUND_PATHS.incorrect);
+incorrectSoundEl.volume = INCORRECT_SOUND_VOLUME;
+
+const breakingBoneSoundEl = new Audio(SOUND_PATHS.breakingBone);
+breakingBoneSoundEl.volume = BREAKING_BONE_SOUND_VOLUME;
+
+function playButtonSound() {
+  buttonSoundEl.currentTime = 0;
+  buttonSoundEl.play().catch(() => {}); 
+}
+
+
+function playCardSound() {
+  cardSoundEl.currentTime = 0;
+  cardSoundEl.play().catch(() => {});
+}
+
+
+function playCorrectSound() {
+  correctSoundEl.currentTime = 0;
+  correctSoundEl.play().catch(() => {});
+}
+
+
+function playIncorrectSound() {
+  incorrectSoundEl.currentTime = 0;
+  incorrectSoundEl.play().catch(() => {});
+}
+
+
+function playBreakingBoneSound() {
+  breakingBoneSoundEl.currentTime = 0;
+  breakingBoneSoundEl.play().catch(() => {});
+}
+
+
+function playBubbleSound() {
+  const bubbleAudio = new Audio(SOUND_PATHS.bubble);
+
+  const randomVolume =
+    BUBBLE_SOUND_MIN_VOLUME +
+    Math.random() * (BUBBLE_SOUND_MAX_VOLUME - BUBBLE_SOUND_MIN_VOLUME);
+
+  bubbleAudio.volume = randomVolume;
+  bubbleAudio.play().catch(() => {});
+}
+
+
+
+function scheduleNextBubbleSound() {
+  const delay =
+    BUBBLE_SOUND_MIN_GAP +
+    Math.random() * (BUBBLE_SOUND_MAX_GAP - BUBBLE_SOUND_MIN_GAP);
+
+  setTimeout(() => {
+    playBubbleSound();
+    scheduleNextBubbleSound(); 
+  }, delay);
+}
+
+let flippedCards = [];  
+let lockBoard = false;   
+let ecoLevel = 0;        
 let matchedPairs = 0;
 const TOTAL_PAIRS = CARD_CONFIG.reduce((sum, c) => sum + c.pairs, 0);
 
-// ===== Thanh đo độ pH =====
-const PH_MAX_HITS = 3;   // 3 lần trúng CO2/Company = cạn hẳn (mỗi lần trừ 1/3)
-const PH_DANGER_HITS = 2; // trúng đủ 2/3 thì sinh vật biến mất
+const PH_MAX_HITS = 3;  
+const PH_DANGER_HITS = 2;
 let phHits = 0;
 
 function updatePhBar() {
@@ -44,6 +138,7 @@ function handlePollutionMatch() {
   phHits = Math.min(PH_MAX_HITS, phHits + 1);
   updatePhBar();
 
+  playBreakingBoneSound(); 
   if (phHits >= PH_DANGER_HITS) {
     document.querySelectorAll(".creature").forEach(el => {
       el.style.opacity = "0";
@@ -55,7 +150,7 @@ function buildDeck() {
   let deck = [];
   CARD_CONFIG.forEach(cfg => {
     for (let p = 0; p < cfg.pairs; p++) {
-      // mỗi cặp tạo ra 2 lá cùng type/ảnh
+     
       deck.push({ type: cfg.type, image: cfg.image, isCreature: cfg.isCreature });
       deck.push({ type: cfg.type, image: cfg.image, isCreature: cfg.isCreature });
     }
@@ -105,6 +200,7 @@ function onCardClick(card, cardData) {
   if (lockBoard) return;
   if (card.classList.contains("flipped") || card.classList.contains("matched")) return;
 
+  playCardSound(); 
   card.classList.add("flipped");
   flippedCards.push({ el: card, data: cardData });
 
@@ -114,12 +210,19 @@ function onCardClick(card, cardData) {
   }
 }
 
+
+
+const FLIP_DURATION = 500;  
+const SHAKE_DURATION = 400; 
+
 function checkForMatch() {
   const [first, second] = flippedCards;
   const isMatch = first.data.type === second.data.type;
 
   if (isMatch) {
+    
     setTimeout(() => {
+      playCorrectSound(); 
       first.el.classList.add("matched");
       second.el.classList.add("matched");
       matchedPairs++;
@@ -129,24 +232,32 @@ function checkForMatch() {
       }
       resetTurn();
       checkWin();
-    }, 350);
+    }, FLIP_DURATION);
   } else {
-    first.el.classList.add("wrong");
-    second.el.classList.add("wrong");
+   
     setTimeout(() => {
-      first.el.classList.remove("flipped", "wrong");
-      second.el.classList.remove("flipped", "wrong");
-      resetTurn();
-    }, 900);
+     
+      playIncorrectSound(); 
+      first.el.classList.add("wrong");
+      second.el.classList.add("wrong");
+
+      
+      setTimeout(() => {
+        first.el.classList.remove("flipped", "wrong");
+        second.el.classList.remove("flipped", "wrong");
+        resetTurn();
+      }, SHAKE_DURATION);
+    }, FLIP_DURATION);
   }
 }
+
 
 function resetTurn() {
   flippedCards = [];
   lockBoard = false;
 }
 
-// Sinh vật sáng lên khi ghép đúng sinh vật, tối đi khi ghép đúng CO2/company
+
 function updateEcoLevel(isCreature) {
   ecoLevel += isCreature ? 1 : -1;
   ecoLevel = Math.max(-4, Math.min(4, ecoLevel));
@@ -162,9 +273,7 @@ function updateEcoLevel(isCreature) {
 
 function checkWin() {
   if (matchedPairs === TOTAL_PAIRS) {
-    setTimeout(() => {
-      alert("Bạn đã ghép hết các cặp thẻ! 🎉");
-    }, 400);
+
   }
 }
 
@@ -177,7 +286,7 @@ function startGame() {
   bggame.classList.remove("hidden");
   phBarContainer.classList.remove("hidden");
 
-  // reset trạng thái pH và bàn cờ mỗi lần bắt đầu
+
   phHits = 0;
   updatePhBar();
   document.querySelectorAll(".creature").forEach(el => {
@@ -190,19 +299,21 @@ function startGame() {
 document.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("startBtn");
   if (startBtn) {
-    startBtn.addEventListener("click", startGame);
+    startBtn.addEventListener("click", () => {
+      playButtonSound(); 
+      startGame();
+    });
   }
 });
 
 
-/*bóng bay*/
 const BUBBLE_IMAGES = [
-  "Image/ballom.png",
-  "Image/ballom-3.png",
-  "Image/ballom-4.png",
-  "Image/ballom-5.png",
-  "Image/ballom-6.png",
-  "Image/ballom-7.png"
+  "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-ballom-1.png",
+  "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-ballom-3.png",
+  "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-ballom-4.png",
+  "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-ballom-5.png",
+  "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-ballom-6.png",
+  "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-ballom-7.png"
 ];
 
 const BUBBLE_COUNT = 20;
@@ -257,6 +368,7 @@ function animateBubbles(time) {
     bubble.x += bubble.drift * wave;
 
     if (bubble.y < -10) {
+
       bubble.y = 100 + Math.random() * 20;
       bubble.x = Math.random() * 100;
     }
@@ -271,4 +383,7 @@ function animateBubbles(time) {
 document.addEventListener("DOMContentLoaded", () => {
   createBubbles();
   requestAnimationFrame(animateBubbles);
+
+
+  scheduleNextBubbleSound();
 });

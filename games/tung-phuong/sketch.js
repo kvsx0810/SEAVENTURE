@@ -28,6 +28,7 @@ let ambient1;
 let ambient2;
 let ambient3;
 let ambient4;
+let ambient5;
 let audioStarted = false;
 
 function preload() {
@@ -52,6 +53,7 @@ function preload() {
   ambient2 = loadSound('sounds/wind_chime.wav');
   ambient3 = loadSound('sounds/water_splash.wav');
   ambient4 = loadSound('sounds/water_drop.wav');
+  ambient5 = loadSound('sounds/echo.wav');
 }
 
 function setup() {
@@ -159,15 +161,25 @@ function mousePressed() {
   if (!audioStarted) {
     userStartAudio().then(() => {
       ambient1.setVolume(0.15);
-      ambient2.setVolume(0.30);
-      ambient3.setVolume(0.03);
+      ambient2.setVolume(0.3);
+      ambient3.setVolume(0.01);
       ambient4.setVolume(0.01);
+      ambient5.setVolume(0.0008);
       ambient1.loop();
       ambient2.loop();
       ambient3.loop();
       ambient4.loop();
+      ambient5.loop();
       audioStarted = true;
     });
+    } else {
+    ambient1.stop();
+    ambient2.stop();
+    ambient3.stop();
+    ambient4.stop();
+    ambient5.stop();
+
+    audioStarted = false;
   }
 }
 

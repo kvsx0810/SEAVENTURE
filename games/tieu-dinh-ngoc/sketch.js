@@ -5,6 +5,11 @@ let rock4Img;
 let rock5Img;
 let rock6Img;
 
+let bottleImg1, bottleImg2, bottleImg3;
+let milkBoxImg1, milkBoxImg2, milkBoxImg3;
+let bagImg1, bagImg2, bagImg3;
+let canImg1, canImg2, canImg3;
+
 // ======================================================
 // SOUND
 // Two ambient loops (underwater + rustling paper, both setLoop) plus four
@@ -30,10 +35,11 @@ let soundOn = false;
 
 const UNDERWATER_VOLUME = 0.28; // background bed — present but not the loudest thing
 const RUSTLING_PAPER_VOLUME = 0.09; // coral "rustle"/sway — still light, just less buried
-const BUBBLE_BREATH_VOLUME = 0.045; // fires very often, so kept light (see note above)
+const BUBBLE_BREATH_VOLUME = 0.022; // fires very often, so kept light (see note above) — turned down further
 const BUBBLE_BREATH_CHANCE = 0.55; // only some exhales actually play a sound
-const BUBBLE_EATING_VOLUME = 0.09; // rarer event, allowed to read a bit clearer
-const DIE_CORAL_VOLUME = 0.5; // a coral dying is a notable beat — let it stand out
+const BUBBLE_EATING_VOLUME = 0.045; // rarer event, allowed to read a bit clearer — turned down further
+const DIE_CORAL_VOLUME = 1; // p5.sound's own volume cap — extra loudness beyond this comes from DIE_CORAL_GAIN_BOOST below
+const DIE_CORAL_GAIN_BOOST = 2.2; // extra amplification on top of DIE_CORAL_VOLUME, applied via a raw Web Audio GainNode (see setup()) since p5.sound's setVolume() alone can't exceed 1
 const CLICK_VOLUME = 0.4;
 
 function toggleSound() {
@@ -265,264 +271,162 @@ function preload() {
   rock5Img = loadImage("assets/images/rock5.png");
   rock6Img = loadImage("assets/images/rock6.png");
 
-  underwaterSound = loadSound("assets/sounds/COMM2754-2026-S2-A1w04-Seariously-underwater-sound.wav");
-  rustlingPaperSound = loadSound("assets/sounds/COMM2754-2026-S2-A1w04-Seariously-rustling-paper-sound.wav");
-  bubbleBreathSound = loadSound("assets/sounds/underwater-bubble-sound.wav");
-  bubbleEatingSound = loadSound("assets/sounds/bubble-eating-sound.wav");
-  dieCoralSound = loadSound("assets/sounds/die-coral-sound.wav");
-  clickSound = loadSound("assets/sounds/click-sound.wav");
+  // SVG, not PNG — the PNG export from Figma baked in that frame's own
+  // (dark) background fill, since these litter pieces are grouped inside
+  // a container frame in the design file. The SVG has no background rect,
+  // just the artwork paths, so it stays transparent like everything else.
+  bottleImg1 = loadImage("assets/images/bottle1.svg");
+  bottleImg2 = loadImage("assets/images/bottle2.svg");
+  bottleImg3 = loadImage("assets/images/bottle3.svg");
+  milkBoxImg1 = loadImage("assets/images/milkbox1.svg");
+  milkBoxImg2 = loadImage("assets/images/milkbox2.svg");
+  milkBoxImg3 = loadImage("assets/images/milkbox3.svg");
+  bagImg1 = loadImage("assets/images/bag1.svg");
+  bagImg2 = loadImage("assets/images/bag2.svg");
+  bagImg3 = loadImage("assets/images/bag3.svg");
+  canImg1 = loadImage("assets/images/can1.svg");
+  canImg2 = loadImage("assets/images/can2.svg");
+  canImg3 = loadImage("assets/images/can3.svg");
+
+  underwaterSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-underwater-sound.wav");
+  rustlingPaperSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-coral-sound.wav");
+  bubbleBreathSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-underwater-bubble-sound.wav");
+  bubbleEatingSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-bubble-eating-sound.wav");
+  dieCoralSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-coral-die-sound.wav");
+  clickSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-clicking-sound.wav");
 }
 
 // ======================================================
-// FLOATING CREATURES (drift down through the water)
-// Same hand-drawn art, recolored through the same palette/hue system as
-// coral and seaweed (setGradientFill / plantFill / remapPlantColor).
+// TRASH ITEMS (litter that drifts down through the water)
+// Four kinds of litter — bottle, milk box, plastic bag, can — each exported
+// straight from Figma in its own three color variants (pink/green/teal).
 // ======================================================
 
-function drawFloatingCreature1(x, y, s = 1) {
+function drawBottle1(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  noStroke();
-
-  setGradientFill(23.8407, 2.7599, 40.9664, 35.6799, [[0.15, "#C9F2EE"], [1, "#E3FAE0"]]);
-  beginShape();
-  vertex(11.2755, 34.4799);
-  bezierVertex(11.2755, 34.4799, 10.9081, 24.0999, 10.5765, 21.5199);
-  bezierVertex(10.0118, 17.1999, 9.6533, 12.3999, 13.5968, 8.8399);
-  bezierVertex(18.3199, 4.5699, 22.8638, 3.6599, 39.4621, 0.2299);
-  bezierVertex(46.2197, -1.1701, 50.5933, 4.1999, 51.0414, 6.1899);
-  bezierVertex(52.1348, 11.0799, 54.5368, 28.6199, 54.5368, 28.6199);
-  vertex(11.2755, 34.4899);
-  vertex(11.2755, 34.4799);
-  endShape(CLOSE);
-
-  noFill();
-  stroke(remapPlantColor("#086E9B"));
-  strokeWeight(1);
-  beginShape();
-  vertex(10.7826, 28.8499);
-  bezierVertex(17.2355, 33.5199, 48.5231, 26.7799, 53.542, 19.7699);
-  endShape();
-  noStroke();
-
-  setGradientFill(13.1307, 25.7599, 58.1318, 197.299, [[0.02, "#E3FAE0"], [1, "#8FEC83"]]);
-  beginShape();
-  vertex(31.1719, 30.9999);
-  bezierVertex(22.0483, 33.9199, 11.2486, 32.5099, 11.2486, 27.9199);
-  bezierVertex(11.2486, 24.5299, 4.6434, 32.8399, 3.4783, 34.6799);
-  bezierVertex(-0.017, 40.1999, -0.0081, 46.6299, 0.0009, 53.5199);
-  bezierVertex(0.0099, 60.7799, 0.0278, 69.6099, 5.1363, 76.2399);
-  bezierVertex(10.7109, 83.4699, 18.2393, 82.7399, 18.544, 86.9499);
-  bezierVertex(18.8398, 90.9699, 12.0194, 92.1299, 8.2821, 99.3199);
-  bezierVertex(5.3156, 105.03, 6.3194, 110.64, 7.4576, 119.82);
-  bezierVertex(11.4727, 152.23, 7.8519, 153.55, 11.9298, 158.98);
-  bezierVertex(20.8294, 170.83, 40.1253, 167.23, 52.6547, 164.89);
-  bezierVertex(60.5057, 163.43, 72.9992, 160.89, 80.9578, 149.56);
-  bezierVertex(83.2521, 146.29, 85.8243, 142.63, 85.9229, 137.55);
-  bezierVertex(86.138, 126.77, 74.9351, 124.68, 71.6907, 111.14);
-  bezierVertex(69.1096, 100.39, 74.1464, 93.2199, 69.701, 88.7899);
-  bezierVertex(65.8204, 84.9199, 59.251, 87.6699, 58.7759, 85.8299);
-  bezierVertex(58.1038, 83.2399, 72.112, 81.0499, 77.812, 70.3199);
-  bezierVertex(85.5286, 55.7699, 73.6624, 33.6699, 72.0223, 30.6099);
-  bezierVertex(68.4284, 23.9199, 65.7487, 18.9399, 60.2727, 16.1999);
-  bezierVertex(58.0321, 15.0799, 52.2066, 14.8199, 52.7712, 17.1399);
-  bezierVertex(54.9222, 25.9499, 47.4655, 25.7699, 31.1809, 30.9899);
-  vertex(31.1719, 30.9999);
-  endShape(CLOSE);
-
-  plantFill("#065274");
-  beginShape();
-  vertex(60.6759, 86.8699);
-  bezierVertex(59.3405, 86.7099, 58.0231, 87.1799, 56.7325, 87.5099);
-  bezierVertex(55.3523, 87.8599, 53.9721, 88.1899, 52.5829, 88.4999);
-  bezierVertex(49.8046, 89.1099, 47.0173, 89.6199, 44.2121, 90.0299);
-  bezierVertex(43.7908, 90.0899, 43.7819, 90.8399, 44.2121, 90.7799);
-  bezierVertex(46.9725, 90.3799, 49.7149, 89.8799, 52.4485, 89.2899);
-  bezierVertex(53.8107, 88.9899, 55.1731, 88.6799, 56.5264, 88.3299);
-  bezierVertex(57.8797, 87.9799, 59.2778, 87.4499, 60.6759, 87.6199);
-  bezierVertex(61.1061, 87.6699, 61.1061, 86.9199, 60.6759, 86.8699);
-  endShape(CLOSE);
-
-  plantFill("#065274");
-  beginShape();
-  vertex(18.4992, 89.81);
-  bezierVertex(21.9138, 89.96, 25.3375, 89.5999, 28.6625, 88.7499);
-  bezierVertex(29.0837, 88.6399, 28.9045, 87.9199, 28.4833, 88.0299);
-  bezierVertex(25.212, 88.8699, 21.8511, 89.2099, 18.4992, 89.0699);
-  bezierVertex(18.069, 89.0499, 18.069, 89.7999, 18.4992, 89.8199);
-  vertex(18.4992, 89.81);
-  endShape(CLOSE);
-
-  plantFill("#065274");
-  beginShape();
-  vertex(18.5888, 85.3499);
-  bezierVertex(21.0534, 84.6999, 23.5629, 84.2999, 26.0902, 84.1599);
-  bezierVertex(26.5204, 84.1399, 26.5204, 83.3899, 26.0902, 83.4099);
-  bezierVertex(23.5001, 83.5499, 20.9279, 83.9599, 18.4095, 84.6199);
-  bezierVertex(17.9883, 84.7299, 18.1675, 85.4499, 18.5888, 85.3399);
-  vertex(18.5888, 85.3499);
-  endShape(CLOSE);
-
+  image(bottleImg1, 0, 0);
   pop();
 }
 
-function drawFloatingCreature2(x, y, s = 1) {
+function drawBottle2(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  noStroke();
-
-  setGradientFill(41.8106, 36.5215, 82.0672, 122.854, [[0, "#E3FAE0"], [0.38, "#D8F8D4"], [1, "#BFF4B8"]]);
-  beginShape();
-  vertex(57.9074, 29.0176);
-  bezierVertex(57.9074, 29.0176, 58.518, 90.94, 58.6136, 90.9621);
-  bezierVertex(58.7093, 90.9842, 61.549, 109.759, 44.1133, 105.176);
-  bezierVertex(30.1427, 101.504, 18.1952, 92.2128, 13.656, 88.6594);
-  bezierVertex(12.7364, 87.9384, 12.707, 86.5627, 13.5898, 85.7976);
-  vertex(16.7606, 83.0609);
-  bezierVertex(17.3712, 82.5385, 17.1873, 81.5527, 16.4369, 81.2731);
-  vertex(1.5393, 75.8217);
-  bezierVertex(0.7668, 75.5422, -0.0424, 76.1381, 0.0017, 76.9547);
-  vertex(0.8846, 94.3095);
-  bezierVertex(0.9213, 95.0966, 1.8189, 95.5233, 2.4516, 95.0599);
-  vertex(4.2908, 93.7209);
-  bezierVertex(5.0927, 93.1397, 6.2256, 93.4266, 6.6376, 94.3242);
-  bezierVertex(9.5951, 100.776, 22.6314, 117.631, 57.7676, 121);
-  bezierVertex(57.7676, 121, 64.9552, 122.251, 66.8091, 128.048);
-  bezierVertex(66.8091, 128.048, 69.6489, 121.78, 74.9826, 120.86);
-  bezierVertex(80.2133, 119.963, 107.735, 119.757, 119.396, 93.9195);
-  bezierVertex(119.793, 93.0441, 120.97, 92.8675, 121.713, 93.4781);
-  vertex(124.082, 95.4203);
-  bezierVertex(124.818, 96.0236, 125.936, 95.6116, 126.098, 94.67);
-  vertex(128.982, 78.2421);
-  bezierVertex(129.136, 77.3519, 128.283, 76.6236, 127.429, 76.9105);
-  vertex(111.899, 82.1633);
-  bezierVertex(111.002, 82.465, 110.766, 83.6273, 111.472, 84.26);
-  vertex(113.275, 85.8638);
-  bezierVertex(113.849, 86.3714, 113.937, 87.2248, 113.488, 87.8428);
-  bezierVertex(110.847, 91.4182, 100.246, 106.72, 80.228, 104.638);
-  bezierVertex(72.7829, 103.859, 73.8496, 93.9858, 73.5333, 88.9169);
-  bezierVertex(72.6284, 74.1591, 70.3698, 29.0028, 70.3698, 29.0028);
-  vertex(57.9, 29.0028);
-  vertex(57.9074, 29.0176);
-  endShape(CLOSE);
-
-  plantFill("#EBFBE9");
-  beginShape();
-  vertex(69.1118, 0.7158);
-  bezierVertex(59.7392, -1.9621, 50.0723, 3.1068, 47.5269, 12.0306);
-  bezierVertex(44.9814, 20.9544, 50.5137, 30.3565, 59.8864, 33.0344);
-  bezierVertex(69.259, 35.7123, 78.9259, 30.6434, 81.4713, 21.7196);
-  bezierVertex(84.0168, 12.7957, 78.4844, 3.3937, 69.1118, 0.7158);
-  endShape(CLOSE);
-  vertex(62.4686, 24.0075);
-  bezierVertex(58.4297, 22.8525, 56.0314, 18.8504, 57.1128, 15.0616);
-  bezierVertex(58.1943, 11.2729, 62.3436, 9.132, 66.3825, 10.287);
-  bezierVertex(70.4214, 11.4421, 72.8197, 15.4442, 71.7382, 19.233);
-  bezierVertex(70.6568, 23.0217, 66.5075, 25.1626, 62.4686, 24.0075);
-  endShape(CLOSE);
-
-  plantFill("#E3FAE0");
-  beginShape();
-  vertex(80.9011, 52.1768);
-  vertex(50.13, 53.2084);
-  bezierVertex(48.9889, 53.2466, 48.0949, 54.2026, 48.1332, 55.3437);
-  vertex(48.3952, 63.1596);
-  bezierVertex(48.4334, 64.3007, 49.3895, 65.1948, 50.5306, 65.1565);
-  vertex(81.3016, 64.125);
-  bezierVertex(82.4427, 64.0867, 83.3367, 63.1307, 83.2985, 61.9896);
-  vertex(83.0365, 54.1737);
-  bezierVertex(82.9982, 53.0326, 82.0422, 52.1386, 80.9011, 52.1768);
-  endShape(CLOSE);
-
+  image(bottleImg2, 0, 0);
   pop();
 }
 
-function drawFloatingCreature3(x, y, s = 1) {
+function drawBottle3(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  noStroke();
-
-  plantFill("#EBFBE9");
-  beginShape();
-  vertex(59.0889, 42.7514);
-  bezierVertex(57.162, 44.0814, 53.4964, 46.0714, 52.3134, 44.8014);
-  bezierVertex(51.4799, 43.9014, 52.645, 42.1914, 52.7526, 37.7314);
-  bezierVertex(52.8063, 35.6314, 52.8601, 33.3914, 52.0176, 31.4914);
-  bezierVertex(50.1714, 27.3114, 44.077, 27.9414, 44.068, 26.4814);
-  bezierVertex(44.068, 25.2014, 48.5134, 25.4414, 51.5785, 21.5514);
-  bezierVertex(52.8063, 19.9914, 53.2993, 18.4314, 53.8639, 16.6214);
-  bezierVertex(55.1634, 12.4514, 55.1366, 8.0914, 55.1186, 5.9414);
-  bezierVertex(55.0828, 3.0814, 54.8229, 1.8614, 55.3427, 1.5814);
-  bezierVertex(56.454, 1.0014, 58.0762, 6.3214, 62.1182, 7.5814);
-  bezierVertex(65.2999, 8.5714, 68.5801, 6.6214, 71.5466, 4.8714);
-  bezierVertex(75.9113, 2.2914, 77.8471, -0.5786, 78.7613, 0.1014);
-  bezierVertex(80.016, 1.0414, 76.6014, 6.6014, 78.7613, 9.8814);
-  bezierVertex(79.7741, 11.4114, 81.5307, 11.7414, 83.0364, 12.0214);
-  bezierVertex(88.3242, 13.0014, 92.4378, 9.7014, 92.9039, 10.5414);
-  bezierVertex(93.2892, 11.2314, 90.1973, 12.9814, 88.3421, 17.1114);
-  bezierVertex(87.8671, 18.1614, 85.9849, 22.6814, 87.3114, 26.9714);
-  bezierVertex(88.9515, 32.2714, 94.4185, 33.8014, 93.9435, 35.1914);
-  bezierVertex(93.6478, 36.0314, 90.8246, 35.9514, 85.1783, 35.7714);
-  bezierVertex(82.1222, 35.6714, 81.692, 35.5514, 81.0557, 36.0214);
-  bezierVertex(77.9457, 38.2914, 80.7509, 46.7014, 78.9226, 47.5214);
-  bezierVertex(78.4297, 47.7414, 77.6141, 47.4214, 71.1164, 40.1214);
-  bezierVertex(68.3201, 36.9814, 67.8183, 36.3114, 66.7697, 36.2614);
-  bezierVertex(64.3409, 36.1514, 63.6149, 39.6414, 59.1069, 42.7514);
-  vertex(59.0889, 42.7514);
-  endShape(CLOSE);
-
-  noFill();
-  stroke(remapPlantColor("#8FEC83"));
-  strokeWeight(1);
-  beginShape();
-  vertex(56.965, 75.2113);
-  bezierVertex(58.5692, 73.2413, 63.2834, 68.8813, 65.3448, 62.3913);
-  bezierVertex(67.4061, 55.9014, 68.2934, 40.5314, 68.4368, 34.2914);
-  bezierVertex(68.5802, 28.0514, 68.4368, 24.7614, 68.4368, 24.7614);
-  endShape();
-  noStroke();
-
-  plantFill("#BFF4B8");
-  beginShape();
-  vertex(37.5703, 88.6914);
-  bezierVertex(37.642, 87.7914, 39.3091, 73.1114, 41.5317, 70.2714);
-  bezierVertex(43.7544, 67.4414, 74.782, 73.3614, 76.0009, 75.6214);
-  bezierVertex(77.2198, 77.8814, 75.0061, 94.9114, 73.832, 96.6114);
-  bezierVertex(72.6669, 98.3114, 37.5614, 88.6914, 37.5614, 88.6914);
-  vertex(37.5703, 88.6914);
-  endShape(CLOSE);
-
-  setGradientFill(30.6065, 87.2514, 77.0653, 176.534, [[0.02, "#E3FAE0"], [1, "#8FEC83"]]);
-  beginShape();
-  vertex(50.0817, 184.211);
-  bezierVertex(77.741, 184.211, 100.163, 161.66, 100.163, 133.841);
-  bezierVertex(100.163, 106.023, 77.741, 83.4714, 50.0817, 83.4714);
-  bezierVertex(22.4224, 83.4714, 0.0001, 106.023, 0.0001, 133.841);
-  bezierVertex(0.0001, 161.66, 22.4224, 184.211, 50.0817, 184.211);
-  endShape(CLOSE);
-
+  image(bottleImg3, 0, 0);
   pop();
 }
 
+function drawMilkBox1(x, y, s = 1) {
+  push();
+  translate(x, y);
+  scale(s);
+  image(milkBoxImg1, 0, 0);
+  pop();
+}
 
-const FLOATING_CREATURE_FNS = [drawFloatingCreature1, drawFloatingCreature2, drawFloatingCreature3];
-// approximate visual center + overall size (larger side of its SVG viewBox)
-// of each creature's own artwork, used to center/fit it when riding inside a bubble
-const FLOATING_CREATURE_CENTER = [
-  { cx: 43, cy: 84, maxDim: 168 },     // drawFloatingCreature1 (86x168)
-  { cx: 64.5, cy: 64.5, maxDim: 129 }, // drawFloatingCreature2 (129x129)
-  { cx: 50.5, cy: 92.5, maxDim: 185 }, // drawFloatingCreature3 (101x185)
+function drawMilkBox2(x, y, s = 1) {
+  push();
+  translate(x, y);
+  scale(s);
+  image(milkBoxImg2, 0, 0);
+  pop();
+}
+
+function drawMilkBox3(x, y, s = 1) {
+  push();
+  translate(x, y);
+  scale(s);
+  image(milkBoxImg3, 0, 0);
+  pop();
+}
+
+function drawBag1(x, y, s = 1) {
+  push();
+  translate(x, y);
+  scale(s);
+  image(bagImg1, 0, 0);
+  pop();
+}
+
+function drawBag2(x, y, s = 1) {
+  push();
+  translate(x, y);
+  scale(s);
+  image(bagImg2, 0, 0);
+  pop();
+}
+
+function drawBag3(x, y, s = 1) {
+  push();
+  translate(x, y);
+  scale(s);
+  image(bagImg3, 0, 0);
+  pop();
+}
+
+function drawCan1(x, y, s = 1) {
+  push();
+  translate(x, y);
+  scale(s);
+  image(canImg1, 0, 0);
+  pop();
+}
+
+function drawCan2(x, y, s = 1) {
+  push();
+  translate(x, y);
+  scale(s);
+  image(canImg2, 0, 0);
+  pop();
+}
+
+function drawCan3(x, y, s = 1) {
+  push();
+  translate(x, y);
+  scale(s);
+  image(canImg3, 0, 0);
+  pop();
+}
+
+const TRASH_ITEM_FNS = [
+  drawBottle1, drawBottle2, drawBottle3,
+  drawMilkBox1, drawMilkBox2, drawMilkBox3,
+  drawBag1, drawBag2, drawBag3,
+  drawCan1, drawCan2, drawCan3,
+];
+// visual center (half its exported pixel size) + overall size (larger side)
+// of each item's own artwork, used to center/fit it when riding inside a bubble
+const TRASH_ITEM_CENTER = [
+  { cx: 42.96, cy: 81.71, maxDim: 163.42 },  // drawBottle1 (85.93x163.42)
+  { cx: 42.96, cy: 81.71, maxDim: 163.42 },  // drawBottle2 (85.93x163.42)
+  { cx: 42.96, cy: 81.71, maxDim: 163.42 },  // drawBottle3 (85.93x163.42)
+  { cx: 109.22, cy: 104, maxDim: 218.45 },   // drawMilkBox1 (218.45x208)
+  { cx: 94.63, cy: 90, maxDim: 189.26 },     // drawMilkBox2 (189.26x180)
+  { cx: 94.63, cy: 90, maxDim: 189.26 },     // drawMilkBox3 (189.26x180)
+  { cx: 77.11, cy: 85.55, maxDim: 171.09 },  // drawBag1 (154.23x171.09)
+  { cx: 77.11, cy: 85.55, maxDim: 171.09 },  // drawBag2 (154.23x171.09)
+  { cx: 77.11, cy: 85.55, maxDim: 171.09 },  // drawBag3 (154.23x171.09)
+  { cx: 52.54, cy: 63.9, maxDim: 127.8 },    // drawCan1 (105.07x127.8)
+  { cx: 52.54, cy: 63.9, maxDim: 127.8 },    // drawCan2 (105.07x127.8)
+  { cx: 52.54, cy: 63.9, maxDim: 127.8 },    // drawCan3 (105.07x127.8)
 ];
 
-let floatingCreatures = [];
+let debrisItems = [];
 let reefDeathTime = null; // set once, the instant every coral has died
 let nextSpawnAt = 0;
 
-function spawnFloatingCreature() {
-  const idx = floor(random(FLOATING_CREATURE_FNS.length));
+function spawnDebris() {
+  const idx = floor(random(TRASH_ITEM_FNS.length));
   // bias where debris falls toward the coral clusters most of the time, so
   // it actually has a real chance of landing on a coral instead of just
   // dropping through the open middle of the scene where there's no coral at
@@ -540,9 +444,9 @@ function spawnFloatingCreature() {
   } else {
     x = random(60, width - 60);
   }
-  floatingCreatures.push({
-    fn: FLOATING_CREATURE_FNS[idx],
-    center: FLOATING_CREATURE_CENTER[idx],
+  debrisItems.push({
+    fn: TRASH_ITEM_FNS[idx],
+    center: TRASH_ITEM_CENTER[idx],
     x,
     y: -random(40, 200), // start just above the top of the canvas
     s: random(0.35, 0.7),
@@ -550,27 +454,26 @@ function spawnFloatingCreature() {
     sway: random(10, 30),
     swaySpeed: random(0.3, 0.8),
     phase: random(TWO_PI),
-    hue: PLANT_HUES[floor(random(PLANT_HUES.length))],
     rot: random(-0.15, 0.15),
   });
 }
 
-function updateAndDrawFloatingCreatures(frozen = false) {
+function updateAndDrawDebris(frozen = false) {
   const now = millis();
 
   // occasionally drop a batch (4-5) of new debris from the top — but not
   // once the reef is fully dead, everything just holds still then
   if (!frozen && now > nextSpawnAt) {
     const batch = 4 + floor(random(2));
-    for (let i = 0; i < batch; i++) spawnFloatingCreature();
+    for (let i = 0; i < batch; i++) spawnDebris();
     nextSpawnAt = now + random(700, 1500);
   }
 
   const dt = frozen ? 0 : deltaTime * 0.001;
   const CORAL_HIT_RADIUS = 110; // scaled per coral's own size below — must actually touch now
 
-  for (let i = floatingCreatures.length - 1; i >= 0; i--) {
-    const c = floatingCreatures[i];
+  for (let i = debrisItems.length - 1; i >= 0; i--) {
+    const c = debrisItems[i];
     let x;
     if (frozen) {
       x = c.drawX !== undefined ? c.drawX : c.x; // hold at its last on-screen position
@@ -595,7 +498,7 @@ function updateAndDrawFloatingCreatures(frozen = false) {
         }
       }
       if (hitCoral) {
-        floatingCreatures.splice(i, 1);
+        debrisItems.splice(i, 1);
         continue;
       }
     }
@@ -603,16 +506,14 @@ function updateAndDrawFloatingCreatures(frozen = false) {
     push();
     translate(x, c.y);
     rotate(c.rot);
-    plantHueOverride = c.hue;
     // center the artwork on (x, c.y) — this is also exactly the point used
     // for collision checks above and by the bubble system, so what you see
     // touching a bubble/coral is exactly when the hit actually registers
     c.fn(-c.center.cx * c.s, -c.center.cy * c.s, c.s);
-    plantHueOverride = null;
     pop();
 
     if (!frozen && c.y > height + 200) {
-      floatingCreatures.splice(i, 1); // drifted past the bottom, remove it
+      debrisItems.splice(i, 1); // drifted past the bottom, remove it
     }
   }
 }
@@ -673,14 +574,14 @@ function updateAndDrawBubbles(frozen = false) {
     // swallow any falling debris the bubble touches: grow, and carry the
     // debris along inside it instead of destroying it (skipped while frozen)
     if (!frozen) {
-      for (let j = floatingCreatures.length - 1; j >= 0; j--) {
-        const c = floatingCreatures[j];
+      for (let j = debrisItems.length - 1; j >= 0; j--) {
+        const c = debrisItems[j];
         const cx = c.drawX !== undefined ? c.drawX : c.x;
         const debrisRadius = 8 * c.s;
         if (dist(x, b.y, cx, c.y) < b.r + debrisRadius) {
           b.r = min(b.r + 12, 22); // cap growth so bubbles can't snowball into giant nets
-          b.swallowed.push({ fn: c.fn, center: c.center, hue: c.hue });
-          floatingCreatures.splice(j, 1);
+          b.swallowed.push({ fn: c.fn, center: c.center });
+          debrisItems.splice(j, 1);
           if (soundOn) bubbleEatingSound.play();
         }
       }
@@ -718,13 +619,11 @@ function updateAndDrawBubbles(frozen = false) {
       const targetSize = b.r * 2 * 0.55 * packFactor; // fits comfortably inside the bubble's current size
       const s = targetSize / item.center.maxDim;
       push();
-      plantHueOverride = item.hue;
       item.fn(
         x + cos(spreadAngle) * spreadR - item.center.cx * s,
         b.y + sin(spreadAngle) * spreadR - item.center.cy * s,
         s
       );
-      plantHueOverride = null;
       pop();
     }
 
@@ -763,6 +662,19 @@ function setup() {
 
   dieCoralSound.playMode("sustain");
   dieCoralSound.setVolume(DIE_CORAL_VOLUME);
+  // p5.sound's setVolume() is clamped to [0, 1], so it can't make this any
+  // louder on its own. To push it past that, route the sound through its
+  // own raw Web Audio GainNode set above 1 — rewires the sound's output
+  // from p5's master bus through this extra amplifier stage, then back into
+  // the master bus, so only this one sound gets the boost.
+  {
+    const ctx = getAudioContext();
+    const boostGain = ctx.createGain();
+    boostGain.gain.value = DIE_CORAL_GAIN_BOOST;
+    dieCoralSound.disconnect();
+    dieCoralSound.panner.connect(boostGain);
+    boostGain.connect(ctx.destination);
+  }
 
   clickSound.setVolume(CLICK_VOLUME);
 
@@ -788,7 +700,7 @@ function draw() {
 
   // once the reef is fully dead, debris/bubbles hold perfectly still —
   // only the underwater dust (particles) keeps drifting
-  updateAndDrawFloatingCreatures(reefDead);
+  updateAndDrawDebris(reefDead);
   updateAndDrawBubbles(reefDead);
 
   drawParticles();

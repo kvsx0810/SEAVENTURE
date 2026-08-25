@@ -34,6 +34,52 @@
 <script>
 const STAGE_W = 1920, STAGE_H = 1080;
 const IMG = 'images/';
+const SOUND = 'sound/';
+const sounds = {
+  bubbling: new Audio(SOUND + 'bubbling-sound.wav'),
+  clicking: new Audio(SOUND + 'clicking.wav'),
+  clickingTrash: new Audio(SOUND + 'clicking-trash.wav'),
+  wrong: new Audio(SOUND + 'wrong.wav'),
+  youWin: new Audio(SOUND + 'you-win.wav'),
+  youLose: new Audio(SOUND + 'you-lose.wav')
+};
+sounds.bubbling.loop = false;
+sounds.youWin.loop = false;
+sounds.youLose.loop = false;
+
+// NOTE: this now logs the exact file path on failure (name + src),
+// not just the error object - check the browser console (F12) after
+// a win/loss; if it prints "Could not play sound [youWin]: .../you-win.wav ..."
+// with a 404/NotSupportedError, the file at that exact path is missing
+// or misnamed in your sound/ folder (check spelling/extension).
+function playSound(sound, name){
+  sound.currentTime = 0;
+  sound.play().catch(err => {
+    console.warn(`Could not play sound [${name || '?'}]:`, sound.src, err);
+  });
+}
+function stopSound(sound){
+  sound.pause();
+  sound.currentTime = 0;
+}
+
+// Browsers block ANY audio-with-sound (even a one-shot ambient sound
+// on load) until the page has seen a real user gesture - that's why
+// bubbling was silent too, not just win/lose. This runs once, on the
+// very first click, and "primes" every sound so later plays that are
+// NOT triggered directly by a click (the win/lose timer running out,
+// a trash piece being missed) are also allowed for the rest of the
+// session, instead of being silently blocked.
+let audioUnlocked = false;
+function unlockAudio(){
+  if(audioUnlocked) return;
+  audioUnlocked = true;
+  Object.entries(sounds).forEach(([name, s])=>{
+    if(name === 'bubbling'){ if(s.paused) playSound(s, name); return; }
+    s.play().then(()=> s.pause()).catch(()=>{});
+    s.currentTime = 0;
+  });
+}
 const SLOT_BOX_W = 735, SLOT_BOX_H = 464;
 const FISH_SPEED = 110;
 
@@ -123,7 +169,17 @@ function preload(list){
 function showStart(){
   clearStage();
   makeImg(IMG+'game_start.png','layer');
-  stage.onclick = ()=> showRandomize();
+
+  // This attempt will very likely be silently blocked (no user
+  // gesture has happened yet on a fresh page load) - that's expected.
+  // It plays for real once unlockAudio() runs on the first click below.
+  playSound(sounds.bubbling, 'bubbling');
+
+  stage.onclick = ()=> {
+    unlockAudio();
+    playSound(sounds.clicking, 'clicking');
+    showRandomize();
+  };
 }
 
 // ---------------- 2. random_char_01 -> 02 -> slot machine ----------------
@@ -156,8 +212,13 @@ function runSlotMachine(el, ticks, total, chosenIndex){
 }
 function finishSlot(el, chosenIndex){
   const src = IMG + fishNames[chosenIndex];
-  el.src = src; fitSlotFish(el, src);
-  stage.onclick = ()=> showGamePhase(src);
+  el.src = src;
+  fitSlotFish(el, src);
+
+  stage.onclick = ()=> {
+    playSound(sounds.clicking, 'clicking');
+    showGamePhase(src);
+  };
 }
 
 // ---------------- 3. main game phase ----------------
@@ -209,7 +270,15 @@ function moveTowardTarget(fish, dt){
 function showPopup(state, fish){
   const popup = makeImg(IMG+'instruction_pop-up.png','layer');
   popup.style.zIndex = 50;
-  stage.onclick = ()=>{ popup.remove(); stage.onclick=null; beginTrashChallenge(state, fish); };
+
+  stage.onclick = ()=>{
+    playSound(sounds.clicking, 'clicking');
+
+    popup.remove();
+    stage.onclick = null;
+
+    beginTrashChallenge(state, fish);
+  };
 }
 
 // ---------------- trash challenge ----------------
@@ -256,8 +325,15 @@ function makeTrashData(el, src){
 }
 function onTrashClick(e, ch, data){
   e.stopPropagation();
+
   if(data.el.dataset.state === 'missed') return;
-  data.el.remove(); ch.active.delete(data);
+
+  // Play trash clicking sound
+  playSound(sounds.clickingTrash, 'clickingTrash');
+
+  data.el.remove();
+  ch.active.delete(data);
+
   checkEnd(ch);
 }
 function trashLoop(ch, now){
@@ -274,9 +350,21 @@ function stepTrash(d, ch, dt){
   if(d.y > STAGE_H) handleMiss(d, ch);
 }
 function handleMiss(d, ch){
-  d.el.dataset.state = 'missed'; d.el.remove(); ch.active.delete(d);
-  ch.missCount++; updateHud(ch);
-  if(ch.missCount > 5){ triggerLose(ch); return; }
+  d.el.dataset.state = 'missed';
+  d.el.remove();
+  ch.active.delete(d);
+
+  // Trash reached the bottom
+  playSound(sounds.wrong, 'wrong');
+
+  ch.missCount++;
+  updateHud(ch);
+
+  if(ch.missCount > 5){
+    triggerLose(ch);
+    return;
+  }
+
   checkEnd(ch);
 }
 function checkEnd(ch){
@@ -300,13 +388,16 @@ function triggerLose(ch){
 
   const leftover = [...ch.active];
 
-  // Show lose popup immediately
   const losePopup = makeImg(IMG+'lose.png','layer');
   losePopup.style.zIndex = 100;
 
-  // Keep popup for 5 seconds, then enter lose scene
+  // Sound starts exactly as the lose layer appears...
+  playSound(sounds.youLose, 'youLose');
+
   timers.push(setTimeout(()=>{
     losePopup.remove();
+    // ...and stops exactly as the lose layer disappears.
+    stopSound(sounds.youLose);
     enterLoseScene(ch, leftover);
   }, 5000));
 }
@@ -368,6 +459,7 @@ function updateFloater(f, t){
 
 // ---------------- win scene ----------------
 function triggerWin(ch){
+
   ch.active.forEach(d=> d.el.remove());
   ch.active.clear();
 
@@ -379,9 +471,13 @@ function triggerWin(ch){
   const winPopup = makeImg(IMG+'win.png','layer');
   winPopup.style.zIndex = 100;
 
-  // Keep popup for 5 seconds, then enter win scene
+  // Sound starts exactly as the win layer appears...
+  playSound(sounds.youWin, 'youWin');
+
   timers.push(setTimeout(()=>{
     winPopup.remove();
+    // ...and stops exactly as the win layer disappears.
+    stopSound(sounds.youWin);
     spawnWinFish(ch.state.src);
   }, 5000));
 }

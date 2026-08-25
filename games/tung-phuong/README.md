@@ -23,7 +23,7 @@ Rather than presenting the ocean as a resource to be harvested, 'Embrace' encour
 
 ## Installation Instructions
 
-- Click anywhere on the canvas to start the ambient soundscape.
+- Click anywhere on the canvas to start the ambient soundscape, click anywhere again to stop the sound.
 - The visual elements continue to animate automatically, while the fish move dynamically within the central globe.
 
 ---
