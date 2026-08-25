@@ -1,22 +1,22 @@
 
 const CARD_CONFIG = [
-  { type: "crab",    image: "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-crab-card.png",    pairs: 1, isCreature: true  },
-  { type: "so",      image: "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-so-card.png",      pairs: 1, isCreature: true  },
-  { type: "sanho",   image: "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-sanho-card.png",   pairs: 2, isCreature: true  },
-  { type: "co2",     image: "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-co2-card.png",     pairs: 2, isCreature: false },
-  { type: "company", image: "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-company-card.png", pairs: 2, isCreature: false },
+  { type: "crab",    image: "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-crab-card.png",    pairs: 1, isCreature: true  },
+  { type: "so",      image: "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-so-card.png",      pairs: 1, isCreature: true  },
+  { type: "sanho",   image: "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-sanho-card.png",   pairs: 2, isCreature: true  },
+  { type: "co2",     image: "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-co2-card.png",     pairs: 2, isCreature: false },
+  { type: "company", image: "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-company-card.png", pairs: 2, isCreature: false },
 ];
 
-const FRONT_IMAGE = "Image\\COMM2754-2026-S2-A2w08-Breathoftheocean-front-card.png"; 
+const FRONT_IMAGE = "Image/COMM2754-2026-S2-A2w08-Breathoftheocean-front-card.png";
 
 
 const SOUND_PATHS = {
-  button: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Button.wav",
-  card: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Card.wav",
-  bubble: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Bubble.wav",
-  correct: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Correct.wav",
-  incorrect: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Incorrect.wav",
-  breakingBone: "Sound\\COMM2754-2026-S2-A2w08-Breathoftheocean-Breaking-bone.wav",
+  button: "Sound/COMM2754-2026-S2-A2w08-Breathoftheocean-Button.wav",
+  card: "Sound/COMM2754-2026-S2-A2w08-Breathoftheocean-Card.wav",
+  bubble: "Sound/COMM2754-2026-S2-A2w08-Breathoftheocean-Bubble.wav",
+  correct: "Sound/COMM2754-2026-S2-A2w08-Breathoftheocean-Correct.wav",
+  incorrect: "Sound/COMM2754-2026-S2-A2w08-Breathoftheocean-Incorrect.wav",
+  breakingBone: "Sound/COMM2754-2026-S2-A2w08-Breathoftheocean-Breaking-bone.wav",
 };
 
 
