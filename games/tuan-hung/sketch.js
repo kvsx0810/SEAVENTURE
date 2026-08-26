@@ -353,7 +353,7 @@ let caughtFish = null; // {name, h} — at most one fish per cast, still danglin
 let soundOn = false;
 let ambientSound, boatMovingSound, hookSplashSound, reelSound, largeFishLostSound, juvenileLostSound;
 let prevRigState = 'moving';
-const BOAT_SOUND_VOLUME = 0.1;
+const BOAT_SOUND_VOLUME = 0.4;
 const REEL_SOUND_VOLUME = 0.5;
 const FISH_LOST_VOLUME = 1.8; // 3x the original 0.6 -- both catch cues, per feedback
 const BOAT_SOUND_MIN_GAP = 6600, BOAT_SOUND_MAX_GAP = 12000; // ms between boat-moving plays
