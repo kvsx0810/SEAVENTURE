@@ -5,28 +5,17 @@ let rock4Img;
 let rock5Img;
 let rock6Img;
 
-let bottleImg1, bottleImg2, bottleImg3;
-let milkBoxImg1, milkBoxImg2, milkBoxImg3;
-let bagImg1, bagImg2, bagImg3;
-let canImg1, canImg2, canImg3;
+let trashBottleImg1, trashBottleImg2, trashBottleImg3;
+let trashMilkBoxImg1, trashMilkBoxImg2, trashMilkBoxImg3;
+let trashBagImg1, trashBagImg2, trashBagImg3;
+let trashCanImg1, trashCanImg2, trashCanImg3;
 
 // ======================================================
-// SOUND
-// Two ambient loops (underwater + rustling paper, both setLoop) plus four
-// one-shot effects triggered by specific game events (bubble breath, bubble
-// eating debris, coral dying, UI click). Browsers block audio until the
-// visitor interacts with the page at least once, so nothing plays until the
-// #sound-toggle button is clicked (see setup()).
-//
-// Levels below are mixed relative to each other, not just picked in
-// isolation — bubble breath in particular fires very often (every coral
-// exhale, roughly 2-4x/sec once several corals are going), so it's kept
-// quiet and only plays some of the time (BUBBLE_BREATH_CHANCE) with a touch
-// of pitch/volume jitter, otherwise it washes out everything else.
+// SOUND (two ambient loops + four one-shot effects — nothing plays until #sound-toggle is clicked)
 // ======================================================
 
 let underwaterSound;
-let rustlingPaperSound;
+let coralMovementSound;
 let bubbleBreathSound;
 let bubbleEatingSound;
 let dieCoralSound;
@@ -34,27 +23,29 @@ let clickSound;
 let soundOn = false;
 
 const UNDERWATER_VOLUME = 0.28; // background bed — present but not the loudest thing
-const RUSTLING_PAPER_VOLUME = 0.09; // coral "rustle"/sway — still light, just less buried
-const BUBBLE_BREATH_VOLUME = 0.022; // fires very often, so kept light (see note above) — turned down further
+const CORAL_MOVEMENT_VOLUME = 0.09; // coral "rustle"/sway — kept light
+const CORAL_MOVEMENT_BASE_RATE = 0.75; // resting playback speed
+const CORAL_MOVEMENT_RATE_VARIANCE = 0.15; // how far the pulse drifts from the base rate
+const SEAWEED_SWAY_REFERENCE_SPEED = 1.35; // pulse cycle speed, matched to seaweed sway
+const BUBBLE_BREATH_VOLUME = 0.022; // fires very often — kept quiet
 const BUBBLE_BREATH_CHANCE = 0.55; // only some exhales actually play a sound
-const BUBBLE_EATING_VOLUME = 0.045; // rarer event, allowed to read a bit clearer — turned down further
-const DIE_CORAL_VOLUME = 1; // p5.sound's own volume cap — extra loudness beyond this comes from DIE_CORAL_GAIN_BOOST below
-const DIE_CORAL_GAIN_BOOST = 2.2; // extra amplification on top of DIE_CORAL_VOLUME, applied via a raw Web Audio GainNode (see setup()) since p5.sound's setVolume() alone can't exceed 1
+const BUBBLE_EATING_VOLUME = 0.045; // rarer event, allowed to read a bit clearer
+const DIE_CORAL_VOLUME = 1; // p5.sound's volume cap — see DIE_CORAL_GAIN_BOOST for more
+const DIE_CORAL_GAIN_BOOST = 2.2; // extra boost past the 1.0 cap, via a raw GainNode in setup() 
 const CLICK_VOLUME = 0.4;
 
 function toggleSound() {
-  // userStartAudio() unlocks the browser's audio context on this first
-  // real click — required before .play() will do anything.
+  // unlocks the browser's audio context on this first real click
   userStartAudio().then(() => {
     soundOn = !soundOn;
     clickSound.play(); // plays on every toggle, on or off
 
     if (soundOn) {
       underwaterSound.play();
-      rustlingPaperSound.play();
+      coralMovementSound.play();
     } else {
       underwaterSound.pause();
-      rustlingPaperSound.pause();
+      coralMovementSound.pause();
     }
 
     updateSoundButton();
@@ -76,14 +67,14 @@ function silenceAmbientSounds() {
 
   const fadeTime = 1.5;
   underwaterSound.fade(0, fadeTime);
-  rustlingPaperSound.fade(0, fadeTime);
+  coralMovementSound.fade(0, fadeTime);
 
   setTimeout(() => {
     underwaterSound.pause();
-    rustlingPaperSound.pause();
+    coralMovementSound.pause();
     // restore their normal volume for the next time sound is turned on
     underwaterSound.setVolume(UNDERWATER_VOLUME);
-    rustlingPaperSound.setVolume(RUSTLING_PAPER_VOLUME);
+    coralMovementSound.setVolume(CORAL_MOVEMENT_VOLUME);
   }, fadeTime * 1000);
 
   soundOn = false;
@@ -138,17 +129,7 @@ function drawParticles() {
 }
 
 // ======================================================
-// SHARED HELPERS
-// (extracted from repeated boilerplate; math/values unchanged)
-// ======================================================
-
-// Fills the current shape with a linear gradient in one call instead of the
-// repeated create/addColorStop/assign boilerplate.
-// stops: array of [position(0-1), "#hexColor"]
-// ======================================================
-// PLANT PALETTE (randomized coral + seaweed re-coloring)
-// Only these 12 colors may be used: green/teal/pink, each with 4 shades
-// (row 1 = darkest ... row 4 = lightest) — exactly the swatch given.
+// SHARED HELPERS (extracted from repeated boilerplate — math/values unchanged)
 // ======================================================
 
 const PLANT_PALETTE = {
@@ -275,21 +256,21 @@ function preload() {
   // (dark) background fill, since these litter pieces are grouped inside
   // a container frame in the design file. The SVG has no background rect,
   // just the artwork paths, so it stays transparent like everything else.
-  bottleImg1 = loadImage("assets/images/bottle1.svg");
-  bottleImg2 = loadImage("assets/images/bottle2.svg");
-  bottleImg3 = loadImage("assets/images/bottle3.svg");
-  milkBoxImg1 = loadImage("assets/images/milkbox1.svg");
-  milkBoxImg2 = loadImage("assets/images/milkbox2.svg");
-  milkBoxImg3 = loadImage("assets/images/milkbox3.svg");
-  bagImg1 = loadImage("assets/images/bag1.svg");
-  bagImg2 = loadImage("assets/images/bag2.svg");
-  bagImg3 = loadImage("assets/images/bag3.svg");
-  canImg1 = loadImage("assets/images/can1.svg");
-  canImg2 = loadImage("assets/images/can2.svg");
-  canImg3 = loadImage("assets/images/can3.svg");
+  trashBottleImg1 = loadImage("assets/images/bottle1.svg");
+  trashBottleImg2 = loadImage("assets/images/bottle2.svg");
+  trashBottleImg3 = loadImage("assets/images/bottle3.svg");
+  trashMilkBoxImg1 = loadImage("assets/images/milkbox1.svg");
+  trashMilkBoxImg2 = loadImage("assets/images/milkbox2.svg");
+  trashMilkBoxImg3 = loadImage("assets/images/milkbox3.svg");
+  trashBagImg1 = loadImage("assets/images/bag1.svg");
+  trashBagImg2 = loadImage("assets/images/bag2.svg");
+  trashBagImg3 = loadImage("assets/images/bag3.svg");
+  trashCanImg1 = loadImage("assets/images/can1.svg");
+  trashCanImg2 = loadImage("assets/images/can2.svg");
+  trashCanImg3 = loadImage("assets/images/can3.svg");
 
   underwaterSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-underwater-sound.wav");
-  rustlingPaperSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-coral-sound.wav");
+  coralMovementSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-coral-movement-sound.wav");
   bubbleBreathSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-underwater-bubble-sound.wav");
   bubbleEatingSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-bubble-eating-sound.wav");
   dieCoralSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-coral-die-sound.wav");
@@ -297,128 +278,126 @@ function preload() {
 }
 
 // ======================================================
-// TRASH ITEMS (litter that drifts down through the water)
-// Four kinds of litter — bottle, milk box, plastic bag, can — each exported
-// straight from Figma in its own three color variants (pink/green/teal).
+// TRASH ITEMS (bottle, milk box, bag, can — each in 3 color variants)
 // ======================================================
 
-function drawBottle1(x, y, s = 1) {
+function drawTrashBottle1(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(bottleImg1, 0, 0);
+  image(trashBottleImg1, 0, 0);
   pop();
 }
 
-function drawBottle2(x, y, s = 1) {
+function drawTrashBottle2(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(bottleImg2, 0, 0);
+  image(trashBottleImg2, 0, 0);
   pop();
 }
 
-function drawBottle3(x, y, s = 1) {
+function drawTrashBottle3(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(bottleImg3, 0, 0);
+  image(trashBottleImg3, 0, 0);
   pop();
 }
 
-function drawMilkBox1(x, y, s = 1) {
+function drawTrashMilkBox1(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(milkBoxImg1, 0, 0);
+  image(trashMilkBoxImg1, 0, 0);
   pop();
 }
 
-function drawMilkBox2(x, y, s = 1) {
+function drawTrashMilkBox2(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(milkBoxImg2, 0, 0);
+  image(trashMilkBoxImg2, 0, 0);
   pop();
 }
 
-function drawMilkBox3(x, y, s = 1) {
+function drawTrashMilkBox3(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(milkBoxImg3, 0, 0);
+  image(trashMilkBoxImg3, 0, 0);
   pop();
 }
 
-function drawBag1(x, y, s = 1) {
+function drawTrashBag1(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(bagImg1, 0, 0);
+  image(trashBagImg1, 0, 0);
   pop();
 }
 
-function drawBag2(x, y, s = 1) {
+function drawTrashBag2(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(bagImg2, 0, 0);
+  image(trashBagImg2, 0, 0);
   pop();
 }
 
-function drawBag3(x, y, s = 1) {
+function drawTrashBag3(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(bagImg3, 0, 0);
+  image(trashBagImg3, 0, 0);
   pop();
 }
 
-function drawCan1(x, y, s = 1) {
+function drawTrashCan1(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(canImg1, 0, 0);
+  image(trashCanImg1, 0, 0);
   pop();
 }
 
-function drawCan2(x, y, s = 1) {
+function drawTrashCan2(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(canImg2, 0, 0);
+  image(trashCanImg2, 0, 0);
   pop();
 }
 
-function drawCan3(x, y, s = 1) {
+function drawTrashCan3(x, y, s = 1) {
   push();
   translate(x, y);
   scale(s);
-  image(canImg3, 0, 0);
+  image(trashCanImg3, 0, 0);
   pop();
 }
 
 const TRASH_ITEM_FNS = [
-  drawBottle1, drawBottle2, drawBottle3,
-  drawMilkBox1, drawMilkBox2, drawMilkBox3,
-  drawBag1, drawBag2, drawBag3,
-  drawCan1, drawCan2, drawCan3,
+  drawTrashBottle1, drawTrashBottle2, drawTrashBottle3,
+  drawTrashMilkBox1, drawTrashMilkBox2, drawTrashMilkBox3,
+  drawTrashBag1, drawTrashBag2, drawTrashBag3,
+  drawTrashCan1, drawTrashCan2, drawTrashCan3,
 ];
 // visual center (half its exported pixel size) + overall size (larger side)
 // of each item's own artwork, used to center/fit it when riding inside a bubble
 const TRASH_ITEM_CENTER = [
-  { cx: 42.96, cy: 81.71, maxDim: 163.42 },  // drawBottle1 (85.93x163.42)
-  { cx: 42.96, cy: 81.71, maxDim: 163.42 },  // drawBottle2 (85.93x163.42)
-  { cx: 42.96, cy: 81.71, maxDim: 163.42 },  // drawBottle3 (85.93x163.42)
-  { cx: 109.22, cy: 104, maxDim: 218.45 },   // drawMilkBox1 (218.45x208)
-  { cx: 94.63, cy: 90, maxDim: 189.26 },     // drawMilkBox2 (189.26x180)
-  { cx: 94.63, cy: 90, maxDim: 189.26 },     // drawMilkBox3 (189.26x180)
-  { cx: 77.11, cy: 85.55, maxDim: 171.09 },  // drawBag1 (154.23x171.09)
-  { cx: 77.11, cy: 85.55, maxDim: 171.09 },  // drawBag2 (154.23x171.09)
-  { cx: 77.11, cy: 85.55, maxDim: 171.09 },  // drawBag3 (154.23x171.09)
-  { cx: 52.54, cy: 63.9, maxDim: 127.8 },    // drawCan1 (105.07x127.8)
-  { cx: 52.54, cy: 63.9, maxDim: 127.8 },    // drawCan2 (105.07x127.8)
-  { cx: 52.54, cy: 63.9, maxDim: 127.8 },    // drawCan3 (105.07x127.8)
+  { cx: 42.96, cy: 81.71, maxDim: 163.42 },  // drawTrashBottle1 (85.93x163.42)
+  { cx: 42.96, cy: 81.71, maxDim: 163.42 },  // drawTrashBottle2 (85.93x163.42)
+  { cx: 42.96, cy: 81.71, maxDim: 163.42 },  // drawTrashBottle3 (85.93x163.42)
+  { cx: 109.22, cy: 104, maxDim: 218.45 },   // drawTrashMilkBox1 (218.45x208)
+  { cx: 94.63, cy: 90, maxDim: 189.26 },     // drawTrashMilkBox2 (189.26x180)
+  { cx: 94.63, cy: 90, maxDim: 189.26 },     // drawTrashMilkBox3 (189.26x180)
+  { cx: 77.11, cy: 85.55, maxDim: 171.09 },  // drawTrashBag1 (154.23x171.09)
+  { cx: 77.11, cy: 85.55, maxDim: 171.09 },  // drawTrashBag2 (154.23x171.09)
+  { cx: 77.11, cy: 85.55, maxDim: 171.09 },  // drawTrashBag3 (154.23x171.09)
+  { cx: 52.54, cy: 63.9, maxDim: 127.8 },    // drawTrashCan1 (105.07x127.8)
+  { cx: 52.54, cy: 63.9, maxDim: 127.8 },    // drawTrashCan2 (105.07x127.8)
+  { cx: 52.54, cy: 63.9, maxDim: 127.8 },    // drawTrashCan3 (105.07x127.8)
 ];
 
 let debrisItems = [];
@@ -519,10 +498,7 @@ function updateAndDrawDebris(frozen = false) {
 }
 
 // ======================================================
-// BUBBLES
-// Shot up from a random coral every so often. If a bubble touches a piece
-// of falling debris, it grows and "swallows" it (the debris disappears)
-// and keeps floating upward.
+// BUBBLES (shot up from a coral — swallows any debris it touches)
 // ======================================================
 
 let bubbles = [];
@@ -649,8 +625,9 @@ function setup() {
   underwaterSound.setLoop(true);
   underwaterSound.setVolume(UNDERWATER_VOLUME);
 
-  rustlingPaperSound.setLoop(true);
-  rustlingPaperSound.setVolume(RUSTLING_PAPER_VOLUME);
+  coralMovementSound.setLoop(true);
+  coralMovementSound.setVolume(CORAL_MOVEMENT_VOLUME);
+  coralMovementSound.rate(CORAL_MOVEMENT_BASE_RATE);
 
   // one-shot effects: allow overlapping plays (multiple bubbles can breathe
   // out or swallow debris close together) instead of cutting each other off
@@ -697,6 +674,12 @@ function draw() {
   // Once the reef is fully dead, seaweed sway freezes too.
   drawSeaweeds(reefDead ? reefDeathTime : null);
   drawCorals();
+
+  // pulse the coral sound's speed in time with the seaweed sway
+  if (soundOn && !reefDead) {
+    const swayPhase = millis() * 0.001 * SEAWEED_SWAY_REFERENCE_SPEED;
+    coralMovementSound.rate(CORAL_MOVEMENT_BASE_RATE + sin(swayPhase) * CORAL_MOVEMENT_RATE_VARIANCE);
+  }
 
   // once the reef is fully dead, debris/bubbles hold perfectly still —
   // only the underwater dust (particles) keeps drifting
@@ -811,8 +794,7 @@ function drawRock6(x, y, s = 1) {
 }
 
 // ======================================================
-// EDIT ROCK POSITIONS HERE — same as the old drawRockN(x, y, s) calls,
-// just written as [x, y, s] rows in order (rock1, rock2, ... rock6).
+// EDIT ROCK POSITIONS HERE — [x, y, s] rows, one per rock (rock1...rock6)
 // ======================================================
 
 const ROCK_DRAW_FNS = [drawRock1, drawRock2, drawRock3, drawRock4, drawRock5, drawRock6];
@@ -834,12 +816,7 @@ function drawRocks() {
 }
 
 // ======================================================
-// CORAL & SEAWEED RANDOMIZATION
-// Same hand-drawn shapes, at EXACTLY the same original spots — only color
-// and size are randomized. "Same spot" means the shape's own ground-contact
-// point (where it actually touches the rock/floor) stays fixed; the shape
-// then grows bigger/smaller around that anchored point, since it's drawn
-// growing DOWN from its own local (0,0), not up from its visual base.
+// CORAL & SEAWEED RANDOMIZATION (same shapes, same spots — only color and size are randomized)
 // ======================================================
 
 const CORAL_DRAW_FNS = [drawCoral1, drawCoral2, drawCoral3, drawCoral4, drawCoral5, drawCoral6,
@@ -847,11 +824,7 @@ const CORAL_DRAW_FNS = [drawCoral1, drawCoral2, drawCoral3, drawCoral4, drawCora
 const SEAWEED_DRAW_FNS = [drawSeaweed1, drawSeaweed2, drawSeaweed3, drawSeaweed4, drawSeaweed5, drawSeaweed6, drawSeaweed7];
 
 // ======================================================
-// EDIT POSITIONS HERE — same as the old drawCoralN(x, y, s) /
-// drawSeaweedN(x, y, s) calls, just written as [x, y, s] rows in the same
-// order (coral1, coral2, coral3, ... / seaweed1, seaweed2, ...).
-// Change these 3 numbers per row to move/resize a shape. Don't touch
-// anything below this block — that part is internal plumbing only.
+// EDIT POSITIONS HERE — [x, y, s] rows per coral/seaweed; nothing below this needs touching
 // ======================================================
 
 const CORAL_XYS = [
@@ -4238,4 +4211,4 @@ function drawCoral12(x, y, s = 1, frozenTime = null) {
   endShape(CLOSE);
 
   pop();
-}
+}
