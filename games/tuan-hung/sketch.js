@@ -351,19 +351,20 @@ let caughtFish = null; // {name, h} — at most one fish per cast, still danglin
 // looping the raw file back-to-back read as a rapid, mechanical repeat).
 // The other one-shot cues (splash, catches) just check soundOn before playing.
 let soundOn = false;
-let ambientSound, boatMovingSound, hookSplashSound, reelSound, fishCaughtSound, juvenileLostSound;
+let ambientSound, boatMovingSound, hookSplashSound, reelSound, largeFishLostSound, juvenileLostSound;
 let prevRigState = 'moving';
-const BOAT_SOUND_VOLUME = 0.3;
+const BOAT_SOUND_VOLUME = 0.1;
 const REEL_SOUND_VOLUME = 0.5;
-const BOAT_SOUND_MIN_GAP = 2200, BOAT_SOUND_MAX_GAP = 4000; // ms between boat-moving plays
+const FISH_LOST_VOLUME = 1.8; // 3x the original 0.6 -- both catch cues, per feedback
+const BOAT_SOUND_MIN_GAP = 6600, BOAT_SOUND_MAX_GAP = 12000; // ms between boat-moving plays
 
 function loadSounds() {
-  ambientSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-ambient-underwater.wav');
-  boatMovingSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-boat-moving.wav');
-  hookSplashSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-hook-water-splash.wav');
-  reelSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-fishing-reel.wav');
-  fishCaughtSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-fish-caught.wav');
-  juvenileLostSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-juvenile-fish-lost.wav');
+  ambientSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-ambient-underwater.wav');
+  boatMovingSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-boat-moving.wav');
+  hookSplashSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-hook-water-splash.wav');
+  reelSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-fishing-reel.wav');
+  largeFishLostSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-large-fish-lost.wav');
+  juvenileLostSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-juvenile-fish-lost.wav');
 }
 
 function setupSoundToggle() {
@@ -1089,9 +1090,9 @@ function tryCatchAtHook() {
     // replacement grows in after a delay. A juvenile catch is permanent.
     if (fish.h >= HERO_FISH_MATURE_THRESHOLD) {
       pendingRespawns.push({ framesLeft: Math.floor(random(HERO_FISH_RESPAWN_FRAMES_MIN, HERO_FISH_RESPAWN_FRAMES_MAX)) });
-      if (soundOn) { fishCaughtSound.setVolume(0.6); fishCaughtSound.play(); }
+      if (soundOn) { largeFishLostSound.setVolume(FISH_LOST_VOLUME); largeFishLostSound.play(); }
     } else if (soundOn) {
-      juvenileLostSound.setVolume(0.6);
+      juvenileLostSound.setVolume(FISH_LOST_VOLUME);
       juvenileLostSound.play();
     }
     return;
