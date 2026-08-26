@@ -346,11 +346,16 @@ let caughtFish = null; // {name, h} — at most one fish per cast, still danglin
 
 // Sound — off by default (browsers block audio until the visitor
 // interacts once), toggled on via #sound-toggle in index.html. Ambient
-// and the reel/boat loops start/stop with soundOn and with rigState;
-// the one-shot cues (splash, catches) just check soundOn before playing.
+// and the reel loop start/stop with soundOn and with rigState; boat-moving
+// is a one-shot re-triggered on a random interval (not a seamless loop —
+// looping the raw file back-to-back read as a rapid, mechanical repeat).
+// The other one-shot cues (splash, catches) just check soundOn before playing.
 let soundOn = false;
 let ambientSound, boatMovingSound, hookSplashSound, reelSound, fishCaughtSound, juvenileLostSound;
 let prevRigState = 'moving';
+const BOAT_SOUND_VOLUME = 0.3;
+const REEL_SOUND_VOLUME = 0.5;
+const BOAT_SOUND_MIN_GAP = 2200, BOAT_SOUND_MAX_GAP = 4000; // ms between boat-moving plays
 
 function loadSounds() {
   ambientSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-ambient-underwater.wav');
@@ -372,6 +377,7 @@ function setupSoundToggle() {
       if (soundOn) {
         ambientSound.setVolume(0.25);
         ambientSound.loop();
+        scheduleBoatSound();
       } else {
         ambientSound.stop();
         boatMovingSound.stop();
@@ -381,15 +387,28 @@ function setupSoundToggle() {
   });
 }
 
-// Boat-moving and reel are continuous loops tied to rigState, not one-shots
-// — start/stop them exactly on the state transition instead of every frame.
+// Re-triggers boat-moving on its own randomized timer, independent of the
+// draw loop, and only actually plays while the rig is 'moving' -- keeps
+// rescheduling itself either way so it doesn't need restarting on state
+// changes.
+function scheduleBoatSound() {
+  const gap = random(BOAT_SOUND_MIN_GAP, BOAT_SOUND_MAX_GAP);
+  setTimeout(() => {
+    if (soundOn && rigState === 'moving') {
+      boatMovingSound.setVolume(BOAT_SOUND_VOLUME);
+      boatMovingSound.play();
+    }
+    if (soundOn) scheduleBoatSound();
+  }, gap);
+}
+
+// Reel is the one loop still tied directly to rigState -- start/stop it
+// exactly on the state transition instead of every frame.
 function updateLoopingSoundsForRigState() {
   if (!soundOn || rigState === prevRigState) { prevRigState = rigState; return; }
-  if (prevRigState === 'moving') boatMovingSound.stop();
   if (prevRigState === 'reeling') reelSound.stop();
-  if (rigState === 'moving') boatMovingSound.loop();
   if (rigState === 'casting') { hookSplashSound.setVolume(0.5); hookSplashSound.play(); }
-  if (rigState === 'reeling') reelSound.loop();
+  if (rigState === 'reeling') { reelSound.setVolume(REEL_SOUND_VOLUME); reelSound.loop(); }
   prevRigState = rigState;
 }
 
