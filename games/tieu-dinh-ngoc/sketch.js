@@ -29,9 +29,9 @@ const CORAL_MOVEMENT_RATE_VARIANCE = 0.15; // how far the pulse drifts from the 
 const SEAWEED_SWAY_REFERENCE_SPEED = 1.35; // pulse cycle speed, matched to seaweed sway
 const BUBBLE_BREATH_VOLUME = 0.022; // fires very often — kept quiet
 const BUBBLE_BREATH_CHANCE = 0.55; // only some exhales actually play a sound
-const BUBBLE_EATING_VOLUME = 0.045; // rarer event, allowed to read a bit clearer
+const BUBBLE_EATING_VOLUME = 0.5; // rarer event, should read clearly over the mix
 const DIE_CORAL_VOLUME = 1; // p5.sound's volume cap — see DIE_CORAL_GAIN_BOOST for more
-const DIE_CORAL_GAIN_BOOST = 2.2; // extra boost past the 1.0 cap, via a raw GainNode in setup() 
+const DIE_CORAL_GAIN_BOOST = 2.1; // extra boost past the 1.0 cap, via a raw GainNode in setup()
 const CLICK_VOLUME = 0.4;
 
 function toggleSound() {
@@ -269,12 +269,12 @@ function preload() {
   trashCanImg2 = loadImage("assets/images/can2.svg");
   trashCanImg3 = loadImage("assets/images/can3.svg");
 
-  underwaterSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-underwater-sound.wav");
-  coralMovementSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-coral-movement-sound.wav");
-  bubbleBreathSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-underwater-bubble-sound.wav");
-  bubbleEatingSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-bubble-eating-sound.wav");
-  dieCoralSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-coral-die-sound.wav");
-  clickSound = loadSound("assets/sounds/COMM2754-2026-S2-A2w09-Seaventure-clicking-sound.wav");
+  underwaterSound = loadSound("assets/sounds/underwater-sound.wav");
+  coralMovementSound = loadSound("assets/sounds/coral-movement-sound.wav");
+  bubbleBreathSound = loadSound("assets/sounds/underwater-bubble-sound.wav");
+  bubbleEatingSound = loadSound("assets/sounds/bubble-eating-sound.wav");
+  dieCoralSound = loadSound("assets/sounds/coral-die-sound.wav");
+  clickSound = loadSound("assets/sounds/clicking-sound.wav");
 }
 
 // ======================================================
@@ -4211,4 +4211,4 @@ function drawCoral12(x, y, s = 1, frozenTime = null) {
   endShape(CLOSE);
 
   pop();
-}
+}
