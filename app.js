@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 'tung-phuong', kind: 'game', label: 'Tùng Phương', thumb: 'assets/images/TungPhuongThumbnail.png', src: 'games/tung-phuong/index.html' },
     { id: 'pham-hoai-an', kind: 'game', label: 'Phạm Hoài An', thumb: 'assets/images/AnPhamThumbnail.png', src: 'games/pham-hoai-an/index.html' },
     { id: 'tuan-hung', kind: 'game', label: 'Trịnh Tuấn Hưng', thumb: 'assets/images/TuanHungThumbnail.png', src: 'games/tuan-hung/index.html' },
-    { id: 'tieu-dinh-ngoc', kind: 'game', label: 'Tiêu Dĩnh Ngọc', thumb: 'assets/images/TieuDinhNgocThumbnail.png', src: 'games/tieu-dinh-ngoc/index.html' },
+    { id: 'tieu-dinh-ngoc', kind: 'game', label: 'Tiêu Dĩnh Ngọc', thumb: 'assets/images/TieuDinhNgocThumbnail.png?v=2', src: 'games/tieu-dinh-ngoc/index.html' },
     { id: 'exit', kind: 'exit' }
   ];
   const CAROUSEL_ENTRY_INDEX = CAROUSEL.findIndex((it) => it.kind === 'random');
