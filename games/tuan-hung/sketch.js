@@ -344,7 +344,57 @@ let rigState = 'moving'; // 'moving' | 'casting' | 'reeling'
 let hookY = HOOK_REST_Y; // stateful — the descent can stop early on a catch, so this isn't a simple lerp between two fixed points
 let caughtFish = null; // {name, h} — at most one fish per cast, still dangling on the way up
 
+// Sound — off by default (browsers block audio until the visitor
+// interacts once), toggled on via #sound-toggle in index.html. Ambient
+// and the reel/boat loops start/stop with soundOn and with rigState;
+// the one-shot cues (splash, catches) just check soundOn before playing.
+let soundOn = false;
+let ambientSound, boatMovingSound, hookSplashSound, reelSound, fishCaughtSound, juvenileLostSound;
+let prevRigState = 'moving';
+
+function loadSounds() {
+  ambientSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-ambient-underwater.wav');
+  boatMovingSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-boat-moving.wav');
+  hookSplashSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-hook-water-splash.wav');
+  reelSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-fishing-reel.wav');
+  fishCaughtSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-fish-caught.wav');
+  juvenileLostSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w09-LastCatch-juvenile-fish-lost.wav');
+}
+
+function setupSoundToggle() {
+  const btn = document.getElementById('sound-toggle');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    userStartAudio().then(() => {
+      soundOn = !soundOn;
+      btn.setAttribute('aria-pressed', String(soundOn));
+      btn.textContent = soundOn ? '🔊' : '🔇';
+      if (soundOn) {
+        ambientSound.setVolume(0.25);
+        ambientSound.loop();
+      } else {
+        ambientSound.stop();
+        boatMovingSound.stop();
+        reelSound.stop();
+      }
+    });
+  });
+}
+
+// Boat-moving and reel are continuous loops tied to rigState, not one-shots
+// — start/stop them exactly on the state transition instead of every frame.
+function updateLoopingSoundsForRigState() {
+  if (!soundOn || rigState === prevRigState) { prevRigState = rigState; return; }
+  if (prevRigState === 'moving') boatMovingSound.stop();
+  if (prevRigState === 'reeling') reelSound.stop();
+  if (rigState === 'moving') boatMovingSound.loop();
+  if (rigState === 'casting') { hookSplashSound.setVolume(0.5); hookSplashSound.play(); }
+  if (rigState === 'reeling') reelSound.loop();
+  prevRigState = rigState;
+}
+
 function preload() {
+  loadSounds();
   bodyImg = loadImage('assets/body.png');
   headImg = loadImage('assets/head.png');
   hand1Img = loadImage('assets/hand1.png');
@@ -404,6 +454,7 @@ function setup() {
   heroFish = buildHeroFish();
   buildCaughtFishBufs();
   hookSwayPhase = random(TWO_PI);
+  setupSoundToggle();
 }
 
 // Kept well below the horizon/sea-surface line — mid-to-lower water column,
@@ -799,6 +850,7 @@ function draw() {
   kelps.forEach(drawTracedShape);
   drawHeroFishLayer();
   updateRig();
+  updateLoopingSoundsForRigState();
   drawRig();
 }
 
@@ -1018,6 +1070,10 @@ function tryCatchAtHook() {
     // replacement grows in after a delay. A juvenile catch is permanent.
     if (fish.h >= HERO_FISH_MATURE_THRESHOLD) {
       pendingRespawns.push({ framesLeft: Math.floor(random(HERO_FISH_RESPAWN_FRAMES_MIN, HERO_FISH_RESPAWN_FRAMES_MAX)) });
+      if (soundOn) { fishCaughtSound.setVolume(0.6); fishCaughtSound.play(); }
+    } else if (soundOn) {
+      juvenileLostSound.setVolume(0.6);
+      juvenileLostSound.play();
     }
     return;
   }

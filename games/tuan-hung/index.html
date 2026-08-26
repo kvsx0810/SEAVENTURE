@@ -3,11 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <title>COMM2754 A2 — Life Below Water</title>
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/addons/p5.sound.min.js"></script>
 </head>
 <body>
   <main id="sketch-holder"></main>
-  <script src="sketch.js?v=37"></script>
+
+  <!-- Browsers block audio until the visitor interacts once, so sound
+       starts off by default -- this both unlocks audio and toggles it. -->
+  <button id="sound-toggle" type="button" aria-pressed="false" aria-label="Toggle sound">🔇</button>
+
+  <script src="sketch.js?v=38"></script>
 </body>
 </html>
