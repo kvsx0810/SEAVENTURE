@@ -2,7 +2,7 @@ const CANVAS_W = 1920;
 const CANVAS_H = 1080;
 const HORIZON_Y = Math.round(CANVAS_H * 0.42);
 
-// p5.js runs at 60fps natively — the whole scene was originally tuned at
+// p5.js runs at 60fps natively, the whole scene was originally tuned at
 // 30fps though, so every per-frame speed/frequency below was calibrated
 // assuming 30 draw() calls a second. Bumping frameRate() alone would make
 // everything (swimming, sway, blinking, the hook...) visibly run 2x too
@@ -25,7 +25,7 @@ const PALETTE = {
 // Raw vector path data traced from the Figma "Scene" frame's Kelp layers,
 // read directly via the Plugin API. Corals/Fish Bone used to be traced the
 // same way but were replaced with colored PNGs (see CORAL_ASSET_FILES
-// below) — bezier-endpoint tracing loses too much curve smoothness on
+// below), bezier-endpoint tracing loses too much curve smoothness on
 // shapes this detailed.
 const RAW_PATHS = {
   kelp: [
@@ -38,12 +38,12 @@ const RAW_PATHS = {
 };
 
 // Character / Boat / Fishing Tools: exported straight out of Figma as PNGs
-// (assets/) instead of traced as vector paths — the bezier-endpoint tracing
+// (assets/) instead of traced as vector paths, the bezier-endpoint tracing
 // used for the corals loses too much of the original curve smoothness on
 // these larger, more detailed shapes. Only pieces that actually animate
 // (eyes, fishing line) stay as code-drawn geometry.
 // x/y/w/h below are each node's absoluteRenderBounds read via the Plugin API
-// (the real rendered-pixel box, in Scene-relative coordinates) — not the
+// (the real rendered-pixel box, in Scene-relative coordinates), not the
 // layout bounding box, which can differ once corner-rounding or rotation is
 // involved (Head's layout box is 143x143 but its rendered silhouette is
 // 112x99; Rod/Hook are rotated so their layout x/y isn't their visual x/y).
@@ -71,7 +71,7 @@ const KELP_DEFS = [
 ];
 
 // The 3 rock layers used to be procedurally generated (noise-based jagged
-// silhouette, different every reload) — after many rounds of tuning it
+// silhouette, different every reload), after many rounds of tuning it
 // still never looked right, so they're real static art exported straight
 // out of Figma instead, same as the character/boat/coral PNGs. x/y below
 // are each layer's real absoluteRenderBounds (Scene-relative); all 3 are
@@ -83,12 +83,12 @@ const STONE_DEFS = {
 };
 
 // Coral reef: generative, differs every reload. Each rock layer has a few
-// hand-built presets — fixed compositions the artist laid out and colored
+// hand-built presets, fixed compositions the artist laid out and colored
 // directly in Figma, one exported PNG per coral (already colored, no
 // code-side recoloring). On every load, one preset is picked per layer, so
 // the reef is a permutation of hand-designed arrangements rather than an
 // algorithmically scattered one. x/y/w/h below are each coral's
-// absoluteRenderBounds read from its own preset frame via the Plugin API —
+// absoluteRenderBounds read from its own preset frame via the Plugin API,
 // every preset frame is exactly CANVAS_W x CANVAS_H, so these coordinates
 // map directly onto the scene with no conversion.
 const CORAL_ASSET_FILES = {
@@ -131,7 +131,7 @@ const REEF_PRESETS = {
       { name: 'Coral5', x: 1613.78, y: 685.63, w: 121.82, h: 127.65 }
     ]
   ],
-  // The 3-coral composition (Coral9 + Coral8 + Coral8) was dropped —
+  // The 3-coral composition (Coral9 + Coral8 + Coral8) was dropped,
   // remaining 2 nudged up 20px (smaller y) from their raw Figma position.
   '3rd': [
     [
@@ -150,7 +150,7 @@ const REEF_PRESETS = {
 // disconnected fragments when a large sway swing (16px) sheared adjacent
 // strips too far apart. AMP is much lower now (8, and further scaled down
 // by reefHealth vitality below) than the 16px that caused that originally,
-// so the strip count doesn't need to carry as much of the fix on its own —
+// so the strip count doesn't need to carry as much of the fix on its own,
 // dialed back down to 30, since each strip is its own image() draw call and
 // this was measured as the single biggest performance cost in the whole
 // scene (REEF_STRIPS x every reef instance x 3 layers, every frame). If
@@ -161,42 +161,42 @@ const REEF_SWAY_AMP = 8;
 const REEF_SWAY_SPEED = 0.034;
 // Preset sizes come straight from each placement's real Figma renderBounds
 // (verified accurate), but rendered at that literal size the reef reads as
-// too prominent/bulky — scale every coral/Fish Bone down uniformly.
+// too prominent/bulky, scale every coral/Fish Bone down uniformly.
 const REEF_SCALE = 0.65;
 
-// Background fish: purely ambient, not a design focal point — a
+// Background fish: purely ambient, not a design focal point, a
 // procedurally-drawn vector fish never looked right (tried rounded-corner
 // polygons, tuned proportions, still read as off), so same as the reef, it's
 // 3 hand-drawn PNG silhouettes exported straight from Figma instead. Split
 // into 3 depth layers exactly like the reef (back/mid/front, drawn behind
 // their matching rock layer so the rock naturally occludes whichever fish
-// pass behind it) — each layer gets its own size/opacity/speed tier for a
+// pass behind it), each layer gets its own size/opacity/speed tier for a
 // simple parallax read (farther = smaller, dimmer, slower).
 //
 // The source art is a flat black silhouette. Just tinting that down with a
 // low alpha (the first version of this) still reads as "black fish, faded"
-// rather than a fish that belongs in front of its own rock layer — tint()
+// rather than a fish that belongs in front of its own rock layer, tint()
 // can only scale alpha, it can't inject a hue into pixels that are already
 // (0,0,0) (multiplying black by any tint color is still black). So each
 // layer's fish are recolored once at startup (source-in + a vertical
 // gradient, same trick as the old coral recolor step) to the same
-// blackPearl tones each rock layer's own gradient uses — front matches the
+// blackPearl tones each rock layer's own gradient uses, front matches the
 // 1st layer's darkest tone, back matches the 3rd layer's lighter/hazier one.
 //
 // Each fish's left/right heading is random, but two fish on the exact same
 // horizontal line swimming toward each other reads as a glitch. Instead of
 // checking every pair for collisions, each layer is pre-divided into a fixed
-// number of horizontal "lanes" spanning the swim band, one fish per lane —
+// number of horizontal "lanes" spanning the swim band, one fish per lane,
 // so no two fish ever share a line by construction, and each fish's own
 // direction is free to be random independently.
-// BackFish1 dropped from the rotation — didn't read as nicely as the other
+// BackFish1 dropped from the rotation, didn't read as nicely as the other
 // two once seen in the scene. File stays in assets/ in case it's wanted
 // again later, just not referenced here.
 const FISH_ASSET_FILES = {
   BackFish2: 'BackFish2.png',
   BackFish3: 'BackFish3.png'
 };
-// sizeMin/sizeMax is each layer's own displayed-height range (px) — overlap
+// sizeMin/sizeMax is each layer's own displayed-height range (px), overlap
 // a bit between tiers so the whole school's per-fish sizes span exactly
 // 20-48px end to end, back skewed toward 20 and front skewed toward 48,
 // rather than each layer being a fixed size with a multiplier on top.
@@ -207,9 +207,9 @@ const FISH_LAYER_DEFS = {
 };
 
 // Background clouds: 2 depth layers drifting slowly across the sky (no
-// vertical motion — just a straight horizontal drift). Unlike the fish
+// vertical motion, just a straight horizontal drift). Unlike the fish
 // PNGs, these are exported already colored (a teal/navy gradient that
-// already matches the sky palette), so no recolor step is needed — just
+// already matches the sky palette), so no recolor step is needed, just
 // scale down and place. The source export is "full HD" (up to 2214x1080,
 // bigger than the whole canvas), so the same pre-scale-once-at-build-time
 // treatment as the fish applies here too, otherwise every cloud would redo
@@ -224,26 +224,26 @@ const CLOUD_LAYER_DEFS = {
 };
 // Keeps clouds clear of the very top edge.
 const CLOUD_SKY_TOP = HORIZON_Y * 0.16;
-// Must always stay above the character's head — computed per-cloud from its
+// Must always stay above the character's head, computed per-cloud from its
 // own height (see buildCloudLayer) rather than a fixed constant, since
 // bigger clouds need more headroom than smaller ones to keep their bottom
 // edge clear of HEAD_IMG_DEF.y.
 const CLOUD_HEAD_CLEARANCE = 15;
 // Each cloud is assigned one vertical slice of the sky at build time and
 // only ever drifts back and forth within it (bouncing at its own zone's
-// edges), instead of sailing across the entire canvas width — reads as a
+// edges), instead of sailing across the entire canvas width, reads as a
 // handful of clouds each loosely parked over their own patch of sky.
 const CLOUD_ZONE_COUNT = 4;
 
 // Hero catchable fish (Fish1/Fish2): the actual gameplay subject, unlike the
-// dim background BackFish silhouettes — full opacity, real color, drawn in
+// dim background BackFish silhouettes, full opacity, real color, drawn in
 // front of the reef. They swim through nearly the whole water column,
 // independent of whatever the boat is doing; the rod "catching" one happens
-// via real proximity to the hook (see tryCatchAtHook()) — not a scripted/
+// via real proximity to the hook (see tryCatchAtHook()), not a scripted/
 // random pick, so as the population thins, catches naturally get rarer too.
 // NOTE: this source art faces LEFT by default (eye/head on the left, tail
-// fin on the right) — the opposite convention from BackFish/Cloud, which
-// face right — so its mirror condition below is inverted accordingly.
+// fin on the right), the opposite convention from BackFish/Cloud, which
+// face right, so its mirror condition below is inverted accordingly.
 const HERO_FISH_ASSET_FILES = {
   Fish1: 'Fish1.png',
   Fish2: 'Fish2.png',
@@ -251,37 +251,37 @@ const HERO_FISH_ASSET_FILES = {
 };
 const HERO_FISH_COUNT = 15;
 const HERO_FISH_SIZE = 70; // px, reference height
-// Wide on purpose — reads as a real mix of small (juvenile) and large
+// Wide on purpose, reads as a real mix of small (juvenile) and large
 // (mature) fish, which matters for the health-penalty logic below: catching
 // a juvenile before it can reproduce is worse for the population than
 // catching an adult, so a caught fish's own size drives how much it costs.
 const HERO_FISH_SIZE_MIN = HERO_FISH_SIZE * 0.45;
 const HERO_FISH_SIZE_MAX = HERO_FISH_SIZE * 0.85;
 // A caught fish at or above this size already had its chance to reproduce,
-// so catching it is more sustainable — see the respawn logic in updateRig()
+// so catching it is more sustainable, see the respawn logic in updateRig()
 // and spawnJuvenileFish() below. Below this size, a catch is permanent.
 const HERO_FISH_MATURE_THRESHOLD = (HERO_FISH_SIZE_MIN + HERO_FISH_SIZE_MAX) / 2;
 const HERO_FISH_RESPAWN_FRAMES_MIN = 150 / FRAME_TIME_SCALE; // ~5s real time
 const HERO_FISH_RESPAWN_FRAMES_MAX = 300 / FRAME_TIME_SCALE; // ~10s real time
 const HERO_FISH_SPEED = 1.3;
-// Spread through nearly the whole water column, not just the upper band —
+// Spread through nearly the whole water column, not just the upper band,
 // they're free to overlap the rock layers/coral/BackFish, all of which are
 // purely decorative background, not something the hero fish need to stay
 // clear of.
 const HERO_FISH_BAND = { top: HORIZON_Y + 30, bottom: CANVAS_H - 20 };
 const HERO_FISH_EDGE_SPAWN_MARGIN = 40; // extra clearance so a respawned fish starts fully off-screen, not clipped at the edge
 const CATCH_RADIUS = 45; // px, how close a fish has to be to the hook to get caught
-const CAUGHT_FISH_SIZE = 75; // px — pre-scale buffer resolution; actual draw size follows each caught fish's own height (see drawCaughtFish), always scaling down from this, never up
+const CAUGHT_FISH_SIZE = 75; // px, pre-scale buffer resolution; actual draw size follows each caught fish's own height (see drawCaughtFish), always scaling down from this, never up
 
 // Reef/ecosystem "health": starts full, only ever goes down (SDG 14.4 is
-// about overfishing depleting stocks — there's no auto-recovery here, a
+// about overfishing depleting stocks, there's no auto-recovery here, a
 // fully fished-out lake just stays empty). Every hero-fish catch costs some
-// health, more for a small/juvenile fish than a large/mature one — even a
+// health, more for a small/juvenile fish than a large/mature one, even a
 // mature catch that later respawns still costs some health, since the
 // fishing pressure itself is still degrading the ecosystem. Health drives
 // two other systems purely visually: how much of the ambient BackFish
 // population is still rendered (drawFishLayer), and how sluggish the
-// reef's own sway animation reads (drawReefInstance) — the whole scene
+// reef's own sway animation reads (drawReefInstance), the whole scene
 // should feel like it's visibly losing life, not just the hero fish count.
 let reefHealth = 1.0;
 const REEF_HEALTH_PENALTY_SMALL = 0.06; // cost of catching the smallest fish
@@ -289,7 +289,7 @@ const REEF_HEALTH_PENALTY_LARGE = 0.02; // cost of catching the largest fish
 const REEF_HEALTH_VITALITY_FLOOR = 0.15; // reef sway never fully freezes, just reads as barely alive
 
 // Boat/character rig: for A2 the boat drives itself (interaction is saved
-// for A3) — it picks a random spot on the water, sails there, fishes for a
+// for A3), it picks a random spot on the water, sails there, fishes for a
 // while, then picks a new spot, repeating forever. Every part below
 // (BODY/HEAD/HAND/EYE/MOUTH/ROD/HOOK/LINE_ANCHOR_DEFS) was authored as
 // fixed absolute Figma coordinates for one static pose, so to make the
@@ -301,7 +301,7 @@ const RIG_ANCHOR_X0 = BOAT_IMG_DEF.x + BOAT_IMG_DEF.w / 2;
 // How far the rig's bounding box reaches behind (the boat's own back/left
 // edge, currently the leftmost point of the whole assembly) and ahead (the
 // rod+hook side, plus a little slack for the hook's idle sway) of that
-// center — used to keep the whole box on-screen, including right up to
+// center, used to keep the whole box on-screen, including right up to
 // both edges, regardless of which way the boat ends up facing.
 const RIG_BACK_EXTENT = RIG_ANCHOR_X0 - BOAT_IMG_DEF.x;
 const RIG_FRONT_EXTENT = (HOOK_IMG_DEF.x + HOOK_IMG_DEF.w + 4) - RIG_ANCHOR_X0;
@@ -309,14 +309,14 @@ const RIG_MOVE_SPEED = 4 * FRAME_TIME_SCALE; // px/frame while sailing between s
 
 // Claw-machine fishing: the hook drops straight down and grabs the very
 // FIRST fish it touches, wherever that happens to be (not a fixed depth +
-// wait), then heads straight back up — at most one fish per cast, whether
+// wait), then heads straight back up, at most one fish per cast, whether
 // the catch happens on the way down or (if nothing bit on the way down) on
 // the way up. See updateRig()'s 'casting'/'reeling' branches and
 // tryCatchAtHook() below.
 const HOOK_REST_Y = HOOK_IMG_DEF.y; // idle/travelling depth, start and end of every cast
 const HOOK_MAX_DEPTH_Y = CANVAS_H - 30; // how far down the hook can drop if it never touches a fish
 const HOOK_CAST_SPEED = 8 * FRAME_TIME_SCALE; // px/frame descending
-const HOOK_REEL_SPEED = 6 * FRAME_TIME_SCALE; // px/frame ascending — a little slower, reads as pulling something up
+const HOOK_REEL_SPEED = 6 * FRAME_TIME_SCALE; // px/frame ascending, a little slower, reads as pulling something up
 
 let backgroundBuf;
 let stoneImgs = {};
@@ -330,24 +330,24 @@ let fishRecolored = { back: {}, mid: {}, front: {} };
 let fishBack = [], fishMid = [], fishFront = [];
 let cloudBack = [], cloudFront = [];
 let heroFish = [];
-let pendingRespawns = []; // [{ framesLeft }] — one entry per mature catch waiting to spawn a new juvenile
+let pendingRespawns = []; // [{ framesLeft }], one entry per mature catch waiting to spawn a new juvenile
 let reefBack = [], reefMid = [], reefFront = [];
 let bodyImg, headImg, hand1Img, hand2Img, mouthImg, boatImg, rodImg, hookImg;
 let blinkTimer = 90 / FRAME_TIME_SCALE, blinking = false, blinkT = 0;
 let hookSwayPhase;
 
-// Rig movement/fishing state — see updateRig() for the state machine.
+// Rig movement/fishing state, see updateRig() for the state machine.
 let rigX = RIG_ANCHOR_X0;
 let rigDir = 1; // 1 = facing/travelling right, -1 = facing/travelling left
 let rigTargetX = RIG_ANCHOR_X0;
 let rigState = 'moving'; // 'moving' | 'casting' | 'reeling'
-let hookY = HOOK_REST_Y; // stateful — the descent can stop early on a catch, so this isn't a simple lerp between two fixed points
-let caughtFish = null; // {name, h} — at most one fish per cast, still dangling on the way up
+let hookY = HOOK_REST_Y; // stateful, the descent can stop early on a catch, so this isn't a simple lerp between two fixed points
+let caughtFish = null; // {name, h}, at most one fish per cast, still dangling on the way up
 
-// Sound — off by default (browsers block audio until the visitor
+// Sound, off by default (browsers block audio until the visitor
 // interacts once), toggled on via #sound-toggle in index.html. Ambient
 // and the reel loop start/stop with soundOn and with rigState; boat-moving
-// is a one-shot re-triggered on a random interval (not a seamless loop —
+// is a one-shot re-triggered on a random interval (not a seamless loop,
 // looping the raw file back-to-back read as a rapid, mechanical repeat).
 // The other one-shot cues (splash, catches) just check soundOn before playing.
 let soundOn = false;
@@ -444,7 +444,7 @@ function setup() {
   // Canvas is drawn at 1920x1080 logical units either way, but rendering at
   // the screen's real device pixel ratio keeps that crisp instead of the
   // browser stretching a 1x bitmap to fill a bigger/HiDPI display. Capped at
-  // 2x though — on a 3x+ display the raw ratio pushes the actual pixel count
+  // 2x though, on a 3x+ display the raw ratio pushes the actual pixel count
   // (and therefore every image()/gradient draw call's cost) up so much it
   // was the main cause of a reported ~20fps average; 2x is still plenty
   // sharp for this kind of flat illustration.
@@ -454,11 +454,11 @@ function setup() {
   frameRate(FRAME_RATE);
   noStroke();
   // Chrome/Edge default to imageSmoothingQuality 'low', which uses a cheap
-  // filter for big downscales — the PNG assets here are exported much larger
+  // filter for big downscales, the PNG assets here are exported much larger
   // than their on-canvas size, so 'low' visibly degraded them. 'high' uses a
   // proper Lanczos-class resampler.
   drawingContext.imageSmoothingQuality = 'high';
-  // Kelp temporarily off — no PNG export exists yet for it, and leaving it
+  // Kelp temporarily off, no PNG export exists yet for it, and leaving it
   // as the lone vector-drawn shape reads as an unfinished leftover next to
   // the PNG-based reef. Re-enable via `kelps = KELP_DEFS.map(makeTracedInstance);`
   // once a Kelp PNG is exported.
@@ -477,7 +477,7 @@ function setup() {
   setupSoundToggle();
 }
 
-// Kept well below the horizon/sea-surface line — mid-to-lower water column,
+// Kept well below the horizon/sea-surface line, mid-to-lower water column,
 // never near the top where a silhouette would read as breaking the surface.
 function fishSwimBand() {
   const waterH = CANVAS_H - HORIZON_Y;
@@ -485,7 +485,7 @@ function fishSwimBand() {
 }
 
 // Recolors each of the 3 fish shapes into each of the 3 layer tones, once,
-// up front — 9 small buffers total, reused by every fish instance in that
+// up front, 9 small buffers total, reused by every fish instance in that
 // layer rather than recoloring per-instance every frame.
 function buildFishRecolors() {
   Object.keys(FISH_LAYER_DEFS).forEach(layerKey => {
@@ -497,7 +497,7 @@ function buildFishRecolors() {
 }
 
 // Uses the source PNG's own alpha as a mask ('source-in') and fills a
-// vertical gradient behind it — tint()/multiply can't recolor a black
+// vertical gradient behind it, tint()/multiply can't recolor a black
 // source since multiplying by pure black (0,0,0) always stays black.
 function recolorSilhouette(img, topHex, bottomHex) {
   const g = createGraphics(img.width, img.height);
@@ -514,7 +514,7 @@ function recolorSilhouette(img, topHex, bottomHex) {
 // Shared by every small on-screen sprite built from a much bigger source PNG
 // (ambient fish, clouds, the hero catchable fish below): drawing straight
 // from a huge native-resolution source every frame forces the canvas to
-// redo a big high-quality downscale on every instance, every frame — the
+// redo a big high-quality downscale on every instance, every frame, the
 // same lag cause already solved for the reef corals (see
 // REEF_SLICE_OVERSAMPLE above). Pre-scaling once, here at build time, means
 // draw() just blits an already-small buffer every frame instead.
@@ -524,7 +524,7 @@ function recolorSilhouette(img, topHex, bottomHex) {
 // often 1.5-3x on real screens). Without matching it here, this buffer's
 // actual raw pixels fall short of what the main canvas needs to fill the
 // same CSS-pixel area, so it gets stretched past its native resolution at
-// draw time and reads as pixelated — worse the smaller the buffer is.
+// draw time and reads as pixelated, worse the smaller the buffer is.
 function preScaleToDisplaySize(img, dispW, dispH) {
   const g = createGraphics(Math.max(1, Math.ceil(dispW)), Math.max(1, Math.ceil(dispH)));
   g.pixelDensity(pixelDensity());
@@ -539,7 +539,7 @@ function buildFishLayer(layerKey, def) {
   const laneH = (band.bottom - band.top) / def.count;
   const fish = [];
   for (let i = 0; i < def.count; i++) {
-    // one fish per lane (see the comment above FISH_LAYER_DEFS) — jitter
+    // one fish per lane (see the comment above FISH_LAYER_DEFS), jitter
     // stays inside the lane's own slice so it can never drift onto a
     // neighboring lane's line
     const laneTop = band.top + i * laneH;
@@ -573,11 +573,11 @@ function updateFishLayer(layer, def) {
 function drawFishInstance(f, def) {
   push();
   translate(f.x, f.y);
-  // mirror horizontally only when swimming right-to-left — the art has an
+  // mirror horizontally only when swimming right-to-left, the art has an
   // asymmetric dorsal fin, so rotate(PI) would flip it upside-down too
   if (f.dir === -1) scale(-1, 1);
   imageMode(CENTER);
-  // f.buf is already the recolored (non-black), pre-scaled buffer — tint()
+  // f.buf is already the recolored (non-black), pre-scaled buffer, tint()
   // here is only ever scaling alpha (255,255,255 leaves RGB unchanged),
   // which is the one thing tint() can safely do to a source that isn't
   // pure black.
@@ -587,7 +587,7 @@ function drawFishInstance(f, def) {
 }
 
 // As reefHealth drops (see the comment above its declaration), only a
-// shrinking prefix of each ambient layer stays active — the rest just never
+// shrinking prefix of each ambient layer stays active, the rest just never
 // gets updated or drawn again. Since reefHealth only ever decreases, a fish
 // that drops out of the active range never needs to come back.
 function drawFishLayer(layer, def) {
@@ -606,7 +606,7 @@ function buildCloudLayer(def) {
     const w = random(def.widthMin, def.widthMax);
     const h = w * (img.height / img.width);
     // bigger clouds need more headroom to keep their own bottom edge above
-    // the character's head — bound is per-cloud, not a fixed constant
+    // the character's head, bound is per-cloud, not a fixed constant
     const bottomBound = Math.max(CLOUD_SKY_TOP + 10, HEAD_IMG_DEF.y - CLOUD_HEAD_CLEARANCE - h / 2);
     const zoneIdx = Math.floor(random(CLOUD_ZONE_COUNT));
     const zoneLeft = zoneIdx * zoneW, zoneRight = zoneLeft + zoneW;
@@ -647,7 +647,7 @@ function drawCloudLayer(layer, def) {
   layer.forEach(c => drawCloudInstance(c, def));
 }
 
-// ---- hero catchable fish (Fish1/Fish2) — always swimming, independent of
+// ---- hero catchable fish (Fish1/Fish2), always swimming, independent of
 // whatever the boat's rig is doing (see HERO_FISH_ASSET_FILES comment) ----
 
 // spawnFromEdge=true (used for respawns, not the initial population) starts
@@ -661,7 +661,7 @@ function makeHeroFish(name, hMin, hMax, spawnFromEdge) {
   const edgeMargin = w + HERO_FISH_EDGE_SPAWN_MARGIN;
   const x = spawnFromEdge ? (dir === 1 ? -edgeMargin : CANVAS_W + edgeMargin) : random(CANVAS_W);
   return {
-    name, // needed at catch time — which sprite to show dangling on the hook
+    name, // needed at catch time, which sprite to show dangling on the hook
     x,
     y: random(HERO_FISH_BAND.top, HERO_FISH_BAND.bottom),
     w, h,
@@ -682,7 +682,7 @@ function buildHeroFish() {
 
 // A mature fish that gets caught already had its chance to reproduce, so
 // after its respawn delay elapses, a new juvenile (not a full-grown
-// replacement) takes its place — offspring start small, and swim in from
+// replacement) takes its place, offspring start small, and swim in from
 // off-screen rather than popping into existence mid-lake.
 function spawnJuvenileFish() {
   const names = Object.keys(HERO_FISH_ASSET_FILES);
@@ -711,7 +711,7 @@ function updateHeroFish() {
 function drawHeroFishInstance(f) {
   push();
   translate(f.x, f.y);
-  // source art faces LEFT by default — mirror when swimming right (opposite
+  // source art faces LEFT by default, mirror when swimming right (opposite
   // of the BackFish/cloud convention, which face right by default)
   if (f.dir === 1) scale(-1, 1);
   imageMode(CENTER);
@@ -734,7 +734,7 @@ function buildCaughtFishBufs() {
   });
 }
 
-// Smaller caught fish cost more health than bigger ones — catching
+// Smaller caught fish cost more health than bigger ones, catching
 // juveniles before they can reproduce is the specific overfishing practice
 // SDG 14.4 calls out, so it should hit the ecosystem harder here too.
 function applyCatchHealthPenalty(caughtH) {
@@ -747,7 +747,7 @@ function applyCatchHealthPenalty(caughtH) {
 // so draw() can slot each one in right before its own layer is painted on
 // top of it (see draw() below for why).
 function buildReef() {
-  // 3rd/back layer sways noticeably stronger and faster than mid/front —
+  // 3rd/back layer sways noticeably stronger and faster than mid/front,
   // it reads as thinner, more delicate growth further from the character,
   // more sensitive to the current.
   reefBack = buildReefLayer(REEF_PRESETS['3rd'], { ampBoost: 1.8, speedBoost: 1.6 });
@@ -764,17 +764,17 @@ function buildReefLayer(presets, opts = {}) {
     // def.w/def.h come from that specific placement's own Figma
     // renderBounds, which isn't always the same aspect ratio as the
     // exported PNG (different placements were sometimes scaled slightly
-    // non-uniformly in Figma) — forcing both independently stretched the
+    // non-uniformly in Figma), forcing both independently stretched the
     // image. Height stays authoritative (it drives the "half exposed above
     // the rock line" placement); width is derived from the PNG's own real
     // aspect ratio so nothing gets squished. The base/root position keeps
     // the original full-size def.y + def.h anchor (where it was designed to
-    // sit against the rock line) — only the rendered bulk shrinks by
+    // sit against the rock line), only the rendered bulk shrinks by
     // REEF_SCALE, not where it's rooted.
     const h = def.h * REEF_SCALE;
     const w = h * (img.width / img.height);
     const centerX = def.x + def.w / 2;
-    // Fish Bone is a rigid skeleton, not a living organism — it shouldn't
+    // Fish Bone is a rigid skeleton, not a living organism, it shouldn't
     // sway like the corals around it.
     const noSway = def.name === 'Fish Bone';
     return {
@@ -794,8 +794,8 @@ function buildReefLayer(presets, opts = {}) {
 // size (as an earlier version did) left each strip only a couple of source
 // pixels tall once sliced 30 ways, which read as blocky/pixelated once the
 // PNGs carried real detailed artwork instead of a flat recolor. Oversampling
-// the buffer here — capped at the source's own native resolution, no point
-// upscaling past real detail — keeps each strip's source slice thick enough
+// the buffer here, capped at the source's own native resolution, no point
+// upscaling past real detail, keeps each strip's source slice thick enough
 // to resample cleanly, while still being far smaller than re-resampling the
 // full native image on every strip, every frame (the original lag cause).
 const REEF_SLICE_OVERSAMPLE = 3;
@@ -810,7 +810,7 @@ function scaleToDisplaySize(img, dispW, dispH) {
 }
 
 // Bends a recolored reef buffer into horizontal strips, base-anchored, each
-// offset by a per-instance sine sway — same rooted/free-tip motion the
+// offset by a per-instance sine sway, same rooted/free-tip motion the
 // vector-traced kelp uses (drawSwayLoop), just for a raster source instead.
 function drawReefInstance(inst) {
   const stripH = inst.buf.height / REEF_STRIPS;
@@ -820,7 +820,7 @@ function drawReefInstance(inst) {
   const effSpeed = REEF_SWAY_SPEED * inst.speedMul * vitality * FRAME_TIME_SCALE;
 
   // Each strip is already a modest scale from an oversampled source (see
-  // REEF_SLICE_OVERSAMPLE) — measured directly, paying 'high' (Lanczos)
+  // REEF_SLICE_OVERSAMPLE), measured directly, paying 'high' (Lanczos)
   // resampling on every one of up to ~400 tiny strip draws a frame (multiple
   // instances x REEF_STRIPS, several times over across 3 layers) was
   // consistently 2-2.5x more expensive than the rest of the entire scene
@@ -850,7 +850,7 @@ function drawReefInstance(inst) {
   drawingContext.imageSmoothingQuality = 'high';
 }
 
-// Each layer's reef corals draw BEFORE that layer's rock — the rock then
+// Each layer's reef corals draw BEFORE that layer's rock, the rock then
 // paints over their base/roots, leaving only the upper body visible above
 // its own contour line, and every later (nearer) layer naturally re-occludes
 // whatever pokes into its own silhouette too.
@@ -888,7 +888,7 @@ function fillGradientRect(ctx, x, y, w, h, hexTop, hexBottom) {
 
 // The sky/water gradient never changes frame to frame, so it's rendered
 // once here into an offscreen buffer instead of recreating 2 canvas
-// gradients and refilling the whole canvas every single frame — this and
+// gradients and refilling the whole canvas every single frame, this and
 // the pixelDensity cap in setup() were the two biggest wins for a reported
 // ~20fps average.
 function buildBackground() {
@@ -899,7 +899,7 @@ function buildBackground() {
   return buf;
 }
 
-// Real static art (see STONE_DEFS) — width always matches CANVAS_W exactly,
+// Real static art (see STONE_DEFS), width always matches CANVAS_W exactly,
 // only the height/y-offset differs per layer.
 function drawStone(layer) {
   const def = STONE_DEFS[layer];
@@ -908,7 +908,7 @@ function drawStone(layer) {
 }
 
 // Splits raw SVG path data into closed loops and keeps only each command's
-// end point (bezier handles are dropped) — plenty of resolution once traced
+// end point (bezier handles are dropped), plenty of resolution once traced
 // at this point density, and cheap to animate per vertex every frame.
 function splitSubpaths(d) {
   return d.match(/M[^Z]*Z/g) || [d];
@@ -956,7 +956,7 @@ function drawTracedShape(inst) {
 }
 
 // Rooted at the base (large local y = seafloor) and free at the tip (small
-// local y) — the sway falloff makes each shape read as anchored, not floating.
+// local y), the sway falloff makes each shape read as anchored, not floating.
 function drawSwayLoop(points, inst) {
   drawingContext.beginPath();
   points.forEach((p, i) => {
@@ -980,7 +980,7 @@ function drawGradientEllipse(cx, cy, w, h, topHex, bottomHex) {
 }
 
 // Idle blink: closed eyelids read as height 0, so scaling the eye's vertical
-// radius down to (almost) nothing and back is enough to sell a real blink —
+// radius down to (almost) nothing and back is enough to sell a real blink,
 // no separate eyelid asset needed.
 function updateBlink() {
   if (blinking) {
@@ -1007,7 +1007,7 @@ function drawEye(e, openness) {
 }
 
 // The line is real geometry (not a traced shape), so the hook end can move
-// independently of the rest of the rig and the line just follows — exactly
+// independently of the rest of the rig and the line just follows, exactly
 // what the cast/wait/reel cycle below needs. Takes/returns local (rig-space)
 // coordinates since it's always called from inside drawRig()'s transform.
 // Returns the hook's current local x so the caller can draw the hook image
@@ -1034,8 +1034,8 @@ function localX(x) { return x - RIG_ANCHOR_X0; }
 function localDef(def) { return { ...def, x: def.x - RIG_ANCHOR_X0 }; }
 
 // The hook's local x (its own idle sway, same formula drawFishingLine used
-// to compute directly) and its world x — accounting for the rig's own
-// translate(rigX,0) + possible scale(-1,1) flip — since the catch-proximity
+// to compute directly) and its world x, accounting for the rig's own
+// translate(rigX,0) + possible scale(-1,1) flip, since the catch-proximity
 // check in updateRig() needs to compare against heroFish positions, which
 // live in world space, not the rig's local space.
 function hookLocalX() {
@@ -1055,7 +1055,7 @@ function rigRangeFor(dir) {
 // Picks a new spot to sail to. dir is decided first, then the target is
 // constrained to (a) keep the rig's whole bounding box on-screen for that
 // facing direction and (b) actually lie on that side of the current
-// position — otherwise the boat would end up moving one way while flipped
+// position, otherwise the boat would end up moving one way while flipped
 // to visually face the other. If there's no room left in the rolled
 // direction (already at that side's extreme), it just turns around instead.
 function pickRigTarget() {
@@ -1074,7 +1074,7 @@ function pickRigTarget() {
 }
 
 // Checks every live fish against the hook's current world position and
-// grabs the first one within CATCH_RADIUS — at most one catch per cast, so
+// grabs the first one within CATCH_RADIUS, at most one catch per cast, so
 // once caughtFish is set this is a no-op for the rest of the trip (called
 // again on the way up in case nothing bit on the way down).
 function tryCatchAtHook() {
@@ -1086,7 +1086,7 @@ function tryCatchAtHook() {
     heroFish.splice(i, 1);
     caughtFish = { name: fish.name, h: fish.h };
     applyCatchHealthPenalty(fish.h);
-    // mature fish already had its chance to reproduce — a juvenile
+    // mature fish already had its chance to reproduce, a juvenile
     // replacement grows in after a delay. A juvenile catch is permanent.
     if (fish.h >= HERO_FISH_MATURE_THRESHOLD) {
       pendingRespawns.push({ framesLeft: Math.floor(random(HERO_FISH_RESPAWN_FRAMES_MIN, HERO_FISH_RESPAWN_FRAMES_MAX)) });
@@ -1127,10 +1127,10 @@ function updateRig() {
   }
 }
 
-// A little struggling wiggle while it dangles up on the line — purely
+// A little struggling wiggle while it dangles up on the line, purely
 // decorative, the sprite's own resting orientation is fine for this. Drawn
 // at the actual caught fish's own height so a tiny juvenile visibly looks
-// tiny on the hook and a bigger one looks bigger — CAUGHT_FISH_SIZE (the
+// tiny on the hook and a bigger one looks bigger, CAUGHT_FISH_SIZE (the
 // pre-scaled buffer's own resolution) is set to the largest realistic
 // catch so this only ever scales down, never up.
 function drawCaughtFish(x, y) {
