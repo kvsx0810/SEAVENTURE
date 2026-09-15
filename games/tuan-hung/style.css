@@ -130,21 +130,26 @@ html, body {
 /* -------------------- catch progress row -------------------- */
 #catch-progress-row {
   position: absolute;
-  left: 38.96%; /* 748px / 1920 */
-  top: 7.41%;   /* 80px / 1080 */
-  width: 32%;
+  /* centered under the health bar (was left-aligned to a Figma pixel value
+     that didn't actually line up with the health bar's own center), and
+     pushed down a bit further so the rotated fish don't lap over the bar */
+  left: 50%;
+  top: 8.7%;
+  width: 17%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .catch-slot {
-  /* percentages here resolve against #catch-progress-row's own box (32%
-     of #hud-overlay), not the overlay directly, so these are pre-divided
-     by that 32% to still land on the real target: 57.94px/1920 = 3.02% of
-     the overlay, and -12px/1920 = -0.63% of the overlay. */
-  width: 9.43%;  /* 3.02% / 32% */
+  /* percentages here resolve against #catch-progress-row's own box (17% of
+     #hud-overlay), pre-divided by that 17% to land on the real target:
+     ~40px/1920 = 2.08% of the overlay, and -8px/1920 = -0.42% of the
+     overlay -- smaller than the first pass, which read as too large. */
+  width: 12.24%;  /* 2.08% / 17% */
   aspect-ratio: 50.6 / 31.3;
-  margin-right: -1.95%; /* -0.63% / 32% */
+  margin-right: -2.45%; /* -0.42% / 17% */
   transform: rotate(-45deg);
   transition: opacity 0.15s, filter 0.15s;
 }
@@ -279,9 +284,9 @@ html, body {
 .panel-content {
   width: 90%;
   /* fixed, not max-height -- both tabs need to occupy the exact same box so
-     switching tabs doesn't resize the whole panel, About (longer) scrolls
-     inside this, How to Play (shorter) just has room to spare */
-  height: 40vh;
+     switching tabs doesn't resize the whole panel. Sized to How to Play's
+     own natural height (the shorter of the two), About scrolls inside it. */
+  height: 24vh;
   overflow-y: auto;
   text-align: center;
   font-size: 18px;

@@ -532,6 +532,7 @@ function setupInfoPanel() {
   backdrop.addEventListener('click', closePanel);
   tabs.forEach(t => t.addEventListener('click', () => selectTab(t.dataset.tab)));
   selectTab('howtoplay');
+  openPanel(); // How to Play pops up on load, no need to wait for the player to find the info button first
 
   document.getElementById('end-screen-back').addEventListener('click', restartGame);
 }
