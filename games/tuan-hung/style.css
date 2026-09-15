@@ -83,15 +83,14 @@ html, body {
 
 #sound-toggle-glyph, #info-toggle-glyph {
   position: relative;
-  font-size: clamp(12px, 1.9vw, 24px);
-  color: #042549;
-  font-family: "apotek-wide", sans-serif;
-  font-weight: 700;
+  width: 46%;
+  height: 46%;
 }
 
-#sound-toggle[aria-pressed="true"] #sound-toggle-glyph::before { content: "🔊"; }
-#sound-toggle[aria-pressed="false"] #sound-toggle-glyph::before { content: "🔇"; }
-#sound-toggle-glyph { font-size: clamp(12px, 1.6vw, 20px); }
+/* unmuted: waves show, X hidden. Muted: waves hidden, X shows. Only one
+   state renders at a time, no more emoji-on-top-of-emoji clutter. */
+#sound-toggle[aria-pressed="true"] #sound-mute-x { display: none; }
+#sound-toggle[aria-pressed="false"] #sound-waves { display: none; }
 
 /* -------------------- ecosystem health -------------------- */
 #health-widget {
@@ -154,14 +153,15 @@ html, body {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* contain, not cover -- Fish1/2/3 aren't the same aspect ratio as
+     BackFish3 (used for the empty state), cover was cropping/zooming them
+     oddly once a slot filled in */
+  object-fit: contain;
 }
 
 .catch-slot--empty {
   opacity: 0.4;
-  /* dark sky sits directly behind this row, so the silhouette needs to go
-     light, not dark, to actually read against it */
-  filter: brightness(0) invert(1);
+  filter: brightness(0); /* plain black silhouette, per Hưng's call */
 }
 
 .catch-slot--filled {
@@ -278,7 +278,10 @@ html, body {
 
 .panel-content {
   width: 90%;
-  max-height: 45vh;
+  /* fixed, not max-height -- both tabs need to occupy the exact same box so
+     switching tabs doesn't resize the whole panel, About (longer) scrolls
+     inside this, How to Play (shorter) just has room to spare */
+  height: 40vh;
   overflow-y: auto;
   text-align: center;
   font-size: 18px;

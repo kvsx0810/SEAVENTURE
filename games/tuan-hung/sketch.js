@@ -292,8 +292,8 @@ let reefHealth = 1.0;
 const WIN_CATCH_TARGET = 10;
 let catchProgress = [];
 let gameOutcome = null; // null | 'win' | 'lose', set once and left alone
-const REEF_HEALTH_PENALTY_SMALL = 0.06; // cost of catching the smallest fish
-const REEF_HEALTH_PENALTY_LARGE = 0.02; // cost of catching the largest fish
+const REEF_HEALTH_PENALTY_SMALL = 0.15; // cost of catching the smallest fish -- all-small runs out of health well before reaching 10 catches, real pressure to pick large
+const REEF_HEALTH_PENALTY_LARGE = 0.05; // cost of catching the largest fish
 const REEF_HEALTH_VITALITY_FLOOR = 0.15; // reef sway never fully freezes, just reads as barely alive
 
 // Boat/character rig: A3 puts the player in control of the fishing action,
@@ -481,6 +481,27 @@ function showEndScreen() {
   screen.hidden = false;
 }
 
+// Full reset for a new round: game state, the hero fish population, the rig
+// (back to idle, centered, hook up), and the catch-progress HUD slots.
+function restartGame() {
+  reefHealth = 1.0;
+  catchProgress = [];
+  gameOutcome = null;
+  pendingRespawns = [];
+  heroFish = buildHeroFish();
+  rigX = RIG_ANCHOR_X0;
+  rigDir = 1;
+  rigState = 'idle';
+  hookY = HOOK_REST_Y;
+  caughtFish = null;
+  catchSlotEls.forEach(({ el, img }) => {
+    el.classList.remove('catch-slot--filled');
+    el.classList.add('catch-slot--empty');
+    img.src = 'assets/BackFish3.png';
+  });
+  document.getElementById('end-screen').hidden = true;
+}
+
 // ==========================================================================
 // How to Play / About panel
 // ==========================================================================
@@ -512,9 +533,7 @@ function setupInfoPanel() {
   tabs.forEach(t => t.addEventListener('click', () => selectTab(t.dataset.tab)));
   selectTab('howtoplay');
 
-  document.getElementById('end-screen-back').addEventListener('click', () => {
-    document.getElementById('end-screen').hidden = true;
-  });
+  document.getElementById('end-screen-back').addEventListener('click', restartGame);
 }
 
 // ==========================================================================
