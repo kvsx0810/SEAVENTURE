@@ -2,18 +2,130 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>COMM2754 A2 — Life Below Water</title>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
+
+  <!-- Google Fonts (Alata, body text in the HUD/panels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alata&display=swap">
+
+  <!-- Adobe Fonts (Apotek Wide, headings/buttons -- same kit the rest of SEAVENTURE uses) -->
+  <link rel="stylesheet" href="https://use.typekit.net/rav6zvx.css">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/addons/p5.sound.min.js"></script>
 </head>
 <body>
   <main id="sketch-holder"></main>
 
-  <!-- Browsers block audio until the visitor interacts once, so sound
-       starts off by default -- this both unlocks audio and toggles it. -->
-  <button id="sound-toggle" type="button" aria-pressed="false" aria-label="Toggle sound">🔇</button>
+  <!-- Positioned to exactly overlap the canvas at any viewport size (see
+       style.css), children below are placed with percentages computed from
+       the 1920x1080 design space so they land at the same spot Figma has
+       them, at any scale. -->
+  <div id="hud-overlay">
 
-  <script src="sketch.js?v=38"></script>
+    <!-- Browsers block audio until the visitor interacts once, so sound
+         starts off by default -- this both unlocks audio and toggles it. -->
+    <button id="sound-toggle" type="button" aria-pressed="false" aria-label="Toggle sound">
+      <img id="sound-toggle-icon" src="assets/ui/sound-icon-real.svg" alt="">
+      <span id="sound-toggle-glyph">🔇</span>
+    </button>
+
+    <!-- Opens the How to Play / About panel below. -->
+    <button id="info-toggle" type="button" aria-label="How to play / About">
+      <img id="info-toggle-icon" src="assets/ui/info-icon-real.svg" alt="">
+      <span id="info-toggle-glyph">i</span>
+    </button>
+
+    <div id="health-widget">
+      <p id="health-label">Ecosystem health</p>
+      <div id="health-track"><div id="health-fill"></div></div>
+    </div>
+
+    <div id="catch-progress-row"></div>
+
+    <!-- Mobile-only touch controls, shown/hidden by sketch.js based on
+         isPhoneLandscapeTouch() -- see the comment above that function for
+         why this is landscape-or-rotate-prompt rather than a CSS rotation
+         of the canvas. -->
+    <div id="touch-controls" hidden>
+      <button id="touch-left" type="button" aria-label="Move left"><img src="assets/ui/move-left-real.svg" alt=""></button>
+      <button id="touch-right" type="button" aria-label="Move right"><img src="assets/ui/move-right-real.svg" alt=""></button>
+      <button id="touch-cast" type="button" aria-label="Drop hook"><img src="assets/ui/hook-button-real.svg" alt=""></button>
+    </div>
+
+  </div>
+
+  <!-- Shown instead of the game on a phone held in portrait -- asking the
+       player to physically rotate their device instead of faking landscape
+       with a CSS rotation, which breaks touch coordinate mapping. Same
+       pattern Tiêu Dĩnh Ngọc's reeflect.2 uses. -->
+  <div id="rotate-prompt" hidden>
+    <p id="rotate-text">Rotate your phone to play</p>
+  </div>
+
+  <!-- Dark backdrop behind any open panel. -->
+  <div id="panel-backdrop" hidden></div>
+
+  <!-- How to Play / About, one shared panel shell with two tabs. -->
+  <div id="info-panel" hidden>
+    <div class="panel-tabs">
+      <button type="button" class="panel-tab" id="tab-howtoplay" data-tab="howtoplay">How to play</button>
+      <button type="button" class="panel-tab" id="tab-about" data-tab="about">About</button>
+    </div>
+
+    <div class="panel-content" id="content-howtoplay">
+      <p>Catch <span class="hl-berry">10</span> fish to <span class="hl-berry">win</span>. Small fish cost the ecosystem more health than large ones.</p>
+      <p>If the ecosystem's health hits 0 before you reach 10, you <span class="hl-turquoise">LOSE</span>.</p>
+
+      <div class="howto-row howto-row--desktop">
+        <span class="keycap">A</span><span class="keycap-sep">/</span><span class="keycap">D</span>
+        <span>: sail the boat left or right</span>
+      </div>
+      <div class="howto-row howto-row--desktop">
+        <span class="keycap keycap--space" aria-hidden="true"></span>
+        <span>: drop the hook, it catches whatever it touches first and reels itself back up</span>
+      </div>
+
+      <div class="howto-row howto-row--mobile">
+        <img class="howto-icon" src="assets/ui/move-left-real.svg" alt="">
+        <span class="keycap-sep">/</span>
+        <img class="howto-icon" src="assets/ui/move-right-real.svg" alt="">
+        <span>: sail the boat left or right</span>
+      </div>
+      <div class="howto-row howto-row--mobile">
+        <img class="howto-icon" src="assets/ui/hook-button-real.svg" alt="">
+        <span>: drop the hook, it catches whatever it touches first and reels itself back up</span>
+      </div>
+    </div>
+
+    <div class="panel-content" id="content-about" hidden>
+      <h2>Abstract</h2>
+      <p>"<span class="grad-text">Last Catch</span>" is one piece inside <span class="hl-blue">SEAVENTURE</span>, a shared arcade cabinet built around <span class="hl-lightblue">SDG 14: Life Below Water</span>. The player controls a boat, deciding when and where to fish a reef that only gets worse the more it's taken from.</p>
+
+      <h2>SDG 14.4</h2>
+      <p>This game is inspired by <span class="hl-lightblue">SDG target 14.4</span>: "By 2020, effectively regulate harvesting and end overfishing, illegal, unreported and unregulated fishing and destructive fishing practices..."</p>
+      <p>Catching a fish before it has had the chance to reproduce costs the ecosystem more than catching one that already has.</p>
+
+      <h2>Goal</h2>
+      <p>The game asks players to weigh <span class="hl-pink">short-term gain</span> against <span class="hl-green">long-term cost</span>, one cast at a time.</p>
+
+      <p class="cta-line">Change everyday habits to protect ocean health</p>
+      <p class="author-line">Trịnh Tuấn Hưng - s4123995</p>
+    </div>
+
+    <button type="button" class="panel-ok" id="panel-ok">OK</button>
+  </div>
+
+  <!-- Shown once catchProgress.length reaches WIN_CATCH_TARGET or reefHealth
+       hits 0 -- see gameOutcome in sketch.js. -->
+  <div id="end-screen" hidden>
+    <p id="end-screen-title"></p>
+    <button type="button" id="end-screen-back">Back</button>
+  </div>
+
+  <script src="sketch.js?v=39"></script>
 </body>
 </html>

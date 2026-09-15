@@ -1,0 +1,19 @@
+<svg width="199" height="199" viewBox="0 0 199 199" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="199" height="199" fill="#1E1E1E"/>
+<g id="Frame for element">
+<rect width="4204" height="2166" transform="translate(-3832 -923)" fill="white"/>
+<g id="Mobile example layout for onscreen button">
+<rect width="1920" height="1080" transform="translate(-1653 -762)" fill="white"/>
+<g id="Hook" opacity="0.5">
+<circle id="Ellipse 28" cx="99.5" cy="99.5" r="99.5" fill="url(#paint0_linear_0_1)"/>
+<path id="Fishing Hook" fill-rule="evenodd" clip-rule="evenodd" d="M69.2143 125.821C67.1387 117.564 68.3365 112.396 67.8702 105.992C67.4907 100.785 65.0608 97.4075 67.2096 96.0538C69.7401 94.4853 74.4925 96.9873 77.8162 102.944C80.9044 108.478 80.6392 114.333 83.8875 118.612C87.7096 123.641 94.4713 125.943 101.974 122.663C108.395 120.089 111.819 111.89 108.484 104.759C103.13 93.316 86.5689 80.5235 85.1333 69.3297C83.6841 54.4762 102.623 47.8104 110.566 60.3252C116.562 70.618 108.466 77.2839 110.566 81.261C112.557 84.9697 125.669 91.3484 129.089 102.341C133.217 115.619 127.569 133.243 110.223 141.73C93.1934 148.358 72.7277 140.483 69.2143 125.824V125.821ZM99.1391 60.939C95.4062 60.939 92.3797 64.0292 92.3797 67.8406C92.3797 71.652 95.4062 74.7422 99.1391 74.7422C102.872 74.7422 105.896 71.652 105.896 67.8406C105.896 64.0292 102.87 60.939 99.1391 60.939Z" fill="#042549"/>
+</g>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_1" x1="99.5" y1="0" x2="99.5" y2="199" gradientUnits="userSpaceOnUse">
+<stop stop-color="#C9F2EE"/>
+<stop offset="1" stop-color="#EBFBE9"/>
+</linearGradient>
+</defs>
+</svg>

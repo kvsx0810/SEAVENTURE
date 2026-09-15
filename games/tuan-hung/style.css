@@ -4,6 +4,15 @@
   box-sizing: border-box;
 }
 
+/* the [hidden] attribute must always win, several elements below also set
+   their own `display` for when they're shown (flex, in most cases), which
+   would otherwise out-specificity the browser's default [hidden]{display:
+   none} rule and leave them visible-but-empty-looking or, worse, visible
+   with stale content. */
+[hidden] {
+  display: none !important;
+}
+
 html, body {
   width: 100%;
   height: 100%;
@@ -12,6 +21,7 @@ html, body {
 }
 
 #sketch-holder {
+  position: relative;
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -24,38 +34,397 @@ html, body {
   height: min(100vh, 100vw * 9 / 16) !important;
 }
 
-/* Sound on/off -- top-left corner, fixed to the real viewport so it's
-   always reachable regardless of how the canvas itself is scaled. */
-#sound-toggle {
-  position: fixed;
-  left: 24px;
-  top: 24px;
-  z-index: 20;
+/* ==========================================================================
+   HUD OVERLAY -- exactly overlaps the canvas at any viewport size, so every
+   child below can be positioned with a plain percentage computed from the
+   1920x1080 design space (e.g. left: 763px in Figma -> 763/1920 = 39.74%)
+   and it lands in the same spot the canvas itself would draw it.
+   ========================================================================== */
+#hud-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(100vw, 100vh * 16 / 9);
+  height: min(100vh, 100vw * 9 / 16);
+  pointer-events: none; /* children opt back in individually */
+  z-index: 10;
+  font-family: "Alata", sans-serif;
+}
 
-  width: 48px;
-  height: 48px;
-  padding: 0;
+#hud-overlay button {
+  pointer-events: auto;
+}
 
+/* -------------------- sound / info buttons -------------------- */
+#sound-toggle, #info-toggle {
+  position: absolute;
+  top: 2.78%;   /* 30px / 1080 */
+  width: 2.66%; /* 51px / 1920 */
+  aspect-ratio: 1;
+  border: none;
+  border-radius: 50%;
+  background: rgba(187, 232, 251, 0.56);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+}
 
-  font-size: 20px;
-  line-height: 1;
+#sound-toggle { left: 2.03%; }   /* 39px / 1920 */
+#info-toggle { left: 94.9%; }    /* 1822px / 1920 */
 
-  background: rgba(2, 20, 39, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 50%;
-  color: #e3fae0;
+#sound-toggle-icon, #info-toggle-icon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#sound-toggle-glyph, #info-toggle-glyph {
+  position: relative;
+  font-size: clamp(12px, 1.9vw, 24px);
+  color: #042549;
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+}
+
+#sound-toggle[aria-pressed="true"] #sound-toggle-glyph::before { content: "🔊"; }
+#sound-toggle[aria-pressed="false"] #sound-toggle-glyph::before { content: "🔇"; }
+#sound-toggle-glyph { font-size: clamp(12px, 1.6vw, 20px); }
+
+/* -------------------- ecosystem health -------------------- */
+#health-widget {
+  position: absolute;
+  left: 39.74%;  /* 763px / 1920 */
+  top: 2.04%;    /* 22px / 1080 */
+  width: 20.89%; /* 401px / 1920 */
+  text-align: center;
+}
+
+#health-label {
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+  font-size: clamp(10px, 1.25vw, 24px);
+  color: #fff;
+  opacity: 0.7;
+  margin-bottom: 0.6vh;
+}
+
+#health-track {
+  width: 100%;
+  height: 2.04vh;
+  min-height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #021427, #07488d);
+  overflow: hidden;
+}
+
+#health-fill {
+  height: 100%;
+  width: 100%; /* set from JS each frame, 0-100% of reefHealth */
+  border-radius: 999px;
+  background: linear-gradient(175deg, #8fec83 15%, #2ec2b4 85%);
+  transition: width 0.15s ease-out;
+}
+
+/* -------------------- catch progress row -------------------- */
+#catch-progress-row {
+  position: absolute;
+  left: 38.96%; /* 748px / 1920 */
+  top: 7.41%;   /* 80px / 1080 */
+  width: 32%;
+  display: flex;
+  align-items: center;
+}
+
+.catch-slot {
+  /* percentages here resolve against #catch-progress-row's own box (32%
+     of #hud-overlay), not the overlay directly, so these are pre-divided
+     by that 32% to still land on the real target: 57.94px/1920 = 3.02% of
+     the overlay, and -12px/1920 = -0.63% of the overlay. */
+  width: 9.43%;  /* 3.02% / 32% */
+  aspect-ratio: 50.6 / 31.3;
+  margin-right: -1.95%; /* -0.63% / 32% */
+  transform: rotate(-45deg);
+  transition: opacity 0.15s, filter 0.15s;
+}
+
+.catch-slot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.catch-slot--empty {
+  opacity: 0.4;
+  /* dark sky sits directly behind this row, so the silhouette needs to go
+     light, not dark, to actually read against it */
+  filter: brightness(0) invert(1);
+}
+
+.catch-slot--filled {
+  opacity: 1;
+}
+
+/* -------------------- mobile touch controls -------------------- */
+#touch-controls {
+  position: absolute;
+  inset: 0;
+}
+
+#touch-left, #touch-right, #touch-cast {
+  position: absolute;
+  bottom: 6%;
+  border: none;
+  background: none;
+  padding: 0;
   cursor: pointer;
-  backdrop-filter: blur(4px);
 }
 
-#sound-toggle:hover {
-  background: rgba(2, 20, 39, 0.75);
+#touch-left, #touch-right { width: 10.6%; }
+#touch-cast { width: 10.4%; }
+
+#touch-left { left: 5.3%; }
+#touch-right { left: 17.5%; }
+#touch-cast { right: 5.3%; }
+
+#touch-left img, #touch-right img, #touch-cast img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-#sound-toggle[aria-pressed="true"] {
-  background: rgba(46, 194, 180, 0.55);
-  border-color: rgba(255, 255, 255, 0.6);
+#touch-left:active img, #touch-right:active img, #touch-cast:active img {
+  filter: brightness(1.25);
+}
+
+/* ==========================================================================
+   Rotate-phone prompt -- real viewport, not canvas-space, since the canvas
+   itself is hidden while this shows.
+   ========================================================================== */
+#rotate-prompt {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: #021427;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+#rotate-text {
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: #fff;
+}
+
+/* ==========================================================================
+   Panels (How to Play / About) + backdrop
+   ========================================================================== */
+#panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+}
+
+#info-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 41;
+  width: min(90vw, 800px);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 27px;
+  padding: 18px 0 26px;
+  border: 3px solid #bff4b8;
+  border-radius: 25px;
+  background: linear-gradient(180deg, #042549, #063e79);
+  font-family: "Alata", sans-serif;
+  color: #fff;
+}
+
+.panel-tabs {
+  display: flex;
+  width: 100%;
+}
+
+.panel-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  padding-bottom: 23px;
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+  font-size: 27px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.panel-tab[aria-selected="true"] {
+  color: #8fec83;
+  border-bottom-color: #8fec83;
+}
+
+.panel-content {
+  width: 90%;
+  max-height: 45vh;
+  overflow-y: auto;
+  text-align: center;
+  font-size: 18px;
+  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 0 4px;
+}
+
+.panel-content h2 {
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: #fcedf0;
+  margin-top: 4px;
+}
+
+.hl-berry { color: #ed8495; }
+.hl-turquoise { color: #2ec2b4; }
+.hl-blue { color: #11aef3; }
+.hl-lightblue { color: #bbe8fb; }
+.hl-pink { color: #f3aab6; }
+.hl-green { color: #bff4b8; }
+
+.grad-text {
+  background: linear-gradient(90deg, #bff4b8, #f8ced5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.cta-line {
+  font-family: "Inter", sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  color: #8fec83;
+}
+
+.author-line {
+  text-align: right;
+  opacity: 0.85;
+}
+
+.howto-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.howto-row--mobile { display: none; }
+
+.keycap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #c9f2ee, #ebfbe9);
+  color: #042549;
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.keycap-sep {
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+}
+
+.keycap--space {
+  width: 64px;
+}
+
+.keycap--space::before {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 8px;
+  border: 3px solid #042549;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+}
+
+.panel-ok {
+  width: 176px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #e3fae0, #bff4b8);
+  box-shadow: 0 4px 0 #8fec83;
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: #042549;
+  cursor: pointer;
+}
+
+.panel-ok:active {
+  box-shadow: 0 1px 0 #8fec83;
+  transform: translateY(3px);
+}
+
+/* ==========================================================================
+   End screen (win/lose) -- minimal placeholder, no dedicated design for
+   this yet, flagged to Hưng separately.
+   ========================================================================== */
+#end-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(2, 20, 39, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+#end-screen-title {
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+  font-size: 48px;
+  color: #fff;
+}
+
+#end-screen-back {
+  width: 176px;
+  height: 48px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #e3fae0, #bff4b8);
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: #042549;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Mobile / landscape-only layout
+   ========================================================================== */
+@media (max-width: 900px) and (pointer: coarse) {
+  .howto-row--desktop { display: none; }
+  .howto-row--mobile { display: flex; }
 }

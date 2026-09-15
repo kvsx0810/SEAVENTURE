@@ -284,13 +284,23 @@ const CAUGHT_FISH_SIZE = 75; // px, pre-scale buffer resolution; actual draw siz
 // reef's own sway animation reads (drawReefInstance), the whole scene
 // should feel like it's visibly losing life, not just the hero fish count.
 let reefHealth = 1.0;
+
+// A3 win/lose: catch WIN_CATCH_TARGET fish before reefHealth bottoms out.
+// catchProgress holds one entry per catch so far (each just the caught
+// fish's species name, e.g. "Fish2"), used both for the win check below and
+// to drive the HUD's catch-progress row (see drawHud()).
+const WIN_CATCH_TARGET = 10;
+let catchProgress = [];
+let gameOutcome = null; // null | 'win' | 'lose', set once and left alone
 const REEF_HEALTH_PENALTY_SMALL = 0.06; // cost of catching the smallest fish
 const REEF_HEALTH_PENALTY_LARGE = 0.02; // cost of catching the largest fish
 const REEF_HEALTH_VITALITY_FLOOR = 0.15; // reef sway never fully freezes, just reads as barely alive
 
-// Boat/character rig: for A2 the boat drives itself (interaction is saved
-// for A3), it picks a random spot on the water, sails there, fishes for a
-// while, then picks a new spot, repeating forever. Every part below
+// Boat/character rig: A3 puts the player in control of the fishing action,
+// Gold Miner style. Hold A/D to sail left/right, press Space to drop the
+// hook -- once it drops, the catch (or miss) and the reel back up are both
+// automatic, same physics as the old A2 auto-pilot version, just started by
+// the player instead of a timer. Every part below
 // (BODY/HEAD/HAND/EYE/MOUTH/ROD/HOOK/LINE_ANCHOR_DEFS) was authored as
 // fixed absolute Figma coordinates for one static pose, so to make the
 // whole assembly movable+flippable as one rigid unit, everything gets
@@ -339,8 +349,9 @@ let hookSwayPhase;
 // Rig movement/fishing state, see updateRig() for the state machine.
 let rigX = RIG_ANCHOR_X0;
 let rigDir = 1; // 1 = facing/travelling right, -1 = facing/travelling left
-let rigTargetX = RIG_ANCHOR_X0;
-let rigState = 'moving'; // 'moving' | 'casting' | 'reeling'
+let rigState = 'idle'; // 'idle' (free to sail with A/D, Space casts) | 'casting' | 'reeling'
+let isMovingNow = false; // true while A or D is actually moving the boat this frame, drives the boat-moving sound
+let touchMoveDir = 0; // -1 / 0 / 1, set by holding the mobile touch-left/touch-right buttons, see setupTouchControls()
 let hookY = HOOK_REST_Y; // stateful, the descent can stop early on a catch, so this isn't a simple lerp between two fixed points
 let caughtFish = null; // {name, h}, at most one fish per cast, still dangling on the way up
 
@@ -373,8 +384,10 @@ function setupSoundToggle() {
   btn.addEventListener('click', () => {
     userStartAudio().then(() => {
       soundOn = !soundOn;
+      // the 🔊/🔇 glyph swaps via CSS ::before keyed off aria-pressed, see
+      // style.css, so no DOM text mutation needed here (that would also
+      // wipe out the icon <img>/<span> markup nested inside the button).
       btn.setAttribute('aria-pressed', String(soundOn));
-      btn.textContent = soundOn ? '🔊' : '🔇';
       if (soundOn) {
         ambientSound.setVolume(0.25);
         ambientSound.loop();
@@ -389,13 +402,13 @@ function setupSoundToggle() {
 }
 
 // Re-triggers boat-moving on its own randomized timer, independent of the
-// draw loop, and only actually plays while the rig is 'moving' -- keeps
-// rescheduling itself either way so it doesn't need restarting on state
-// changes.
+// draw loop, and only actually plays while the player is actually holding
+// A/D -- keeps rescheduling itself either way so it doesn't need
+// restarting on state changes.
 function scheduleBoatSound() {
   const gap = random(BOAT_SOUND_MIN_GAP, BOAT_SOUND_MAX_GAP);
   setTimeout(() => {
-    if (soundOn && rigState === 'moving') {
+    if (soundOn && isMovingNow) {
       boatMovingSound.setVolume(BOAT_SOUND_VOLUME);
       boatMovingSound.play();
     }
@@ -411,6 +424,152 @@ function updateLoopingSoundsForRigState() {
   if (rigState === 'casting') { hookSplashSound.setVolume(0.5); hookSplashSound.play(); }
   if (rigState === 'reeling') { reelSound.setVolume(REEL_SOUND_VOLUME); reelSound.loop(); }
   prevRigState = rigState;
+}
+
+// ==========================================================================
+// HUD -- health bar + catch-progress row, both live in the #hud-overlay DOM
+// layer (see index.html/style.css), not drawn on canvas. Apotek Wide (used
+// for the health label) doesn't reliably rasterize inside a p5 canvas
+// textFont() call the way a real DOM element does, so the whole HUD is DOM,
+// positioned with percentages of the 1920x1080 design space so it tracks
+// the canvas's own CSS scaling exactly.
+// ==========================================================================
+
+let catchSlotEls = [];
+
+function buildCatchProgressSlots() {
+  const row = document.getElementById('catch-progress-row');
+  if (!row) return;
+  row.innerHTML = '';
+  catchSlotEls = [];
+  for (let i = 0; i < WIN_CATCH_TARGET; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'catch-slot catch-slot--empty';
+    const img = document.createElement('img');
+    img.src = 'assets/BackFish3.png';
+    img.alt = '';
+    slot.appendChild(img);
+    row.appendChild(slot);
+    catchSlotEls.push({ el: slot, img });
+  }
+}
+
+// Called every frame from draw(): pushes reefHealth/catchProgress into the
+// DOM HUD, and shows the end screen once gameOutcome is set.
+function syncHud() {
+  const fill = document.getElementById('health-fill');
+  if (fill) fill.style.width = Math.round(reefHealth * 100) + '%';
+
+  for (let i = 0; i < catchSlotEls.length; i++) {
+    const filled = i < catchProgress.length;
+    const { el, img } = catchSlotEls[i];
+    if (filled && el.classList.contains('catch-slot--empty')) {
+      el.classList.remove('catch-slot--empty');
+      el.classList.add('catch-slot--filled');
+      img.src = 'assets/' + catchProgress[i] + '.png'; // Fish1/Fish2/Fish3, matches the species actually caught
+    }
+  }
+
+  if (gameOutcome) showEndScreen();
+}
+
+function showEndScreen() {
+  const screen = document.getElementById('end-screen');
+  if (!screen || !screen.hidden) return; // only trigger once
+  document.getElementById('end-screen-title').textContent =
+    gameOutcome === 'win' ? 'You win!' : 'The reef is gone.';
+  screen.hidden = false;
+}
+
+// ==========================================================================
+// How to Play / About panel
+// ==========================================================================
+function setupInfoPanel() {
+  const infoBtn = document.getElementById('info-toggle');
+  const panel = document.getElementById('info-panel');
+  const backdrop = document.getElementById('panel-backdrop');
+  const okBtn = document.getElementById('panel-ok');
+  const tabs = document.querySelectorAll('.panel-tab');
+  if (!infoBtn || !panel || !backdrop) return;
+
+  function openPanel() {
+    panel.hidden = false;
+    backdrop.hidden = false;
+  }
+  function closePanel() {
+    panel.hidden = true;
+    backdrop.hidden = true;
+  }
+  function selectTab(name) {
+    tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+    document.getElementById('content-howtoplay').hidden = name !== 'howtoplay';
+    document.getElementById('content-about').hidden = name !== 'about';
+  }
+
+  infoBtn.addEventListener('click', openPanel);
+  okBtn.addEventListener('click', closePanel);
+  backdrop.addEventListener('click', closePanel);
+  tabs.forEach(t => t.addEventListener('click', () => selectTab(t.dataset.tab)));
+  selectTab('howtoplay');
+
+  document.getElementById('end-screen-back').addEventListener('click', () => {
+    document.getElementById('end-screen').hidden = true;
+  });
+}
+
+// ==========================================================================
+// Mobile touch controls -- move-left/move-right hold to sail (mirrors A/D),
+// hook button taps to cast (mirrors Space). Only shown once
+// setupResponsiveLayout() below decides this is actually a phone.
+// ==========================================================================
+function setupTouchControls() {
+  const left = document.getElementById('touch-left');
+  const right = document.getElementById('touch-right');
+  const cast = document.getElementById('touch-cast');
+  if (!left || !right || !cast) return;
+
+  function bindHold(btn, dir) {
+    const start = (e) => { e.preventDefault(); touchMoveDir = dir; };
+    const end = (e) => { if (touchMoveDir === dir) touchMoveDir = 0; };
+    btn.addEventListener('pointerdown', start);
+    btn.addEventListener('pointerup', end);
+    btn.addEventListener('pointercancel', end);
+    btn.addEventListener('pointerleave', end);
+  }
+  bindHold(left, -1);
+  bindHold(right, 1);
+  cast.addEventListener('pointerdown', (e) => { e.preventDefault(); tryStartCast(); });
+}
+
+// ==========================================================================
+// Responsive: landscape-only on phones, with a "rotate your phone" prompt
+// instead of portrait play -- same approach Tiêu Dĩnh Ngọc's reeflect.2
+// uses. A CSS rotation of the canvas was NOT used here (tried and rejected
+// in her project first): mobile browsers don't remap touch clientX/clientY
+// under a rotated root element, so taps would land nowhere near the finger.
+// A real physical rotation has no such problem, since the browser's own
+// viewport (and therefore every touch coordinate) is genuinely landscape.
+// ==========================================================================
+function isPhoneTouch() {
+  return window.matchMedia('(max-width: 900px)').matches
+    && window.matchMedia('(pointer: coarse)').matches;
+}
+function isPhonePortrait() {
+  return isPhoneTouch() && window.innerHeight > window.innerWidth;
+}
+
+function setupResponsiveLayout() {
+  function apply() {
+    const phone = isPhoneTouch();
+    const portrait = isPhonePortrait();
+    document.getElementById('rotate-prompt').hidden = !portrait;
+    document.getElementById('sketch-holder').style.visibility = portrait ? 'hidden' : 'visible';
+    document.getElementById('hud-overlay').style.visibility = portrait ? 'hidden' : 'visible';
+    document.getElementById('touch-controls').hidden = !(phone && !portrait);
+  }
+  window.addEventListener('resize', apply);
+  window.addEventListener('orientationchange', apply);
+  apply();
 }
 
 function preload() {
@@ -475,6 +634,10 @@ function setup() {
   buildCaughtFishBufs();
   hookSwayPhase = random(TWO_PI);
   setupSoundToggle();
+  setupInfoPanel();
+  setupTouchControls();
+  setupResponsiveLayout();
+  buildCatchProgressSlots();
 }
 
 // Kept well below the horizon/sea-surface line, mid-to-lower water column,
@@ -872,6 +1035,7 @@ function draw() {
   updateRig();
   updateLoopingSoundsForRigState();
   drawRig();
+  syncHud();
 }
 
 function drawImgDef(img, def) {
@@ -1052,25 +1216,14 @@ function rigRangeFor(dir) {
     : { min: RIG_FRONT_EXTENT, max: CANVAS_W - RIG_BACK_EXTENT };
 }
 
-// Picks a new spot to sail to. dir is decided first, then the target is
-// constrained to (a) keep the rig's whole bounding box on-screen for that
-// facing direction and (b) actually lie on that side of the current
-// position, otherwise the boat would end up moving one way while flipped
-// to visually face the other. If there's no room left in the rolled
-// direction (already at that side's extreme), it just turns around instead.
-function pickRigTarget() {
-  let dir = random() < 0.5 ? 1 : -1;
-  let range = rigRangeFor(dir);
-  let lo = dir === 1 ? Math.max(range.min, rigX) : range.min;
-  let hi = dir === 1 ? range.max : Math.min(range.max, rigX);
-  if (lo >= hi) {
-    dir *= -1;
-    range = rigRangeFor(dir);
-    lo = dir === 1 ? Math.max(range.min, rigX) : range.min;
-    hi = dir === 1 ? range.max : Math.min(range.max, rigX);
-  }
-  rigTargetX = random(lo, hi);
+// Moves the rig one frame's worth in dir (-1 left / +1 right), clamped to
+// keep the whole rig on-screen for that facing direction, same bound
+// rigRangeFor() always applied. Flips rigDir to match so the sprite faces
+// the way it's actually sailing.
+function moveRig(dir) {
   rigDir = dir;
+  const range = rigRangeFor(dir);
+  rigX = constrain(rigX + dir * RIG_MOVE_SPEED, range.min, range.max);
 }
 
 // Checks every live fish against the hook's current world position and
@@ -1095,21 +1248,25 @@ function tryCatchAtHook() {
       juvenileLostSound.setVolume(FISH_LOST_VOLUME);
       juvenileLostSound.play();
     }
+    if (!gameOutcome) {
+      catchProgress.push(fish.name);
+      if (reefHealth <= 0) gameOutcome = 'lose';
+      else if (catchProgress.length >= WIN_CATCH_TARGET) gameOutcome = 'win';
+    }
     return;
   }
 }
 
 function updateRig() {
-  if (rigState === 'moving') {
-    const delta = rigTargetX - rigX;
-    if (Math.abs(delta) <= RIG_MOVE_SPEED) {
-      rigX = rigTargetX;
-      rigState = 'casting';
-      hookY = HOOK_REST_Y;
-      caughtFish = null;
-    } else {
-      rigX += Math.sign(delta) * RIG_MOVE_SPEED;
-    }
+  if (rigState === 'idle') {
+    // free to sail while no hook is out, A/D (or the touch-left/touch-right
+    // buttons, see touchMoveDir below) move, Space/touch-cast drops the
+    // hook and hands off to the automatic casting/reeling. Locked once the
+    // round has a winner/loser, see gameOutcome above.
+    isMovingNow = false;
+    if (gameOutcome) return;
+    if (keyIsDown(65) || touchMoveDir === -1) { moveRig(-1); isMovingNow = true; } // A
+    else if (keyIsDown(68) || touchMoveDir === 1) { moveRig(1); isMovingNow = true; } // D
   } else if (rigState === 'casting') {
     hookY = Math.min(hookY + HOOK_CAST_SPEED, HOOK_MAX_DEPTH_Y);
     tryCatchAtHook();
@@ -1120,10 +1277,27 @@ function updateRig() {
     hookY = Math.max(hookY - HOOK_REEL_SPEED, HOOK_REST_Y);
     tryCatchAtHook();
     if (hookY <= HOOK_REST_Y) {
-      rigState = 'moving';
+      rigState = 'idle';
       caughtFish = null;
-      pickRigTarget();
     }
+  }
+}
+
+// Drops the hook from wherever the boat currently is. Shared by Space
+// (keyPressed below) and the touch-cast button. Only fires while idle, the
+// boat can't move (moveRig only runs in 'idle') and can't cast again until
+// the current cast/reel finishes, or once the round already has an outcome.
+function tryStartCast() {
+  if (rigState !== 'idle' || gameOutcome) return;
+  rigState = 'casting';
+  hookY = HOOK_REST_Y;
+  caughtFish = null;
+}
+
+function keyPressed() {
+  if (key === ' ' || keyCode === 32) {
+    tryStartCast();
+    return false; // stop Space from also scrolling the page
   }
 }
 

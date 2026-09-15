@@ -1,0 +1,19 @@
+<svg width="210" height="210" viewBox="0 0 210 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="210" height="210" fill="#1E1E1E"/>
+<g id="Frame for element">
+<rect width="4204" height="2166" transform="translate(-2516 -923.592)" fill="white"/>
+<g id="Mobile example layout for onscreen button">
+<rect width="1920" height="1080" transform="translate(-337 -762.592)" fill="white"/>
+<g id="Move right" opacity="0.5">
+<circle id="Ellipse 28" cx="104.704" cy="104.704" r="104.704" fill="url(#paint0_linear_0_1)"/>
+<path id="Polygon 2" d="M161.269 104.102L75.5195 153.61L75.5195 54.5951L161.269 104.102Z" fill="#042549"/>
+</g>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_1" x1="104.704" y1="0" x2="104.704" y2="209.408" gradientUnits="userSpaceOnUse">
+<stop stop-color="#C9F2EE"/>
+<stop offset="1" stop-color="#EBFBE9"/>
+</linearGradient>
+</defs>
+</svg>
