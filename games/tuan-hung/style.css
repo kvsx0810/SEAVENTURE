@@ -247,10 +247,9 @@ html, body {
   /* width/height are a FIXED fraction of the canvas's own box (same
      min(100vw,100vh*16/9) formula #hud-overlay uses), not the raw
      viewport, so the panel is the same relative size versus the game
-     image at every screen size. 1144/1920 = 59.6% width (10% wider
-     again from 1040px per Hung's request): 59.5833vw and 59.5833% of
-     177.7778vh = 105.9259vh */
-  width: min(59.5833vw, 105.9259vh, 1400px);
+     image at every screen size. 65% width per Hung's request: 65vw and
+     65% of 177.7778vh = 115.5556vh */
+  width: min(65vw, 115.5556vh, 1400px);
   max-height: min(85vh, 47.8125vw);
   display: flex;
   flex-direction: column;
@@ -352,30 +351,7 @@ html, body {
   flex-wrap: wrap;
 }
 
-.howto-row--mobile {
-  display: none;
-  /* the desktop row centers + wraps as a whole unit, which is fine for
-     short "A / D : ..." text -- but the mobile row's explanation text is
-     much longer, so wrapping used to push the ENTIRE text (icon
-     included) onto its own line below the icon instead of just flowing
-     the text next to it. Pin the icon(s) to the left and let only the
-     text wrap in the remaining space instead. */
-  justify-content: flex-start;
-  align-items: flex-start;
-  flex-wrap: nowrap;
-  text-align: left;
-}
-
-.howto-row--mobile .howto-icon,
-.howto-row--mobile .keycap-sep {
-  flex-shrink: 0;
-}
-
-.howto-row--mobile > span:last-child {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: 0.85em;
-}
+.howto-row--mobile { display: none; }
 
 .howto-icon {
   width: clamp(24px, 5vh, 40px);
