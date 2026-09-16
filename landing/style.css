@@ -129,7 +129,7 @@ section[id] {
      background-clip:text clips part of the slanted glyphs at the edges.
      Same reason the rest of SEAVENTURE never sets italic on this font. */
   font-size: clamp(22px, 3.2vw, 42px);
-  background: linear-gradient(-85deg, var(--logo-grad-1) 21%, var(--logo-grad-2) 118%);
+  background: linear-gradient(90deg, #62c9f6, #b8e7fb);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -256,21 +256,21 @@ section[id] {
   display: block;
 }
 
+/* Sized down and pulled close to the true section edges (see per-section
+   rules below) -- text columns are centered with their own max-width, so
+   at common laptop widths there's only a slim margin outside that column
+   for decorations to live in without sitting on top of the text. */
 .deco-bubble {
-  width: clamp(90px, 11vw, 160px);
+  width: clamp(56px, 7vw, 96px);
   aspect-ratio: 207 / 204;
 }
 
-/* per the master bubble-cluster export (all bubbles shift-selected in
-   Figma): every bubble spot is actually TWO overlapping instances of the
-   same cluster symbol, a big one plus a ~42%-scale mini one right next
-   to it -- never a single bubble on its own. */
 .deco-bubble--mini {
-  width: clamp(38px, 4.6vw, 68px);
+  width: clamp(26px, 3.2vw, 42px);
 }
 
 .deco-fish {
-  width: clamp(70px, 8vw, 120px);
+  width: clamp(46px, 5.5vw, 76px);
   aspect-ratio: 176 / 122;
 }
 
@@ -289,9 +289,9 @@ section[id] {
 
 /* per the sliced Figma reference (slide 2): bubble + fish cluster
    bottom-left. Light rays removed for now (see chat). */
-.intro .deco-bubble { bottom: 2%; left: 6%; }
-.intro .deco-bubble--intro-mini { bottom: 9%; left: 2%; }
-.intro .deco-fish--2 { aspect-ratio: 125 / 124; width: clamp(60px, 7vw, 100px); bottom: 1%; left: 18%; transform: rotate(8deg); }
+.intro .deco-bubble { bottom: 2%; left: 0%; }
+.intro .deco-bubble--intro-mini { bottom: 9%; left: 7%; }
+.intro .deco-fish--2 { aspect-ratio: 125 / 124; width: clamp(40px, 5vw, 70px); bottom: 2%; left: 22%; transform: rotate(8deg); }
 
 .intro-text {
   font-family: "Alata", sans-serif;
@@ -351,14 +351,20 @@ section[id] {
 /* Spread across all 4 corners, one pair per corner, well clear of the
    vertically-centered title+description column and never overlapping
    each other -- was all bunched into just two crowded corners before. */
-.sdg .deco-bubble--sdg-tl { top: 2%; left: 2%; }
-.sdg .deco-bubble--sdg-tl-mini { top: 9%; left: 10%; }
-.sdg .deco-fish--sdg-a { top: 3%; right: 4%; left: auto; transform: rotate(-18deg); }
-.sdg .deco-fish--sdg-b { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); top: 15%; right: 16%; left: auto; transform: rotate(10deg) scaleX(-1); }
-.sdg .deco-fish--sdg-e { aspect-ratio: 203 / 263; width: clamp(60px, 7vw, 110px); bottom: 4%; left: 3%; transform: rotate(-6deg); }
-.sdg .deco-fish--sdg-f { aspect-ratio: 125 / 124; width: clamp(55px, 6.5vw, 95px); bottom: 16%; left: 15%; transform: rotate(4deg); }
-.sdg .deco-bubble--sdg-br { bottom: 2%; right: 3%; }
-.sdg .deco-bubble--sdg-br-mini { bottom: 9%; right: 11%; }
+/* .sdg is itself the max-width:1100px column (it's the positioning
+   container for these absolutely-positioned decorations, same box the
+   title/desc text lives in) -- 0%/100% is the text's own edge, not the
+   page margin. Negative offsets push the decorations actually outside
+   that column into the surrounding margin instead of just touching the
+   text's edge. */
+.sdg .deco-bubble--sdg-tl { top: 1%; left: -8%; }
+.sdg .deco-bubble--sdg-tl-mini { top: 8%; left: -4%; }
+.sdg .deco-fish--sdg-a { top: 0%; right: -8%; left: auto; transform: rotate(-18deg); }
+.sdg .deco-fish--sdg-b { aspect-ratio: 96 / 36; width: clamp(34px, 4vw, 56px); top: 11%; right: -4%; left: auto; transform: rotate(10deg) scaleX(-1); }
+.sdg .deco-fish--sdg-e { aspect-ratio: 203 / 263; width: clamp(40px, 5vw, 74px); bottom: 3%; left: -8%; transform: rotate(-6deg); }
+.sdg .deco-fish--sdg-f { aspect-ratio: 125 / 124; width: clamp(36px, 4.5vw, 64px); bottom: 12%; left: -4%; transform: rotate(4deg); }
+.sdg .deco-bubble--sdg-br { bottom: 1%; right: -8%; }
+.sdg .deco-bubble--sdg-br-mini { bottom: 8%; right: -4%; }
 
 /* -------------------- quote + CTA -------------------- */
 /* Figma reference (see chat): the quote/author are left/right-aligned
@@ -380,12 +386,12 @@ section[id] {
 }
 
 /* per the master export: a bubble pair (big + mini) top-left */
-.quote .deco-bubble--quote { top: 2%; left: 3%; }
-.quote .deco-bubble--quote-mini { top: 9%; left: 12%; }
+.quote .deco-bubble--quote { top: 1%; left: 0%; }
+.quote .deco-bubble--quote-mini { top: 8%; left: 7%; }
 /* Right side, opposite the left-aligned text column and the bubble
    cluster -- clear of both. */
-.quote .deco-fish--quote-a { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); top: 4%; right: 4%; transform: rotate(8deg) scaleX(-1); }
-.quote .deco-fish--quote-b { aspect-ratio: 96 / 36; width: clamp(40px, 5vw, 66px); bottom: 6%; right: 10%; transform: rotate(-6deg); }
+.quote .deco-fish--quote-a { aspect-ratio: 96 / 36; width: clamp(34px, 4vw, 56px); top: 2%; right: 0%; transform: rotate(8deg) scaleX(-1); }
+.quote .deco-fish--quote-b { aspect-ratio: 96 / 36; width: clamp(30px, 3.6vw, 48px); bottom: 3%; right: 6%; transform: rotate(-6deg); }
 
 .quote-text {
   font-family: "Inter", sans-serif;
@@ -417,8 +423,8 @@ section[id] {
 }
 
 /* Tucked into the corners, clear of the centered hands+CTA text. */
-.cta-section .deco-fish--cta-a { aspect-ratio: 96 / 36; width: clamp(46px, 5.5vw, 74px); top: 5%; left: 4%; transform: rotate(-10deg); }
-.cta-section .deco-fish--cta-b { aspect-ratio: 96 / 36; width: clamp(40px, 5vw, 66px); bottom: 6%; right: 4%; transform: rotate(8deg) scaleX(-1); }
+.cta-section .deco-fish--cta-a { aspect-ratio: 96 / 36; width: clamp(34px, 4vw, 56px); top: 3%; left: 1%; transform: rotate(-10deg); }
+.cta-section .deco-fish--cta-b { aspect-ratio: 96 / 36; width: clamp(30px, 3.6vw, 48px); bottom: 4%; right: 1%; transform: rotate(8deg) scaleX(-1); }
 
 /* a second, fainter wave behind the hands for a bit more background
    rhythm between the flat sections above/below it */
@@ -524,9 +530,9 @@ section[id] {
   color: transparent;
 }
 
-.explainer .deco-bubble--explainer { bottom: 6%; right: 4%; }
-.explainer .deco-bubble--explainer-mini { bottom: 13%; right: 13%; }
-.explainer .deco-fish { top: 10%; left: 4%; transform: scaleX(-1); }
+.explainer .deco-bubble--explainer { bottom: 2%; right: 0%; }
+.explainer .deco-bubble--explainer-mini { bottom: 9%; right: 7%; }
+.explainer .deco-fish { aspect-ratio: 176 / 122; width: clamp(36px, 4.5vw, 60px); top: 2%; left: 0%; transform: scaleX(-1); }
 
 .explainer-text .hl {
   color: var(--explainer-highlight);
@@ -555,8 +561,12 @@ section[id] {
 
 /* per the master export: the last fish pair on the page sits low,
    left-hand side -- near the machine rather than the copy column */
-.games .deco-fish--games-a { bottom: 4%; left: 2%; transform: rotate(-10deg); }
-.games .deco-fish--games-b { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); bottom: 14%; left: 10%; transform: rotate(6deg) scaleX(-1); }
+/* Both pinned right at the very bottom edge (not spread up the section)
+   -- on narrow viewports .games stacks machine-then-text and grows very
+   tall, so any larger bottom % here would land mid-way down and cut
+   through the desc paragraph instead of staying clear beneath it. */
+.games .deco-fish--games-a { aspect-ratio: 125 / 124; width: clamp(36px, 4.5vw, 60px); bottom: 1%; left: 0%; transform: rotate(-10deg); }
+.games .deco-fish--games-b { aspect-ratio: 96 / 36; width: clamp(30px, 3.6vw, 48px); bottom: 1%; left: 15%; transform: rotate(6deg) scaleX(-1); }
 
 .games-machine {
   width: clamp(220px, 28vw, 420px);
@@ -566,7 +576,7 @@ section[id] {
 
 .games-copy {
   align-self: center;
-  max-width: 780px;
+  max-width: 620px;
   text-align: center;
 }
 
@@ -574,7 +584,7 @@ section[id] {
   font-family: "Inter", sans-serif;
   font-weight: 900;
   letter-spacing: -0.02em;
-  font-size: clamp(24px, 5vw, 56px);
+  font-size: clamp(20px, 3.4vw, 38px);
   line-height: 1.25;
   margin: 0 0 16px;
   background: linear-gradient(-44deg, var(--explainer-grad-1) 12%, var(--explainer-grad-2) 88%);
@@ -589,7 +599,7 @@ section[id] {
 
 .games-desc {
   font-family: "Alata", sans-serif;
-  font-size: var(--body-text-size);
+  font-size: clamp(13px, 1.7vw, 20px);
   line-height: 1.6;
   color: var(--quote-color);
   opacity: 0.85;
@@ -750,7 +760,7 @@ section[id] {
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
   font-size: clamp(16px, 2.4vw, 30px);
-  background: linear-gradient(135deg, var(--footer-brand-1), var(--footer-brand-2));
+  background: linear-gradient(90deg, #62c9f6, #b8e7fb);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
