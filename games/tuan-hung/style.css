@@ -244,14 +244,16 @@ html, body {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 41;
-  /* width/height bound to the CANVAS's own box (same min(100vw,100vh*16/9)
-     formula #hud-overlay uses), not the raw viewport -- plain 90vw/85vh
-     overshoot the canvas on any screen that isn't ~16:9, e.g. a landscape
-     phone, where the 16:9 game image itself is letterboxed narrower than
-     the full width, but the panel didn't shrink to match, so it ended up
-     wider than the game it was floating over instead of matching its
-     proportions the way it does on a 1920x1080 desktop */
-  width: min(90vw, 160vh, 800px);
+  /* width/height are a FIXED fraction of the canvas's own box (same
+     min(100vw,100vh*16/9) formula #hud-overlay uses), not the raw
+     viewport -- the first attempt at this bound the box correctly but
+     kept the old 90% figure, which is nowhere near what 800px actually
+     was as a fraction of a 1920-wide canvas (~41.7%), so the panel
+     still looked proportionally bigger on a letterboxed phone screen
+     than it does on desktop. 800/1920 = 41.67% width, so the panel is
+     the same relative size versus the game image at every screen size:
+     41.6667vw and 41.6667% of 177.7778vh = 74.0741vh */
+  width: min(41.6667vw, 74.0741vh, 1400px);
   max-height: min(85vh, 47.8125vw);
   display: flex;
   flex-direction: column;
