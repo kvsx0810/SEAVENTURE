@@ -50,15 +50,6 @@ html, body {
   pointer-events: none; /* children opt back in individually */
   z-index: 10;
   font-family: "Alata", sans-serif;
-  /* whole HUD (buttons, health bar, catch-progress row, touch controls)
-     slides up + fades in together once on page load -- one animation on
-     the shared parent, since every child is positioned relative to it */
-  animation: hudSlideFadeIn 0.6s ease-out;
-}
-
-@keyframes hudSlideFadeIn {
-  0% { opacity: 0; transform: translate(-50%, -50%) translateY(60px); }
-  100% { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
 }
 
 #hud-overlay button {
@@ -155,11 +146,11 @@ html, body {
 }
 
 @keyframes healthShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-4px); }
-  40% { transform: translateX(4px); }
-  60% { transform: translateX(-3px); }
-  80% { transform: translateX(3px); }
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-4px, 2px); }
+  40% { transform: translate(4px, -2px); }
+  60% { transform: translate(-3px, 2px); }
+  80% { transform: translate(3px, -1px); }
 }
 
 #health-track.pulse {
@@ -327,16 +318,17 @@ html, body {
   background: linear-gradient(180deg, #042549, #063e79);
   font-family: "Alata", sans-serif;
   color: #fff;
-  /* fades/scales in together with the backdrop above, see showOverlay()/
-     hideOverlay() in sketch.js */
+  /* slides up + fades in from below every time it opens/closes (see
+     showOverlay()/hideOverlay() in sketch.js, called from openPanel()/
+     closePanel()), not just on page load */
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.94);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translate(-50%, -50%) translateY(60px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 #info-panel.is-open {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+  transform: translate(-50%, -50%) translateY(0);
 }
 
 .panel-tabs {
