@@ -21,6 +21,12 @@
   --hero-grad-2: #076690;
   --wave-1-color: #11aef3;
   --wave-2-color: #bbe8fb;
+  --intro-grad-1: #065c83;
+  --intro-grad-2: #03334e;
+  --sdg-color: #021427;
+  --body-grad-1: #076792;
+  --body-grad-2: #03263f;
+  --body-highlight: #021427;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -35,6 +41,12 @@
     --hero-grad-2: #bbe8fb;
     --wave-1-color: #021427;
     --wave-2-color: #0a69cc;
+    --intro-grad-1: #bbe8fb;
+    --intro-grad-2: #0a69cc;
+    --sdg-color: #bbe8fb;
+    --body-grad-1: #89bbdd;
+    --body-grad-2: #3d78af;
+    --body-highlight: #bbe8fb;
   }
 }
 
@@ -188,6 +200,57 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* -------------------- team intro -------------------- */
+.intro {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(30px, 6vw, 80px) 24px;
+  text-align: center;
+}
+
+.intro-text {
+  font-family: "Alata", sans-serif;
+  font-size: clamp(16px, 2.2vw, 26px);
+  line-height: 1.7;
+  margin: 0;
+  background: linear-gradient(113deg, var(--intro-grad-1) 10%, var(--intro-grad-2) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* -------------------- SDG 14 -------------------- */
+.sdg {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(20px, 6vw, 60px) 24px clamp(40px, 8vw, 100px);
+  text-align: center;
+}
+
+.sdg-title {
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+  font-size: clamp(32px, 7vw, 90px);
+  line-height: 1.15;
+  margin: 0 0 clamp(20px, 4vw, 50px);
+  color: var(--sdg-color);
+}
+
+.sdg-desc {
+  font-family: "Alata", sans-serif;
+  font-size: clamp(15px, 2vw, 24px);
+  line-height: 1.7;
+  margin: 0;
+  background: linear-gradient(110deg, var(--body-grad-1) 10%, var(--body-grad-2) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sdg-desc .hl {
+  color: var(--body-highlight);
 }
 
 @media (max-width: 640px) {
