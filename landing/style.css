@@ -26,11 +26,11 @@
   --page-grad-top: #bbe8fb;
   --page-grad-bottom: #11aef3;
   --header-bg: #ebfbe9;
-  --logo-grad-1: #021427;
-  --logo-grad-2: #07488d;
   --nav-color: #021427;
-  --hero-grad-1: #03263e;
-  --hero-grad-2: #076690;
+  /* shared by brand-name (header), hero-title and the footer's N5CC
+     wordmark -- all three read the same gradient */
+  --brand-grad-1: #03263e;
+  --brand-grad-2: #076690;
   --wave-1-color: #11aef3;
   --wave-2-color: #bbe8fb;
   --intro-grad-1: #065c83;
@@ -45,8 +45,8 @@
   --explainer-highlight: #021427;
   --footer-link-1: #065c83;
   --footer-link-2: #03334e;
-  --footer-brand-1: #021427;
-  --footer-brand-2: #07488d;
+  --footer-rule-color: rgba(3, 38, 62, 0.6);
+  --start-btn-text: #eaf7ff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -54,11 +54,9 @@
     --page-grad-top: #063e79;
     --page-grad-bottom: #021427;
     --header-bg: #021427;
-    --logo-grad-1: #24629f;
-    --logo-grad-2: #9ccce8;
     --nav-color: #98c9e6;
-    --hero-grad-1: #07488d;
-    --hero-grad-2: #bbe8fb;
+    --brand-grad-1: #62c9f6;
+    --brand-grad-2: #b8e7fb;
     --wave-1-color: #021427;
     --wave-2-color: #0a69cc;
     --intro-grad-1: #bbe8fb;
@@ -73,8 +71,8 @@
     --explainer-highlight: #bbe8fb;
     --footer-link-1: #bbe8fb;
     --footer-link-2: #0a69cc;
-    --footer-brand-1: #bbe8fb;
-    --footer-brand-2: #2663a0;
+    --footer-rule-color: rgba(255, 255, 255, 0.6);
+    --start-btn-text: #021427;
   }
 }
 
@@ -84,11 +82,9 @@
   --page-grad-top: #063e79;
   --page-grad-bottom: #021427;
   --header-bg: #021427;
-  --logo-grad-1: #24629f;
-  --logo-grad-2: #9ccce8;
   --nav-color: #98c9e6;
-  --hero-grad-1: #07488d;
-  --hero-grad-2: #bbe8fb;
+  --brand-grad-1: #62c9f6;
+  --brand-grad-2: #b8e7fb;
   --wave-1-color: #021427;
   --wave-2-color: #0a69cc;
   --intro-grad-1: #bbe8fb;
@@ -103,8 +99,8 @@
   --explainer-highlight: #bbe8fb;
   --footer-link-1: #bbe8fb;
   --footer-link-2: #0a69cc;
-  --footer-brand-1: #bbe8fb;
-  --footer-brand-2: #2663a0;
+  --footer-rule-color: rgba(255, 255, 255, 0.6);
+  --start-btn-text: #021427;
 }
 
 body {
@@ -159,7 +155,7 @@ section[id] {
      background-clip:text clips part of the slanted glyphs at the edges.
      Same reason the rest of SEAVENTURE never sets italic on this font. */
   font-size: clamp(22px, 3.2vw, 42px);
-  background: linear-gradient(90deg, #62c9f6, #b8e7fb);
+  background: linear-gradient(90deg, var(--brand-grad-1), var(--brand-grad-2));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -276,7 +272,7 @@ section[id] {
   font-size: clamp(40px, 10.5vw, 190px);
   line-height: 0.95;
   margin: 0;
-  background: linear-gradient(90deg, #62c9f6, #b8e7fb);
+  background: linear-gradient(90deg, var(--brand-grad-1), var(--brand-grad-2));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -510,14 +506,14 @@ section[id] {
 .quote-hand--upper {
   top: 0;
   right: 0;
-  width: 64%;
+  width: 74%;
   transform: translate(8%, -8%);
 }
 
 .quote-hand--bottom {
   bottom: 0;
   left: 0;
-  width: 58%;
+  width: 67%;
   transform: translate(-8%, 8%);
 }
 
@@ -657,7 +653,7 @@ section[id] {
   font-weight: 900;
   letter-spacing: -0.02em;
   font-size: clamp(20px, 3.6vw, 42px);
-  color: #021427;
+  color: var(--start-btn-text);
   text-decoration: none;
   padding: 0.5em 1.6em;
   border-radius: 999px;
@@ -709,7 +705,7 @@ section[id] {
   position: absolute;
   bottom: 0;
   z-index: 0;
-  height: clamp(90px, 12vw, 200px);
+  height: clamp(270px, 36vw, 600px);
   width: auto;
   pointer-events: none;
 }
@@ -734,7 +730,7 @@ section[id] {
   max-width: 1200px;
   margin: 0 auto;
   padding-bottom: clamp(24px, 5vw, 50px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid var(--footer-rule-color);
   text-align: center;
 }
 
@@ -818,7 +814,7 @@ section[id] {
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
   font-size: clamp(16px, 2.4vw, 30px);
-  background: linear-gradient(90deg, #62c9f6, #b8e7fb);
+  background: linear-gradient(90deg, var(--brand-grad-1), var(--brand-grad-2));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
