@@ -241,9 +241,9 @@ section[id] {
 }
 
 /* -------------------- small reusable decorations -------------------- */
-/* Self-authored, not exported from Figma -- per Hung's call these are
-   real inline <svg> (shared gradient/symbol/pattern defs are the
-   hidden <svg> at the top of body), not a CSS mask-image trick. */
+/* Real inline <svg>, paths from Hung's actual Figma exports (see the
+   <symbol> defs at the top of body) -- fill/opacity are baked into
+   each path already, no CSS color/opacity needed on top. */
 .deco {
   position: absolute;
   pointer-events: none;
@@ -251,11 +251,14 @@ section[id] {
   display: block;
 }
 
+.deco-bubble {
+  width: clamp(90px, 11vw, 160px);
+  aspect-ratio: 207 / 204;
+}
+
 .deco-fish {
-  width: 52px;
-  height: 26px;
-  color: var(--quote-color);
-  opacity: 0.16;
+  width: clamp(70px, 8vw, 120px);
+  aspect-ratio: 176 / 122;
 }
 
 /* -------------------- team intro -------------------- */
@@ -272,9 +275,8 @@ section[id] {
   text-align: center;
 }
 
-.intro .deco-bubble:nth-of-type(1) { width: 70px; height: 70px; top: 12%; left: 6%; }
-.intro .deco-bubble:nth-of-type(2) { width: 34px; height: 34px; top: 22%; left: 12%; }
-.intro .deco-fish { top: 70%; right: 8%; transform: rotate(-6deg) scaleX(-1); }
+.intro .deco-bubble { top: 10%; left: 5%; }
+.intro .deco-fish--2 { aspect-ratio: 125 / 124; width: clamp(60px, 7vw, 100px); top: 68%; right: 8%; transform: rotate(-6deg) scaleX(-1); }
 
 .intro-text {
   font-family: "Alata", sans-serif;
@@ -301,18 +303,16 @@ section[id] {
   text-align: center;
 }
 
-/* self-authored light-ray backdrop, not exported from Figma -- real
-   <svg> (a repeating <pattern> of thin rects, defined once in the
-   hidden defs block at the top of body), sitting behind the heading/
-   desc (z-index:-1) */
+/* light-ray backdrop (Hung's real Figma paths, see #deco-light-rays),
+   sitting behind the heading/desc (z-index:-1). The 4 beam shapes are
+   already diagonal in the source paths, so no extra CSS rotation. */
 .sdg-rays {
   position: absolute;
   z-index: -1;
-  top: -40%;
-  left: -15%;
-  width: 75%;
-  height: 180%;
-  transform: rotate(-8deg);
+  top: -10%;
+  left: -12%;
+  width: 85%;
+  aspect-ratio: 1920 / 1969;
   -webkit-mask-image: linear-gradient(180deg, black, transparent 85%);
   mask-image: linear-gradient(180deg, black, transparent 85%);
   pointer-events: none;
@@ -460,8 +460,8 @@ section[id] {
   color: transparent;
 }
 
-.explainer .deco-bubble { width: 90px; height: 90px; bottom: 8%; right: 4%; }
-.explainer .deco-fish { top: 15%; left: 4%; }
+.explainer .deco-bubble--explainer { bottom: 6%; right: 4%; }
+.explainer .deco-fish { top: 10%; left: 4%; transform: scaleX(-1); }
 
 .explainer .hl {
   color: var(--explainer-highlight);
