@@ -50,11 +50,15 @@ body {
   top: 0;
   z-index: 100;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  height: 104px;
-  padding: 0 clamp(16px, 4vw, 60px);
+  /* min-height, not height -- if brand+nav ever can't both fit on one
+     row, the row should wrap and the bar should grow to fit it, never
+     clip/hide a nav item under a hard-capped box */
+  min-height: 104px;
+  padding: 12px clamp(16px, 4vw, 60px);
   background: var(--header-bg);
 }
 
