@@ -69,6 +69,15 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+#sound-toggle:hover, #info-toggle:hover {
+  background: rgba(187, 232, 251, 0.8);
+}
+
+#sound-toggle:active, #info-toggle:active {
+  transform: scale(0.9);
 }
 
 #sound-toggle { left: 2.03%; }   /* 39px / 1920 */
@@ -127,6 +136,19 @@ html, body {
   transition: width 0.15s ease-out;
 }
 
+/* brief "ouch" ring flash, triggered from JS (pulseHealthBar() in
+   sketch.js) whenever a catch costs more than the average penalty --
+   i.e. a smaller, more costly fish */
+@keyframes healthPulse {
+  0% { box-shadow: 0 0 0 0 rgba(237, 132, 149, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(237, 132, 149, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(237, 132, 149, 0); }
+}
+
+#health-track.pulse {
+  animation: healthPulse 0.5s ease-out;
+}
+
 /* -------------------- catch progress row -------------------- */
 #catch-progress-row {
   position: absolute;
@@ -171,6 +193,17 @@ html, body {
 
 .catch-slot--filled {
   opacity: 1;
+  /* plays once, right when the class is added in syncHud() -- a plain
+     transform (not a transition) since the slot's base transform is
+     already rotate(-45deg), and keyframes can carry that rotation
+     through every step of the pop */
+  animation: catchSlotPop 0.35s ease;
+}
+
+@keyframes catchSlotPop {
+  0% { transform: rotate(-45deg) scale(0.5); }
+  60% { transform: rotate(-45deg) scale(1.2); }
+  100% { transform: rotate(-45deg) scale(1); }
 }
 
 /* -------------------- mobile touch controls -------------------- */
@@ -186,6 +219,11 @@ html, body {
   background: none;
   padding: 0;
   cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+#touch-left:active, #touch-right:active, #touch-cast:active {
+  transform: scale(0.88);
 }
 
 #touch-left, #touch-right { width: 10.6%; }
@@ -236,13 +274,21 @@ html, body {
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 40;
+  /* faded in/out from JS (showOverlay/hideOverlay in sketch.js), which
+     toggles .is-open a frame after removing [hidden] -- [hidden] itself
+     can't transition since display:none skips straight past it */
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+#panel-backdrop.is-open {
+  opacity: 1;
 }
 
 #info-panel {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   z-index: 41;
   /* original desktop sizing -- untouched since Hung confirmed it looked
      right. All the width tweaking after that was only ever meant for the
@@ -264,6 +310,16 @@ html, body {
   background: linear-gradient(180deg, #042549, #063e79);
   font-family: "Alata", sans-serif;
   color: #fff;
+  /* fades/scales in together with the backdrop above, see showOverlay()/
+     hideOverlay() in sketch.js */
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.94);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#info-panel.is-open {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .panel-tabs {
@@ -282,11 +338,16 @@ html, body {
   font-size: clamp(13px, 3vh, 23px);
   color: #fff;
   cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .panel-tab[aria-selected="true"] {
   color: #8fec83;
   border-bottom-color: #8fec83;
+}
+
+.panel-tab:not([aria-selected="true"]):hover {
+  color: #bff4b8;
 }
 
 .panel-content {
@@ -403,6 +464,11 @@ html, body {
   font-size: clamp(13px, 2.6vh, 21px);
   color: #042549;
   cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+}
+
+.panel-ok:hover {
+  filter: brightness(1.05);
 }
 
 .panel-ok:active {
@@ -424,6 +490,16 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 24px;
+  /* fades/scales in from showEndScreen() via showOverlay(), same pattern
+     as the info panel */
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#end-screen.is-open {
+  opacity: 1;
+  transform: scale(1);
 }
 
 #end-screen-title {
@@ -439,11 +515,22 @@ html, body {
   border: none;
   border-radius: 10px;
   background: linear-gradient(90deg, #e3fae0, #bff4b8);
+  box-shadow: 0 4px 0 #8fec83;
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
   font-size: 22px;
   color: #042549;
   cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.15s ease;
+}
+
+#end-screen-back:hover {
+  filter: brightness(1.05);
+}
+
+#end-screen-back:active {
+  box-shadow: 0 1px 0 #8fec83;
+  transform: translateY(3px);
 }
 
 /* ==========================================================================

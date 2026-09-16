@@ -473,12 +473,36 @@ function syncHud() {
   if (gameOutcome) showEndScreen();
 }
 
+// Reveals/hides an overlay with a fade (see the matching .is-open CSS on
+// #panel-backdrop, #info-panel and #end-screen) instead of an instant
+// [hidden] toggle. [hidden] forces display:none, which can't transition,
+// so it's still used to fully remove the element from layout/hit-testing
+// once hidden -- just not at the same instant the fade starts/ends.
+function showOverlay(el) {
+  if (!el) return;
+  // cancel a pending hideOverlay() from a rapid close-then-reopen, or it
+  // would still fire and yank the panel back to hidden mid-fade-in
+  if (el._hideTimeout) { clearTimeout(el._hideTimeout); el._hideTimeout = null; }
+  el.hidden = false;
+  // two rAFs: the first lets the browser paint the "just unhidden, still
+  // at the closed/faded-out state" frame; only then does adding
+  // .is-open on the next frame actually trigger a transition instead of
+  // the browser collapsing both style changes into one paint
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-open')));
+}
+
+function hideOverlay(el, duration = 200) {
+  if (!el) return;
+  el.classList.remove('is-open');
+  el._hideTimeout = setTimeout(() => { el.hidden = true; el._hideTimeout = null; }, duration);
+}
+
 function showEndScreen() {
   const screen = document.getElementById('end-screen');
   if (!screen || !screen.hidden) return; // only trigger once
   document.getElementById('end-screen-title').textContent =
     gameOutcome === 'win' ? 'You win!' : 'The reef is gone.';
-  screen.hidden = false;
+  showOverlay(screen);
 }
 
 // Full reset for a new round: game state, the hero fish population, the rig
@@ -499,7 +523,7 @@ function restartGame() {
     el.classList.add('catch-slot--empty');
     img.src = 'assets/BackFish3.png';
   });
-  document.getElementById('end-screen').hidden = true;
+  hideOverlay(document.getElementById('end-screen'), 250);
 }
 
 // ==========================================================================
@@ -514,12 +538,12 @@ function setupInfoPanel() {
   if (!infoBtn || !panel || !backdrop) return;
 
   function openPanel() {
-    panel.hidden = false;
-    backdrop.hidden = false;
+    showOverlay(panel);
+    showOverlay(backdrop);
   }
   function closePanel() {
-    panel.hidden = true;
-    backdrop.hidden = true;
+    hideOverlay(panel);
+    hideOverlay(backdrop);
   }
   function selectTab(name) {
     tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
@@ -929,6 +953,17 @@ function applyCatchHealthPenalty(caughtH) {
   const smallness = constrain(map(caughtH, HERO_FISH_SIZE_MIN, HERO_FISH_SIZE_MAX, 1, 0), 0, 1);
   const penalty = lerp(REEF_HEALTH_PENALTY_LARGE, REEF_HEALTH_PENALTY_SMALL, smallness);
   reefHealth = constrain(reefHealth - penalty, 0, 1);
+  // only the costlier (smaller-fish) catches get the "ouch" flash, not
+  // every single catch
+  if (penalty > (REEF_HEALTH_PENALTY_SMALL + REEF_HEALTH_PENALTY_LARGE) / 2) pulseHealthBar();
+}
+
+function pulseHealthBar() {
+  const track = document.getElementById('health-track');
+  if (!track) return;
+  track.classList.remove('pulse');
+  void track.offsetWidth; // force reflow so re-adding the class below replays the animation even if it's still mid-pulse
+  track.classList.add('pulse');
 }
 
 // Picks one hand-built preset per rock layer into reefBack/reefMid/reefFront
