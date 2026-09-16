@@ -249,8 +249,12 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 27px;
-  padding: 18px 0 26px;
+  /* the panel sits in real viewport space, not scaled to the game canvas
+     like the HUD overlay -- so a landscape phone (short on vh, not vw)
+     needs everything below scaled off vh too, or it reads as "blown up"
+     on a small screen even though it's the same px size as on desktop */
+  gap: clamp(10px, 3.5vh, 27px);
+  padding: clamp(10px, 2.3vh, 18px) 0 clamp(12px, 3.3vh, 26px);
   border: 3px solid #bff4b8;
   border-radius: 25px;
   background: linear-gradient(180deg, #042549, #063e79);
@@ -268,10 +272,10 @@ html, body {
   background: none;
   border: none;
   border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-  padding-bottom: 23px;
+  padding-bottom: clamp(8px, 3vh, 23px);
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
-  font-size: 27px;
+  font-size: clamp(14px, 3.5vh, 27px);
   color: #fff;
   cursor: pointer;
 }
@@ -285,23 +289,25 @@ html, body {
   width: 90%;
   /* fixed, not max-height -- both tabs need to occupy the exact same box so
      switching tabs doesn't resize the whole panel. Sized to How to Play's
-     own natural height (the shorter of the two), About scrolls inside it. */
-  height: 24vh;
+     own natural height (the shorter of the two) on a normal desktop
+     viewport, clamped so it doesn't collapse to nothing on a short
+     landscape-phone screen either. About scrolls inside it. */
+  height: clamp(110px, 24vh, 260px);
   overflow-y: auto;
   text-align: center;
-  font-size: 18px;
+  font-size: clamp(12px, 2.3vh, 18px);
   line-height: 1.45;
   display: flex;
   flex-direction: column;
   justify-content: safe center;
-  gap: 15px;
+  gap: clamp(8px, 2vh, 15px);
   padding: 0 4px;
 }
 
 .panel-content h2 {
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
-  font-size: 24px;
+  font-size: clamp(14px, 3vh, 24px);
   color: #fcedf0;
   margin-top: 4px;
 }
@@ -343,8 +349,8 @@ html, body {
 .howto-row--mobile { display: none; }
 
 .howto-icon {
-  width: 40px;
-  height: 40px;
+  width: clamp(24px, 5vh, 40px);
+  height: clamp(24px, 5vh, 40px);
   object-fit: contain;
 }
 
@@ -352,14 +358,14 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: clamp(24px, 5vh, 40px);
+  height: clamp(24px, 5vh, 40px);
   border-radius: 8px;
   background: linear-gradient(180deg, #c9f2ee, #ebfbe9);
   color: #042549;
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
-  font-size: 20px;
+  font-size: clamp(12px, 2.5vh, 20px);
 }
 
 .keycap-sep {
@@ -368,29 +374,29 @@ html, body {
 }
 
 .keycap--space {
-  width: 64px;
+  width: clamp(38px, 8vh, 64px);
 }
 
 .keycap--space::before {
   content: "";
   display: block;
-  width: 28px;
-  height: 8px;
+  width: 70%;
+  height: 20%;
   border: 3px solid #042549;
   border-top: none;
   border-radius: 0 0 6px 6px;
 }
 
 .panel-ok {
-  width: 176px;
-  height: 40px;
+  width: clamp(110px, 22vh, 176px);
+  height: clamp(30px, 5vh, 40px);
   border: none;
   border-radius: 10px;
   background: linear-gradient(90deg, #e3fae0, #bff4b8);
   box-shadow: 0 4px 0 #8fec83;
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
-  font-size: 24px;
+  font-size: clamp(14px, 3vh, 24px);
   color: #042549;
   cursor: pointer;
 }
