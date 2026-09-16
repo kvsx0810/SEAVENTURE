@@ -247,10 +247,10 @@ html, body {
   /* width/height are a FIXED fraction of the canvas's own box (same
      min(100vw,100vh*16/9) formula #hud-overlay uses), not the raw
      viewport, so the panel is the same relative size versus the game
-     image at every screen size. 920/1920 = 47.9% width (widened from
-     the original 800px reference per Hung's request for more breathing
-     room): 47.9167vw and 47.9167% of 177.7778vh = 85.1852vh */
-  width: min(47.9167vw, 85.1852vh, 1400px);
+     image at every screen size. 1040/1920 = 54.2% width (widened again
+     from 920px per Hung's request): 54.1667vw and 54.1667% of
+     177.7778vh = 96.2963vh */
+  width: min(54.1667vw, 96.2963vh, 1400px);
   max-height: min(85vh, 47.8125vw);
   display: flex;
   flex-direction: column;
