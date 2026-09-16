@@ -352,7 +352,30 @@ html, body {
   flex-wrap: wrap;
 }
 
-.howto-row--mobile { display: none; }
+.howto-row--mobile {
+  display: none;
+  /* the desktop row centers + wraps as a whole unit, which is fine for
+     short "A / D : ..." text -- but the mobile row's explanation text is
+     much longer, so wrapping used to push the ENTIRE text (icon
+     included) onto its own line below the icon instead of just flowing
+     the text next to it. Pin the icon(s) to the left and let only the
+     text wrap in the remaining space instead. */
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  text-align: left;
+}
+
+.howto-row--mobile .howto-icon,
+.howto-row--mobile .keycap-sep {
+  flex-shrink: 0;
+}
+
+.howto-row--mobile > span:last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.85em;
+}
 
 .howto-icon {
   width: clamp(24px, 5vh, 40px);
