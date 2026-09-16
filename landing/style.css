@@ -223,26 +223,25 @@ section[id] {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  gap: clamp(12px, 2vw, 32px);
 }
 
 .hero-mascot {
   width: clamp(90px, 13vw, 189px);
   height: auto;
-  margin-right: clamp(-16px, -1.5vw, -8px);
   position: relative;
   z-index: 1;
 }
 
+/* Plain light color instead of the old dark-to-light gradient -- reads
+   clearly against the hero background in both themes. */
 .hero-title {
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
   font-size: clamp(40px, 10.5vw, 190px);
   line-height: 0.95;
   margin: 0;
-  background: linear-gradient(-83deg, var(--hero-grad-1) 21%, var(--hero-grad-2) 118%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #eaf7ff;
 }
 
 /* -------------------- small reusable decorations -------------------- */
@@ -348,18 +347,17 @@ section[id] {
    a big+mini bubble pair top-left with all 4 fish scattered around it,
    a second small fish pair lower-left, and another bubble pair +
    small fish "school" bottom-right. */
-.sdg .deco-bubble--sdg-tl { top: 4%; left: 2%; }
-.sdg .deco-bubble--sdg-tl-mini { top: 1%; left: 13%; }
-.sdg .deco-fish--sdg-a { top: 6%; left: 16%; transform: rotate(-18deg); }
-.sdg .deco-fish--sdg-b { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); top: 13%; left: 24%; transform: rotate(10deg) scaleX(-1); }
-.sdg .deco-fish--sdg-e { aspect-ratio: 203 / 263; width: clamp(60px, 7vw, 110px); top: 9%; left: 4%; transform: rotate(-6deg); }
-.sdg .deco-fish--sdg-f { aspect-ratio: 125 / 124; width: clamp(55px, 6.5vw, 95px); top: 18%; left: 16%; transform: rotate(4deg); }
-.sdg .deco-fish--sdg-school1 { aspect-ratio: 96 / 36; width: clamp(30px, 3.6vw, 48px); top: 28%; left: 6%; opacity: 0.7; transform: rotate(-4deg); }
-.sdg .deco-fish--sdg-school2 { aspect-ratio: 96 / 36; width: clamp(26px, 3vw, 40px); top: 32%; left: 14%; opacity: 0.6; transform: rotate(6deg) scaleX(-1); }
+/* Spread across all 4 corners, one pair per corner, well clear of the
+   vertically-centered title+description column and never overlapping
+   each other -- was all bunched into just two crowded corners before. */
+.sdg .deco-bubble--sdg-tl { top: 2%; left: 2%; }
+.sdg .deco-bubble--sdg-tl-mini { top: 9%; left: 10%; }
+.sdg .deco-fish--sdg-a { top: 3%; right: 4%; left: auto; transform: rotate(-18deg); }
+.sdg .deco-fish--sdg-b { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); top: 15%; right: 16%; left: auto; transform: rotate(10deg) scaleX(-1); }
+.sdg .deco-fish--sdg-e { aspect-ratio: 203 / 263; width: clamp(60px, 7vw, 110px); bottom: 4%; left: 3%; transform: rotate(-6deg); }
+.sdg .deco-fish--sdg-f { aspect-ratio: 125 / 124; width: clamp(55px, 6.5vw, 95px); bottom: 16%; left: 15%; transform: rotate(4deg); }
 .sdg .deco-bubble--sdg-br { bottom: 2%; right: 3%; }
-.sdg .deco-bubble--sdg-br-mini { bottom: 9%; right: 12%; }
-.sdg .deco-fish--sdg-c { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); bottom: 16%; right: 8%; transform: rotate(-8deg); }
-.sdg .deco-fish--sdg-d { aspect-ratio: 96 / 36; width: clamp(36px, 4.5vw, 60px); bottom: 22%; right: 15%; transform: rotate(4deg); }
+.sdg .deco-bubble--sdg-br-mini { bottom: 9%; right: 11%; }
 
 /* -------------------- quote + CTA -------------------- */
 /* Figma reference (see chat): the quote/author are left/right-aligned
@@ -374,7 +372,7 @@ section[id] {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  max-width: 1100px;
+  max-width: 1500px;
   margin: 0 auto;
   padding: clamp(20px, 5vw, 60px) 24px;
   text-align: left;
@@ -383,6 +381,10 @@ section[id] {
 /* per the master export: a bubble pair (big + mini) top-left */
 .quote .deco-bubble--quote { top: 2%; left: 3%; }
 .quote .deco-bubble--quote-mini { top: 9%; left: 12%; }
+/* Right side, opposite the left-aligned text column and the bubble
+   cluster -- clear of both. */
+.quote .deco-fish--quote-a { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); top: 4%; right: 4%; transform: rotate(8deg) scaleX(-1); }
+.quote .deco-fish--quote-b { aspect-ratio: 96 / 36; width: clamp(40px, 5vw, 66px); bottom: 6%; right: 10%; transform: rotate(-6deg); }
 
 .quote-text {
   font-family: "Inter", sans-serif;
@@ -396,7 +398,7 @@ section[id] {
 
 .quote-author {
   font-family: "Alata", sans-serif;
-  font-size: clamp(14px, 1.6vw, 20px);
+  font-size: clamp(18px, 2.4vw, 30px);
   color: var(--quote-color);
   opacity: 0.75;
   margin: 12px 0 0;
@@ -412,6 +414,10 @@ section[id] {
   justify-content: center;
   padding: clamp(20px, 5vw, 60px) 24px;
 }
+
+/* Tucked into the corners, clear of the centered hands+CTA text. */
+.cta-section .deco-fish--cta-a { aspect-ratio: 96 / 36; width: clamp(46px, 5.5vw, 74px); top: 5%; left: 4%; transform: rotate(-10deg); }
+.cta-section .deco-fish--cta-b { aspect-ratio: 96 / 36; width: clamp(40px, 5vw, 66px); bottom: 6%; right: 4%; transform: rotate(8deg) scaleX(-1); }
 
 /* a second, fainter wave behind the hands for a bit more background
    rhythm between the flat sections above/below it */
@@ -441,7 +447,7 @@ section[id] {
 .quote-hands-wrap {
   position: relative;
   z-index: 1;
-  width: min(68%, 780px);
+  width: min(88%, 1180px);
   margin: 0 auto;
 }
 
@@ -473,13 +479,24 @@ section[id] {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  max-width: 1100px;
+  max-width: 1500px;
   margin: 0 auto;
   padding: clamp(30px, 6vw, 80px) 24px;
   text-align: left;
+}
+
+/* One single flowing paragraph -- the highlighted spans used to sit as
+   DIRECT children of the flex container above, which turned each one
+   into its own flex item (flex-direction:column stacks flex items),
+   reading as forced paragraph breaks around every highlight instead of
+   inline color changes within one continuous run of text. Wrapping the
+   whole thing in a single <p> fixes it: now there's exactly one flex
+   item, and the <span>s inside it are ordinary inline text. */
+.explainer-text {
   font-family: "Alata", sans-serif;
   font-size: var(--body-text-size);
   line-height: 1.7;
+  margin: 0;
   background: linear-gradient(-42deg, var(--explainer-grad-1) 12%, var(--explainer-grad-2) 88%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -490,7 +507,7 @@ section[id] {
 .explainer .deco-bubble--explainer-mini { bottom: 13%; right: 13%; }
 .explainer .deco-fish { top: 10%; left: 4%; transform: scaleX(-1); }
 
-.explainer .hl {
+.explainer-text .hl {
   color: var(--explainer-highlight);
 }
 
@@ -515,7 +532,7 @@ section[id] {
 .games .deco-fish--games-b { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); bottom: 14%; left: 10%; transform: rotate(6deg) scaleX(-1); }
 
 .games-machine {
-  width: clamp(160px, 22vw, 320px);
+  width: clamp(220px, 28vw, 420px);
   height: auto;
   flex-shrink: 0;
 }
