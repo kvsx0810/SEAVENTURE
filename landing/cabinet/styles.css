@@ -297,3 +297,72 @@ body {
   40% { transform: translateY(16%); }
   100% { transform: translateY(0); }
 }
+
+/* -- popup: fullscreen-ish 16:9 reveal for the chosen game, dims the
+   whole cabinet (the one place allowed to break out of the curved-screen
+   clip) -- same technique as the root cabinet's app.js/styles.css -- */
+.popup-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 20, 39, 0);
+  pointer-events: none;
+  transition: background 0.35s ease;
+}
+
+.popup-overlay.is-open {
+  display: flex;
+  background: rgba(2, 20, 39, 0.86);
+  pointer-events: auto;
+}
+
+.popup-frame {
+  position: relative;
+  width: 82%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 0.6cqw;
+  box-shadow: 0 0 4cqw rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  transform: scale(0.92);
+  opacity: 0;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.popup-overlay.is-open .popup-frame {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.popup-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.popup-close {
+  position: absolute;
+  top: 1.5%;
+  right: 1.5%;
+  width: 2.8cqw;
+  height: 2.8cqw;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #e3fae0;
+  font-family: 'Alata', sans-serif;
+  font-size: 1.6cqw;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.popup-close:hover { background: rgba(255, 255, 255, 0.24); }

@@ -2,23 +2,21 @@
 // into the game-select carousel (random + the 5 games) since the landing
 // page's START button is only meant to launch a game, not re-walk the
 // SDG/credit/reference slides that live on the landing page itself now.
-//
-// Two of the five links below (Breath of the Ocean, A Fishy Situation) are
-// plain GitHub repo URLs, not live GitHub Pages sites -- see chat. They'll
-// 404 until those teammates enable Pages on their repos; wire the real
-// live URL in here once they do.
 
 document.addEventListener('DOMContentLoaded', () => {
   const screenContent = document.getElementById('screenContent');
   const joyLeft = document.getElementById('joyLeft');
   const joyRight = document.getElementById('joyRight');
   const arcadeButton = document.getElementById('arcadeButton');
+  const popupOverlay = document.getElementById('popupOverlay');
+  const popupIframe = document.getElementById('popupIframe');
+  const popupClose = document.getElementById('popupClose');
 
   const CAROUSEL = [
     { id: 'random', kind: 'random' },
-    { id: 'fishy-situation', kind: 'game', label: 'A Fishy Situation', thumb: '../../assets/images/KieuPhuongThumbnail.png', src: 'https://github.com/KieuPhuonggg/AFishySituu' },
+    { id: 'fishy-situation', kind: 'game', label: 'A Fishy Situation', thumb: '../../assets/images/KieuPhuongThumbnail.png', src: 'https://kieuphuonggg.github.io/AFishySituu/' },
     { id: 'embrace', kind: 'game', label: 'Embrace', thumb: '../../assets/images/TungPhuongThumbnail.png', src: 'https://phuongtung06.github.io/EmbraceA3/' },
-    { id: 'breath-of-the-ocean', kind: 'game', label: 'Breath of the Ocean', thumb: '../../assets/images/AnPhamThumbnail.png', src: 'https://github.com/anphamb/Breath-of-the-Ocean' },
+    { id: 'breath-of-the-ocean', kind: 'game', label: 'Breath of the Ocean', thumb: '../../assets/images/AnPhamThumbnail.png', src: 'https://anphamb.github.io/Breath-of-the-Ocean/' },
     { id: 'the-last-catch', kind: 'game', label: 'The Last Catch', thumb: '../../assets/images/TuanHungThumbnail.png', src: '../../games/tuan-hung/index.html' },
     { id: 'reeflect', kind: 'game', label: 'Reeflect', thumb: '../../assets/images/TieuDinhNgocThumbnail.png?v=3', src: 'https://ngoctieu0207.github.io/reeflect.2/' },
     { id: 'exit', kind: 'exit' }
@@ -104,21 +102,24 @@ document.addEventListener('DOMContentLoaded', () => {
     tick();
   }
 
-  // External games (teammates' own repos/pages) open in a new tab so the
-  // cabinet stays put; the local game navigates the tab directly.
-  function launchGame(item) {
-    if (/^https?:\/\//.test(item.src)) {
-      window.open(item.src, '_blank', 'noopener');
-    } else {
-      window.location.href = item.src;
-    }
+  // Same iframe-popup mechanism as the root cabinet -- the chosen game
+  // loads inline over the arcade instead of leaving the page, whether
+  // it's a teammate's external Pages site or the local game.
+  function openPopup(item) {
+    popupIframe.src = item.src;
+    popupOverlay.classList.add('is-open');
+  }
+
+  function closePopup() {
+    popupOverlay.classList.remove('is-open');
+    popupIframe.removeAttribute('src');
   }
 
   function confirmCarousel() {
     const item = CAROUSEL[carouselIndex];
     if (item.kind === 'exit') { window.location.href = '../index.html'; return; }
     if (item.kind === 'random') { spinRandom(); return; }
-    launchGame(item);
+    openPopup(item);
   }
 
   arcadeButton.addEventListener('click', () => {
@@ -130,6 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   joyLeft.addEventListener('click', () => { if (mode !== 'spinning') goCarousel(-1, joyLeft); });
   joyRight.addEventListener('click', () => { if (mode !== 'spinning') goCarousel(1, joyRight); });
+
+  popupClose.addEventListener('click', closePopup);
+  popupOverlay.addEventListener('click', (e) => {
+    if (e.target === popupOverlay) closePopup();
+  });
 
   screenContent.innerHTML = '<div class="page-panel">' + renderCarouselItem(CAROUSEL[carouselIndex]) + '</div>';
 });

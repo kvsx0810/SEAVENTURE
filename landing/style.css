@@ -17,6 +17,11 @@
      alone made content look vertically centered in the CSS box but
      visibly low within the space actually visible under the header. */
   --header-h: 104px;
+  /* one shared size for every normal paragraph/body-copy block on the
+     page (intro/SDG desc/explainer/games desc) -- these used to each
+     carry their own slightly-different clamp(), which read as
+     inconsistent type scale when scrolling through the page. */
+  --body-text-size: clamp(16px, 2.6vw, 38px);
   --page-grad-top: #bbe8fb;
   --page-grad-bottom: #11aef3;
   --header-bg: #ebfbe9;
@@ -290,7 +295,7 @@ section[id] {
 
 .intro-text {
   font-family: "Alata", sans-serif;
-  font-size: clamp(16px, 2.8vw, 40px);
+  font-size: var(--body-text-size);
   line-height: 1.7;
   margin: 0;
   background: linear-gradient(113deg, var(--intro-grad-1) 10%, var(--intro-grad-2) 90%);
@@ -324,7 +329,7 @@ section[id] {
 
 .sdg-desc {
   font-family: "Alata", sans-serif;
-  font-size: clamp(15px, 2.6vw, 38px);
+  font-size: var(--body-text-size);
   line-height: 1.7;
   margin: 0;
   background: linear-gradient(110deg, var(--body-grad-1) 10%, var(--body-grad-2) 90%);
@@ -429,19 +434,15 @@ section[id] {
   pointer-events: none;
 }
 
-/* Full-bleed, edge to edge -- the two hands' own artwork already reaches
-   the left/right extremes of the source composition (bottom hand's
-   fingers start at the left edge, top hand's fingers reach the right
-   edge), so dropping the old max-width:900px cap and letting this span
-   the full section width plants each hand flush against its matching
-   screen edge instead of floating in a centered column. height:auto
-   (not a forced 100%/100% stretch) keeps the artwork's real proportions
-   -- stretching both axes independently badly distorted it on narrow
+/* Sized down from an earlier full-width pass (see chat) -- height:auto,
+   never a forced 100%/100% stretch, keeps the hands' real proportions;
+   stretching both axes independently badly distorted them on narrow
    viewports. */
 .quote-hands-wrap {
   position: relative;
   z-index: 1;
-  width: 100%;
+  width: min(68%, 780px);
+  margin: 0 auto;
 }
 
 .quote-hands {
@@ -455,11 +456,11 @@ section[id] {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: min(80%, 620px);
+  width: min(85vw, 820px);
   font-family: "Inter", sans-serif;
   font-weight: 900;
   letter-spacing: -0.02em;
-  font-size: clamp(16px, 4vw, 48px);
+  font-size: clamp(24px, 6vw, 68px);
   line-height: 1.2;
   color: var(--quote-color);
   margin: 0;
@@ -477,7 +478,7 @@ section[id] {
   padding: clamp(30px, 6vw, 80px) 24px;
   text-align: left;
   font-family: "Alata", sans-serif;
-  font-size: clamp(15px, 2.6vw, 38px);
+  font-size: var(--body-text-size);
   line-height: 1.7;
   background: linear-gradient(-42deg, var(--explainer-grad-1) 12%, var(--explainer-grad-2) 88%);
   -webkit-background-clip: text;
@@ -543,7 +544,7 @@ section[id] {
 
 .games-desc {
   font-family: "Alata", sans-serif;
-  font-size: clamp(14px, 2vw, 28px);
+  font-size: var(--body-text-size);
   line-height: 1.6;
   color: var(--quote-color);
   opacity: 0.85;
