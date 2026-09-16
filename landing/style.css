@@ -241,32 +241,21 @@ section[id] {
 }
 
 /* -------------------- small reusable decorations -------------------- */
-/* Self-authored, not exported from Figma -- per Hung's call, simple
-   bubbles/fish are cheap enough to build directly as CSS/SVG rather
-   than round-tripping through an export (unlike the footer coral). */
+/* Self-authored, not exported from Figma -- per Hung's call these are
+   real inline <svg> (shared gradient/symbol/pattern defs are the
+   hidden <svg> at the top of body), not a CSS mask-image trick. */
 .deco {
   position: absolute;
   pointer-events: none;
   z-index: 0;
-}
-
-.deco-bubble {
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.08) 55%, transparent 72%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: block;
 }
 
 .deco-fish {
   width: 52px;
   height: 26px;
-  background-color: var(--quote-color);
+  color: var(--quote-color);
   opacity: 0.16;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Cpath d='M2 15C10 3 40 3 48 15C40 27 10 27 2 15Z M48 15L60 4L60 26Z'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Cpath d='M2 15C10 3 40 3 48 15C40 27 10 27 2 15Z M48 15L60 4L60 26Z'/%3E%3C/svg%3E");
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-  mask-size: contain;
 }
 
 /* -------------------- team intro -------------------- */
@@ -312,11 +301,11 @@ section[id] {
   text-align: center;
 }
 
-/* self-authored light-ray backdrop, not exported from Figma -- a plain
-   striped gradient clipped to a wedge, sitting behind the heading/desc
-   (z-index:-1, see below) */
-.sdg::before {
-  content: "";
+/* self-authored light-ray backdrop, not exported from Figma -- real
+   <svg> (a repeating <pattern> of thin rects, defined once in the
+   hidden defs block at the top of body), sitting behind the heading/
+   desc (z-index:-1) */
+.sdg-rays {
   position: absolute;
   z-index: -1;
   top: -40%;
@@ -324,13 +313,6 @@ section[id] {
   width: 75%;
   height: 180%;
   transform: rotate(-8deg);
-  background: repeating-linear-gradient(
-    100deg,
-    rgba(255, 255, 255, 0.07) 0px,
-    rgba(255, 255, 255, 0.07) 3px,
-    transparent 3px,
-    transparent 46px
-  );
   -webkit-mask-image: linear-gradient(180deg, black, transparent 85%);
   mask-image: linear-gradient(180deg, black, transparent 85%);
   pointer-events: none;
