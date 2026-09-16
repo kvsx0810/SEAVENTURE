@@ -244,8 +244,15 @@ html, body {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 41;
-  width: min(90vw, 800px);
-  max-height: 85vh;
+  /* width/height bound to the CANVAS's own box (same min(100vw,100vh*16/9)
+     formula #hud-overlay uses), not the raw viewport -- plain 90vw/85vh
+     overshoot the canvas on any screen that isn't ~16:9, e.g. a landscape
+     phone, where the 16:9 game image itself is letterboxed narrower than
+     the full width, but the panel didn't shrink to match, so it ended up
+     wider than the game it was floating over instead of matching its
+     proportions the way it does on a 1920x1080 desktop */
+  width: min(90vw, 160vh, 800px);
+  max-height: min(85vh, 47.8125vw);
   display: flex;
   flex-direction: column;
   align-items: center;
