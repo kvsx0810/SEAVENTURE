@@ -571,7 +571,12 @@ function setupTouchControls() {
 // viewport (and therefore every touch coordinate) is genuinely landscape.
 // ==========================================================================
 function isPhoneTouch() {
-  return window.matchMedia('(max-width: 900px)').matches
+  // a phone's SHORT side stays under 900px in either orientation, but
+  // whether that's width or height flips with rotation -- checking only
+  // width missed phones held landscape (e.g. iPhone 16 Pro Max is ~932px
+  // wide in landscape), which made the game think it was on desktop
+  return (window.matchMedia('(max-width: 900px)').matches
+      || window.matchMedia('(max-height: 900px)').matches)
     && window.matchMedia('(pointer: coarse)').matches;
 }
 function isPhonePortrait() {
