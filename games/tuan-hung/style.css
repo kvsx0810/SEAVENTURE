@@ -246,14 +246,11 @@ html, body {
   z-index: 41;
   /* width/height are a FIXED fraction of the canvas's own box (same
      min(100vw,100vh*16/9) formula #hud-overlay uses), not the raw
-     viewport -- the first attempt at this bound the box correctly but
-     kept the old 90% figure, which is nowhere near what 800px actually
-     was as a fraction of a 1920-wide canvas (~41.7%), so the panel
-     still looked proportionally bigger on a letterboxed phone screen
-     than it does on desktop. 800/1920 = 41.67% width, so the panel is
-     the same relative size versus the game image at every screen size:
-     41.6667vw and 41.6667% of 177.7778vh = 74.0741vh */
-  width: min(41.6667vw, 74.0741vh, 1400px);
+     viewport, so the panel is the same relative size versus the game
+     image at every screen size. 920/1920 = 47.9% width (widened from
+     the original 800px reference per Hung's request for more breathing
+     room): 47.9167vw and 47.9167% of 177.7778vh = 85.1852vh */
+  width: min(47.9167vw, 85.1852vh, 1400px);
   max-height: min(85vh, 47.8125vw);
   display: flex;
   flex-direction: column;
@@ -284,7 +281,7 @@ html, body {
   padding-bottom: clamp(8px, 3vh, 23px);
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
-  font-size: clamp(14px, 3.5vh, 27px);
+  font-size: clamp(13px, 3vh, 23px);
   color: #fff;
   cursor: pointer;
 }
@@ -304,7 +301,7 @@ html, body {
   height: clamp(110px, 24vh, 260px);
   overflow-y: auto;
   text-align: center;
-  font-size: clamp(12px, 2.3vh, 18px);
+  font-size: clamp(11px, 2vh, 16px);
   line-height: 1.45;
   display: flex;
   flex-direction: column;
@@ -316,7 +313,7 @@ html, body {
 .panel-content h2 {
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
-  font-size: clamp(14px, 3vh, 24px);
+  font-size: clamp(13px, 2.6vh, 21px);
   color: #fcedf0;
   margin-top: 4px;
 }
@@ -374,7 +371,7 @@ html, body {
   color: #042549;
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
-  font-size: clamp(12px, 2.5vh, 20px);
+  font-size: clamp(11px, 2.2vh, 18px);
 }
 
 .keycap-sep {
@@ -405,7 +402,7 @@ html, body {
   box-shadow: 0 4px 0 #8fec83;
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
-  font-size: clamp(14px, 3vh, 24px);
+  font-size: clamp(13px, 2.6vh, 21px);
   color: #042549;
   cursor: pointer;
 }
