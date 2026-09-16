@@ -17,7 +17,19 @@
   <!-- Apotek Wide -- same Adobe Fonts kit every other SEAVENTURE page uses -->
   <link rel="stylesheet" href="https://use.typekit.net/rav6zvx.css">
 
-  <link rel="stylesheet" href="style.css?v=21">
+  <link rel="stylesheet" href="style.css?v=23">
+
+  <!-- Applies a saved light/dark override (from the toggle button, see
+       the script near the end of body) before first paint, so the page
+       never flashes the wrong theme on load. -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('seaventure-theme');
+        if (saved === 'light' || saved === 'dark') document.documentElement.dataset.theme = saved;
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
 
@@ -82,20 +94,32 @@
 
   <header class="site-header">
     <a class="brand" href="#home">
-      <picture>
-        <source srcset="assets/mascot-dark.png" media="(prefers-color-scheme: dark)">
-        <img class="brand-icon" src="assets/mascot-light.png" alt="">
-      </picture>
+      <img class="brand-icon theme-img theme-img--light" src="assets/mascot-light.png" alt="">
+      <img class="brand-icon theme-img theme-img--dark" src="assets/mascot-dark.png" alt="">
       <span class="brand-name">SEAVENTURE</span>
     </a>
-    <nav class="site-nav" aria-label="Primary">
-      <a href="#home">HOME</a>
-      <a href="#about">ABOUT</a>
-      <a href="#quote">QUOTE</a>
-      <a href="#cta">CTA</a>
-      <a href="#para">PARA</a>
-      <a href="#game">GAME</a>
-    </nav>
+    <div class="nav-group">
+      <nav class="site-nav" aria-label="Primary">
+        <a href="#home">HOME</a>
+        <a href="#about">ABOUT</a>
+        <a href="#quote">QUOTE</a>
+        <a href="#cta">CTA</a>
+        <a href="#para">PARA</a>
+        <a href="#game">GAME</a>
+      </nav>
+      <!-- Standard sun/moon icon -- the Figma toggle icon couldn't be
+           pulled this round (no Figma access this session, see chat) --
+           swap these two <svg>s for the real icon once it's available. -->
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch between light and dark mode">
+        <svg class="theme-toggle-icon theme-img theme-img--light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg class="theme-toggle-icon theme-img theme-img--dark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+      </button>
+    </div>
   </header>
 
   <main>
@@ -105,10 +129,8 @@
         <div class="wave wave-2"></div>
       </div>
       <div class="hero-content">
-        <picture>
-          <source srcset="assets/mascot-dark.png" media="(prefers-color-scheme: dark)">
-          <img class="hero-mascot" src="assets/mascot-light.png" alt="">
-        </picture>
+        <img class="hero-mascot theme-img theme-img--light" src="assets/mascot-light.png" alt="">
+        <img class="hero-mascot theme-img theme-img--dark" src="assets/mascot-dark.png" alt="">
         <h1 class="hero-title">SEAVENTURE</h1>
       </div>
     </section>
@@ -146,8 +168,10 @@
       <svg class="deco deco-fish deco-fish--cta-a" viewBox="0 0 96 36" aria-hidden="true"><use href="#deco-fish-4"/></svg>
       <svg class="deco deco-fish deco-fish--cta-b" viewBox="0 0 96 36" aria-hidden="true"><use href="#deco-fish-4"/></svg>
       <div class="quote-hands-wrap">
-        <img class="quote-hand quote-hand--upper" src="assets/hand-upper.png" alt="" aria-hidden="true">
-        <img class="quote-hand quote-hand--bottom" src="assets/hand-bottom.png" alt="" aria-hidden="true">
+        <img class="quote-hand quote-hand--upper theme-img theme-img--light" src="assets/hand-upper-light.png" alt="" aria-hidden="true">
+        <img class="quote-hand quote-hand--upper theme-img theme-img--dark" src="assets/hand-upper-dark.png" alt="" aria-hidden="true">
+        <img class="quote-hand quote-hand--bottom theme-img theme-img--light" src="assets/hand-bottom-light.png" alt="" aria-hidden="true">
+        <img class="quote-hand quote-hand--bottom theme-img theme-img--dark" src="assets/hand-bottom-dark.png" alt="" aria-hidden="true">
         <p class="cta">Change everyday habits to protect ocean health</p>
       </div>
     </section>
@@ -162,7 +186,8 @@
     <section class="games" id="game">
       <svg class="deco deco-fish deco-fish--games-a" viewBox="0 0 125 124" aria-hidden="true"><use href="#deco-fish-2"/></svg>
       <svg class="deco deco-fish deco-fish--games-b" viewBox="0 0 96 36" aria-hidden="true"><use href="#deco-fish-4"/></svg>
-      <img class="games-machine" src="assets/arcade.png" alt="Arcade cabinet">
+      <img class="games-machine theme-img theme-img--light" src="assets/arcade-light.png" alt="Arcade cabinet">
+      <img class="games-machine theme-img theme-img--dark" src="assets/arcade-dark.png" alt="Arcade cabinet">
       <div class="games-copy">
         <h2 class="games-heading">Explore games inspired by <span class="hl">SDG 14: Life Below Water</span></h2>
         <p class="games-desc">Each game focuses on a different goal for protecting our ocean, and make sure you check CREDIT of each game to learn more about them.</p>
@@ -173,6 +198,10 @@
   </main>
 
   <footer class="site-footer">
+    <img class="footer-reef footer-reef--left theme-img theme-img--light" src="assets/reef-left-light.png" alt="" aria-hidden="true">
+    <img class="footer-reef footer-reef--left theme-img theme-img--dark" src="assets/reef-left-dark.png" alt="" aria-hidden="true">
+    <img class="footer-reef footer-reef--right theme-img theme-img--light" src="assets/reef-right-light.png" alt="" aria-hidden="true">
+    <img class="footer-reef footer-reef--right theme-img theme-img--dark" src="assets/reef-right-dark.png" alt="" aria-hidden="true">
     <div class="footer-cols">
       <div class="footer-col">
         <h3>About</h3>
@@ -219,15 +248,25 @@
       <div class="footer-credit-group">
         <p class="footer-copyright">&copy; N5CC (2026). All rights reserved.</p>
         <p class="footer-brand">
-          <picture>
-            <source srcset="assets/mascot-dark.png" media="(prefers-color-scheme: dark)">
-            <img class="footer-brand-icon" src="assets/mascot-light.png" alt="">
-          </picture>
+          <img class="footer-brand-icon theme-img theme-img--light" src="assets/mascot-light.png" alt="">
+          <img class="footer-brand-icon theme-img theme-img--dark" src="assets/mascot-dark.png" alt="">
           <span class="footer-brand-text">N5CC</span>
         </p>
       </div>
     </div>
   </footer>
 
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var btn = document.getElementById('themeToggle');
+      btn.addEventListener('click', function () {
+        var current = root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        var next = current === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try { localStorage.setItem('seaventure-theme', next); } catch (e) {}
+      });
+    })();
+  </script>
 </body>
 </html>
