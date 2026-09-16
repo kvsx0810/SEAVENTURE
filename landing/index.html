@@ -17,7 +17,7 @@
   <!-- Apotek Wide -- same Adobe Fonts kit every other SEAVENTURE page uses -->
   <link rel="stylesheet" href="https://use.typekit.net/rav6zvx.css">
 
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 
@@ -27,7 +27,10 @@
 
   <header class="site-header">
     <a class="brand" href="#home">
-      <img class="brand-icon" src="assets/mascot.png" alt="">
+      <picture>
+        <source srcset="assets/mascot-dark.png" media="(prefers-color-scheme: dark)">
+        <img class="brand-icon" src="assets/mascot-light.png" alt="">
+      </picture>
       <span class="brand-name">SEAVENTURE</span>
     </a>
     <nav class="site-nav" aria-label="Primary">
@@ -47,12 +50,18 @@
         <div class="wave wave-2"></div>
       </div>
       <div class="hero-content">
-        <img class="hero-mascot" src="assets/mascot.png" alt="">
+        <picture>
+          <source srcset="assets/mascot-dark.png" media="(prefers-color-scheme: dark)">
+          <img class="hero-mascot" src="assets/mascot-light.png" alt="">
+        </picture>
         <h1 class="hero-title">SEAVENTURE</h1>
       </div>
     </section>
 
     <section class="intro">
+      <span class="deco deco-bubble" aria-hidden="true"></span>
+      <span class="deco deco-bubble" aria-hidden="true"></span>
+      <span class="deco deco-fish" aria-hidden="true"></span>
       <p class="intro-text">N5CC (Ngã 5 Chuồng Chó) is a team of five - Hồ Kiều Phương, Tiêu Dĩnh Ngọc, Trần Tùng Phương, Phạm Hoài An, and Trịnh Tuấn Hưng. Together, we created Seaventure, a website and interactive games exploring different goals of SDG 14: Life Below Water.</p>
     </section>
 
@@ -74,6 +83,8 @@
     </section>
 
     <section class="explainer" id="para">
+      <span class="deco deco-bubble" aria-hidden="true"></span>
+      <span class="deco deco-fish" aria-hidden="true"></span>
       <span class="hl">“The greatest threat to our planet is the belief that someone else will save it”</span> reminds us that protecting the ocean starts with individual action. SDG 14 addresses issues such as pollution, overfishing, ocean acidification, and ecosystem loss, all of which are affected by our everyday choices. Small changes in how we consume, use resources, and manage waste can collectively make a difference. <span class="hl">Change everyday habits to protect ocean health.</span>
     </section>
 
@@ -130,7 +141,10 @@
       <p>Stevenson A (2012) Robert Swan OBE: &ldquo;The greatest threat to our planet is the belief that someone else will save it&rdquo;, HuffPost website, accessed 19 August 2026. https://www.huffpost.com/entry/robert-swan-antarctica_b_1315047</p>
       <p>&copy; N5CC (2026). All rights reserved.</p>
       <p class="footer-brand">
-        <img class="footer-brand-icon" src="assets/mascot.png" alt="">
+        <picture>
+          <source srcset="assets/mascot-dark.png" media="(prefers-color-scheme: dark)">
+          <img class="footer-brand-icon" src="assets/mascot-light.png" alt="">
+        </picture>
         <span class="footer-brand-text">N5CC</span>
       </p>
     </div>
