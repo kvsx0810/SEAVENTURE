@@ -153,7 +153,10 @@ body {
   justify-content: center;
   flex-wrap: wrap;
   gap: 0;
-  padding: clamp(60px, 10vw, 140px) 20px clamp(40px, 6vw, 80px);
+  /* symmetric top/bottom -- mismatched padding here was shrinking the
+     centered content's available box unevenly, so align-items:center
+     centered it a little low instead of dead-center in the viewport */
+  padding: clamp(40px, 6vw, 80px) 20px;
   text-align: center;
 }
 
@@ -287,7 +290,9 @@ body {
 /* Figma reference (see chat): the quote/author are left/right-aligned
    inside a max-width column, NOT centered, and the CTA line sits
    nested in the gap between the two hand shapes rather than stacked
-   below them -- fixed after reviewing sliced Figma screenshots. */
+   below them. These were one merged section at first, but that made
+   it feel cramped compared to its neighbors (each is its own full
+   "slide" in Figma) -- split into two full-height sections instead. */
 .quote {
   min-height: 100vh;
   display: flex;
@@ -318,10 +323,42 @@ body {
   text-align: right;
 }
 
+.cta-section {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(20px, 5vw, 60px) 24px;
+}
+
+/* a second, fainter wave behind the hands for a bit more background
+   rhythm between the flat sections above/below it */
+.cta-section::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  aspect-ratio: 1920 / 786;
+  opacity: 0.35;
+  background: var(--wave-1-color);
+  -webkit-mask-image: url("assets/wave1.svg");
+  mask-image: url("assets/wave1.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  pointer-events: none;
+}
+
 .quote-hands-wrap {
   position: relative;
+  z-index: 1;
   width: min(100%, 900px);
-  margin: clamp(10px, 3vw, 30px) auto;
+  margin: 0 auto;
 }
 
 .quote-hands {
@@ -451,8 +488,35 @@ body {
 
 /* -------------------- footer -------------------- */
 .site-footer {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(180deg, var(--page-grad-top), var(--page-grad-bottom));
   padding: clamp(30px, 6vw, 70px) 24px clamp(20px, 4vw, 40px);
+}
+
+/* another faint wave for background rhythm, same reasoning as the one
+   behind the hands in .cta-section */
+.site-footer::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -10%;
+  width: 100%;
+  aspect-ratio: 1920 / 232;
+  opacity: 0.4;
+  background: var(--wave-2-color);
+  -webkit-mask-image: url("assets/wave2.svg");
+  mask-image: url("assets/wave2.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  pointer-events: none;
+}
+
+.footer-cols, .footer-credit {
+  position: relative;
+  z-index: 1;
 }
 
 .footer-cols {
