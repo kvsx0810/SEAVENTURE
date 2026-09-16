@@ -196,7 +196,7 @@ section[id] {
 }
 
 .wave-1 {
-  top: 52%;
+  top: 42%;
   aspect-ratio: 1920 / 786;
   background: var(--wave-1-color);
   -webkit-mask-image: url("assets/wave1.svg");
@@ -204,7 +204,7 @@ section[id] {
 }
 
 .wave-2 {
-  top: 70%;
+  top: 60%;
   aspect-ratio: 1920 / 232;
   background: var(--wave-2-color);
   -webkit-mask-image: url("assets/wave2.svg");
@@ -429,11 +429,19 @@ section[id] {
   pointer-events: none;
 }
 
+/* Full-bleed, edge to edge -- the two hands' own artwork already reaches
+   the left/right extremes of the source composition (bottom hand's
+   fingers start at the left edge, top hand's fingers reach the right
+   edge), so dropping the old max-width:900px cap and letting this span
+   the full section width plants each hand flush against its matching
+   screen edge instead of floating in a centered column. height:auto
+   (not a forced 100%/100% stretch) keeps the artwork's real proportions
+   -- stretching both axes independently badly distorted it on narrow
+   viewports. */
 .quote-hands-wrap {
   position: relative;
   z-index: 1;
-  width: min(100%, 900px);
-  margin: 0 auto;
+  width: 100%;
 }
 
 .quote-hands {
@@ -447,7 +455,7 @@ section[id] {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 80%;
+  width: min(80%, 620px);
   font-family: "Inter", sans-serif;
   font-weight: 900;
   letter-spacing: -0.02em;
@@ -513,7 +521,7 @@ section[id] {
 
 .games-copy {
   max-width: 560px;
-  text-align: right;
+  text-align: center;
 }
 
 .games-heading {
