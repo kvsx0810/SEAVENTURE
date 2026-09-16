@@ -244,13 +244,12 @@ html, body {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 41;
-  /* width/height are a FIXED fraction of the canvas's own box (same
-     min(100vw,100vh*16/9) formula #hud-overlay uses), not the raw
-     viewport, so the panel is the same relative size versus the game
-     image at every screen size. 65% width per Hung's request: 65vw and
-     65% of 177.7778vh = 115.5556vh */
-  width: min(65vw, 115.5556vh, 1400px);
-  max-height: min(85vh, 47.8125vw);
+  /* original desktop sizing -- untouched since Hung confirmed it looked
+     right. All the width tweaking after that was only ever meant for the
+     mobile view (see the phone-only override below); this formula never
+     changes again without an explicit request to change desktop. */
+  width: min(90vw, 800px);
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -457,4 +456,15 @@ html, body {
        (pointer: coarse) and (max-height: 900px) {
   .howto-row--desktop { display: none; }
   .howto-row--mobile { display: flex; }
+
+  /* mobile-only panel sizing -- plain 90vw/85vh overshoot the canvas on a
+     landscape phone, since the 16:9 game image is letterboxed narrower
+     than the full screen there. Bind width/height to the canvas's own
+     box (same min(100vw,100vh*16/9) formula #hud-overlay uses) instead,
+     at 65% per Hung's request. Desktop is untouched -- it keeps the
+     plain min(90vw, 800px) rule above. */
+  #info-panel {
+    width: min(65vw, 115.5556vh, 1400px);
+    max-height: min(85vh, 47.8125vw);
+  }
 }
