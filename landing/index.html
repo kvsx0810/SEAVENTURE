@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SEAVENTURE</title>
 
-  <!-- Alata (body/nav) + Inter Black Italic (quote/CTA/START), same as the
-       rest of SEAVENTURE -->
+  <!-- Alata (body/nav) + Inter Black (quote/CTA/START), same as the rest
+       of SEAVENTURE. Upright weight 900 -- the design's "not-italic"
+       Inter Black, not the italic axis (see chat: font-style:italic was
+       a mistake on top of this, but the italic-only font URL would
+       have kept rendering slanted even after removing it). -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Alata&family=Inter:ital,wght@1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alata&family=Inter:wght@900&display=swap" rel="stylesheet">
 
   <!-- Apotek Wide -- same Adobe Fonts kit every other SEAVENTURE page uses -->
   <link rel="stylesheet" href="https://use.typekit.net/rav6zvx.css">
 
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
@@ -61,8 +64,10 @@
     <section class="quote" id="quote">
       <p class="quote-text">“The greatest threat to our planet is the belief that someone else will save it”</p>
       <p class="quote-author">Robert Swan</p>
-      <img class="quote-hands" src="assets/hands.svg" alt="" aria-hidden="true">
-      <p class="cta" id="cta">Change everyday habits to protect ocean health</p>
+      <div class="quote-hands-wrap">
+        <img class="quote-hands" src="assets/hands.svg" alt="" aria-hidden="true">
+        <p class="cta" id="cta">Change everyday habits to protect ocean health</p>
+      </div>
     </section>
 
     <section class="explainer" id="para">
@@ -120,8 +125,11 @@
       <p>School of Communication and Design</p>
       <p>Digital Media Program</p>
       <p>Stevenson A (2012) Robert Swan OBE: &ldquo;The greatest threat to our planet is the belief that someone else will save it&rdquo;, HuffPost website, accessed 19 August 2026. https://www.huffpost.com/entry/robert-swan-antarctica_b_1315047</p>
-      <p>N5CC (2026). All rights reserved.</p>
-      <p class="footer-brand">N5CC</p>
+      <p>&copy; N5CC (2026). All rights reserved.</p>
+      <p class="footer-brand">
+        <img class="footer-brand-icon" src="assets/mascot.png" alt="">
+        <span class="footer-brand-text">N5CC</span>
+      </p>
     </div>
   </footer>
 
