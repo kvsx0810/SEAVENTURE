@@ -196,7 +196,7 @@ section[id] {
 }
 
 .wave-1 {
-  top: 8%;
+  top: 52%;
   aspect-ratio: 1920 / 786;
   background: var(--wave-1-color);
   -webkit-mask-image: url("assets/wave1.svg");
@@ -204,7 +204,7 @@ section[id] {
 }
 
 .wave-2 {
-  top: 34%;
+  top: 70%;
   aspect-ratio: 1920 / 232;
   background: var(--wave-2-color);
   -webkit-mask-image: url("assets/wave2.svg");
@@ -256,6 +256,14 @@ section[id] {
   aspect-ratio: 207 / 204;
 }
 
+/* per the master bubble-cluster export (all bubbles shift-selected in
+   Figma): every bubble spot is actually TWO overlapping instances of the
+   same cluster symbol, a big one plus a ~42%-scale mini one right next
+   to it -- never a single bubble on its own. */
+.deco-bubble--mini {
+  width: clamp(38px, 4.6vw, 68px);
+}
+
 .deco-fish {
   width: clamp(70px, 8vw, 120px);
   aspect-ratio: 176 / 122;
@@ -264,7 +272,6 @@ section[id] {
 /* -------------------- team intro -------------------- */
 .intro {
   position: relative;
-  overflow: hidden;
   min-height: calc(100vh - var(--header-h));
   display: flex;
   flex-direction: column;
@@ -276,18 +283,10 @@ section[id] {
 }
 
 /* per the sliced Figma reference (slide 2): bubble + fish cluster
-   bottom-left, light rays top-right -- not top-left/bottom-right like
-   the first guess */
+   bottom-left. Light rays removed for now (see chat). */
 .intro .deco-bubble { bottom: 2%; left: 6%; }
-.intro .deco-fish--2 { aspect-ratio: 125 / 124; width: clamp(60px, 7vw, 100px); bottom: -2%; left: 18%; transform: rotate(8deg); }
-
-.intro .sdg-rays {
-  top: -25%;
-  left: auto;
-  right: -20%;
-  width: 60%;
-  transform: scaleX(-1);
-}
+.intro .deco-bubble--intro-mini { bottom: 9%; left: 2%; }
+.intro .deco-fish--2 { aspect-ratio: 125 / 124; width: clamp(60px, 7vw, 100px); bottom: 1%; left: 18%; transform: rotate(8deg); }
 
 .intro-text {
   font-family: "Alata", sans-serif;
@@ -303,7 +302,6 @@ section[id] {
 /* -------------------- SDG 14 -------------------- */
 .sdg {
   position: relative;
-  overflow: hidden;
   min-height: calc(100vh - var(--header-h));
   display: flex;
   flex-direction: column;
@@ -312,22 +310,6 @@ section[id] {
   margin: 0 auto;
   padding: clamp(20px, 6vw, 60px) 24px clamp(40px, 8vw, 100px);
   text-align: center;
-}
-
-/* light-ray backdrop (Hung's real Figma paths, see #deco-light-rays).
-   Base position below is generic; .intro overrides it (top-right) to
-   match the sliced Figma reference -- the rays actually sit behind the
-   intro/team-credit slide, not SDG. z-index:-1 keeps it behind text. */
-.sdg-rays {
-  position: absolute;
-  z-index: -1;
-  top: -10%;
-  left: -12%;
-  width: 85%;
-  aspect-ratio: 1920 / 1969;
-  -webkit-mask-image: linear-gradient(180deg, black, transparent 85%);
-  mask-image: linear-gradient(180deg, black, transparent 85%);
-  pointer-events: none;
 }
 
 .sdg-title {
@@ -355,16 +337,24 @@ section[id] {
   color: var(--body-highlight);
 }
 
-/* per the sliced reference (slides 3-4): a bubble cluster + a couple
-   of fish top-left, and another bubble cluster + a small fish school
-   bottom-right -- denser than the other sections since SDG covers two
-   Figma slides' worth of content in this one full-height section */
+/* per the master bubble/fish export: SDG is by far the densest cluster
+   in the whole page (all 4 fish variants + 2 bubble-pairs), matching
+   how it covers two Figma slides' worth of content in one section --
+   a big+mini bubble pair top-left with all 4 fish scattered around it,
+   a second small fish pair lower-left, and another bubble pair +
+   small fish "school" bottom-right. */
 .sdg .deco-bubble--sdg-tl { top: 4%; left: 2%; }
-.sdg .deco-fish--sdg-a { top: 6%; left: 14%; transform: rotate(-18deg); }
-.sdg .deco-fish--sdg-b { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); top: 12%; left: 22%; transform: rotate(10deg) scaleX(-1); }
+.sdg .deco-bubble--sdg-tl-mini { top: 1%; left: 13%; }
+.sdg .deco-fish--sdg-a { top: 6%; left: 16%; transform: rotate(-18deg); }
+.sdg .deco-fish--sdg-b { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); top: 13%; left: 24%; transform: rotate(10deg) scaleX(-1); }
+.sdg .deco-fish--sdg-e { aspect-ratio: 203 / 263; width: clamp(60px, 7vw, 110px); top: 9%; left: 4%; transform: rotate(-6deg); }
+.sdg .deco-fish--sdg-f { aspect-ratio: 125 / 124; width: clamp(55px, 6.5vw, 95px); top: 18%; left: 16%; transform: rotate(4deg); }
+.sdg .deco-fish--sdg-school1 { aspect-ratio: 96 / 36; width: clamp(30px, 3.6vw, 48px); top: 28%; left: 6%; opacity: 0.7; transform: rotate(-4deg); }
+.sdg .deco-fish--sdg-school2 { aspect-ratio: 96 / 36; width: clamp(26px, 3vw, 40px); top: 32%; left: 14%; opacity: 0.6; transform: rotate(6deg) scaleX(-1); }
 .sdg .deco-bubble--sdg-br { bottom: 2%; right: 3%; }
-.sdg .deco-fish--sdg-c { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); bottom: 14%; right: 10%; transform: rotate(-8deg); }
-.sdg .deco-fish--sdg-d { aspect-ratio: 96 / 36; width: clamp(36px, 4.5vw, 60px); bottom: 8%; right: 16%; transform: rotate(4deg); }
+.sdg .deco-bubble--sdg-br-mini { bottom: 9%; right: 12%; }
+.sdg .deco-fish--sdg-c { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); bottom: 16%; right: 8%; transform: rotate(-8deg); }
+.sdg .deco-fish--sdg-d { aspect-ratio: 96 / 36; width: clamp(36px, 4.5vw, 60px); bottom: 22%; right: 15%; transform: rotate(4deg); }
 
 /* -------------------- quote + CTA -------------------- */
 /* Figma reference (see chat): the quote/author are left/right-aligned
@@ -375,7 +365,6 @@ section[id] {
    "slide" in Figma) -- split into two full-height sections instead. */
 .quote {
   position: relative;
-  overflow: hidden;
   min-height: calc(100vh - var(--header-h));
   display: flex;
   flex-direction: column;
@@ -386,9 +375,9 @@ section[id] {
   text-align: left;
 }
 
-/* per the sliced reference (slide 5): a bubble cluster top-left, plus
-   a sliver of a second one peeking in from the top-right corner */
+/* per the master export: a bubble pair (big + mini) top-left */
 .quote .deco-bubble--quote { top: 2%; left: 3%; }
+.quote .deco-bubble--quote-mini { top: 9%; left: 12%; }
 
 .quote-text {
   font-family: "Inter", sans-serif;
@@ -471,7 +460,6 @@ section[id] {
 
 .explainer {
   position: relative;
-  overflow: hidden;
   min-height: calc(100vh - var(--header-h));
   display: flex;
   flex-direction: column;
@@ -490,6 +478,7 @@ section[id] {
 }
 
 .explainer .deco-bubble--explainer { bottom: 6%; right: 4%; }
+.explainer .deco-bubble--explainer-mini { bottom: 13%; right: 13%; }
 .explainer .deco-fish { top: 10%; left: 4%; transform: scaleX(-1); }
 
 .explainer .hl {
@@ -498,6 +487,7 @@ section[id] {
 
 /* -------------------- games / cabinet launcher -------------------- */
 .games {
+  position: relative;
   min-height: calc(100vh - var(--header-h));
   display: flex;
   align-items: center;
@@ -509,6 +499,11 @@ section[id] {
   flex-wrap: wrap;
   text-align: left;
 }
+
+/* per the master export: the last fish pair on the page sits low,
+   left-hand side -- near the machine rather than the copy column */
+.games .deco-fish--games-a { bottom: 4%; left: 2%; transform: rotate(-10deg); }
+.games .deco-fish--games-b { aspect-ratio: 96 / 36; width: clamp(50px, 6vw, 80px); bottom: 14%; left: 10%; transform: rotate(6deg) scaleX(-1); }
 
 .games-machine {
   width: clamp(160px, 22vw, 320px);
