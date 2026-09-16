@@ -139,9 +139,15 @@ body {
 }
 
 /* -------------------- hero -------------------- */
+/* Every major section below is built from stacked 1920x1080 "slide"
+   frames in Figma (the layer name is literally "Slide 16:9"), so each
+   one gets a full viewport's worth of room instead of the tighter
+   clamp()-only padding this had before -- min-height: 100vh, content
+   vertically centered inside it. */
 .hero {
   position: relative;
   overflow: hidden;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -220,6 +226,10 @@ body {
 
 /* -------------------- team intro -------------------- */
 .intro {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   max-width: 1100px;
   margin: 0 auto;
   padding: clamp(30px, 6vw, 80px) 24px;
@@ -239,6 +249,10 @@ body {
 
 /* -------------------- SDG 14 -------------------- */
 .sdg {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   max-width: 1100px;
   margin: 0 auto;
   padding: clamp(20px, 6vw, 60px) 24px clamp(40px, 8vw, 100px);
@@ -275,9 +289,13 @@ body {
    nested in the gap between the two hand shapes rather than stacked
    below them -- fixed after reviewing sliced Figma screenshots. */
 .quote {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   max-width: 1100px;
   margin: 0 auto;
-  padding: clamp(20px, 5vw, 60px) 24px 0;
+  padding: clamp(20px, 5vw, 60px) 24px;
   text-align: left;
 }
 
@@ -329,6 +347,10 @@ body {
 }
 
 .explainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   max-width: 1100px;
   margin: 0 auto;
   padding: clamp(30px, 6vw, 80px) 24px;
@@ -348,6 +370,7 @@ body {
 
 /* -------------------- games / cabinet launcher -------------------- */
 .games {
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
