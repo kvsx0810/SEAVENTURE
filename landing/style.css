@@ -15,6 +15,13 @@
   }
 }
 
+/* Per-word wrapper the line-by-line reveal in animations.js splits
+   [data-reveal] text into -- inline-block so GSAP's opacity/y transform
+   actually applies (plain inline elements don't reliably transform). */
+.reveal-word {
+  display: inline-block;
+}
+
 /* ==========================================================================
    Theme tokens -- pulled straight from the Figma dark/light frames
    (node 668:15 / 668:16). Light is the default palette. Dark applies
@@ -194,16 +201,35 @@ section[id] {
 }
 
 .site-nav a {
+  position: relative;
   font-family: "Alata", sans-serif;
   font-size: clamp(12px, 1.3vw, 20px);
   color: var(--nav-color);
   text-decoration: none;
   letter-spacing: 0.02em;
+  padding-bottom: 4px;
   transition: opacity 0.15s ease;
 }
 
 .site-nav a:hover {
   opacity: 0.65;
+}
+
+/* Scroll-spy underline -- toggled by animations.js as each section
+   scrolls into view, not a static per-page indicator. */
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: 0;
+  height: 2px;
+  background: currentColor;
+  transition: right 0.25s ease;
+}
+
+.site-nav a.is-active::after {
+  right: 0;
 }
 
 /* -------------------- hero -------------------- */
@@ -589,22 +615,20 @@ section[id] {
 }
 
 /* -------------------- games / cabinet launcher -------------------- */
-/* align-items:flex-end (not center) plus zero bottom padding puts the
-   machine's own bottom edge flush against the section's bottom edge --
-   "standing on" the footer that immediately follows, rather than
-   floating with a padding gap under it. The copy column overrides back
-   to vertically centered (align-self) since bottom-aligning a text
-   block would look odd. */
+/* align-items:flex-start -- machine and copy share the same TOP edge.
+   Real padding-bottom (not 0) guarantees the copy's own bottom (incl.
+   the START button) never touches the footer even on the rare
+   viewport where the text ends up taller than the machine art. */
 .games {
   position: relative;
   min-height: calc(100vh - var(--header-h));
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
   gap: clamp(24px, 5vw, 80px);
   max-width: 1300px;
   margin: 0 auto;
-  padding: clamp(20px, 6vw, 60px) 24px 0;
+  padding: clamp(20px, 6vw, 60px) 24px clamp(40px, 8vw, 80px);
   flex-wrap: wrap;
   text-align: left;
 }
@@ -634,7 +658,6 @@ section[id] {
    once the two no longer summed to fit .games' own max-width, and the
    wrapped copy then landed flush against the footer on its own row. */
 .games-copy {
-  align-self: flex-end;
   flex: 1 1 300px;
   max-width: 760px;
   text-align: center;
@@ -943,4 +966,28 @@ section[id] {
 
 :root[data-theme="dark"] .theme-img--dark {
   display: block;
+}
+
+/* -------------------- page transition -------------------- */
+/* Full-screen wipe used by page-transition.js: covers the screen with
+   the mascot centered before navigating into the cabinet, and the
+   cabinet's own copy of this same markup starts covering *its* screen
+   and slides away on arrival -- a plain multi-page site's stand-in for
+   a proper SPA route transition. Starts translated off-screen (below)
+   here on the landing page since nothing needs covering on load. */
+.page-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, var(--page-grad-top), var(--page-grad-bottom));
+  transform: translateY(100%);
+  pointer-events: none;
+}
+
+.page-transition-mascot {
+  width: clamp(120px, 22vw, 260px);
+  height: auto;
 }

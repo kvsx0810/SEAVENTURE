@@ -23,8 +23,14 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
   const ENTRY_INDEX = CAROUSEL.findIndex((it) => it.kind === 'random');
 
+  // Landing page footer links pass ?game=<id> so "A Fishy Situation" etc.
+  // land here with that game already selected (and opened) instead of
+  // dumping the visitor on the plain Random card.
+  const requestedGameId = new URLSearchParams(window.location.search).get('game');
+  const requestedIndex = requestedGameId ? CAROUSEL.findIndex((it) => it.id === requestedGameId) : -1;
+
   let mode = 'carousel'; // 'carousel' | 'spinning'
-  let carouselIndex = ENTRY_INDEX;
+  let carouselIndex = requestedIndex !== -1 ? requestedIndex : ENTRY_INDEX;
 
   function renderCarouselItem(item) {
     if (item.kind === 'exit') {
@@ -138,4 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   screenContent.innerHTML = '<div class="page-panel">' + renderCarouselItem(CAROUSEL[carouselIndex]) + '</div>';
+
+  if (requestedIndex !== -1) {
+    setTimeout(() => openPopup(CAROUSEL[requestedIndex]), 500);
+  }
 });

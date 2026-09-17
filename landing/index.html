@@ -17,7 +17,7 @@
   <!-- Apotek Wide -- same Adobe Fonts kit every other SEAVENTURE page uses -->
   <link rel="stylesheet" href="https://use.typekit.net/rav6zvx.css">
 
-  <link rel="stylesheet" href="style.css?v=30">
+  <link rel="stylesheet" href="style.css?v=31">
 
   <!-- Applies a saved light/dark override (from the toggle button, see
        the script near the end of body) before first paint, so the page
@@ -91,6 +91,11 @@
       </linearGradient>
     </defs>
   </svg>
+
+  <div class="page-transition" id="pageTransition" data-transition-mode="depart" aria-hidden="true">
+    <img class="page-transition-mascot theme-img theme-img--light" src="assets/mascot-light.png" alt="">
+    <img class="page-transition-mascot theme-img theme-img--dark" src="assets/mascot-dark.png" alt="">
+  </div>
 
   <header class="site-header">
     <a class="brand" href="#home">
@@ -167,11 +172,11 @@
     <section class="cta-section" id="cta">
       <svg class="deco deco-fish deco-fish--cta-a" viewBox="0 0 96 36" aria-hidden="true"><use href="#deco-fish-4"/></svg>
       <svg class="deco deco-fish deco-fish--cta-b" viewBox="0 0 96 36" aria-hidden="true"><use href="#deco-fish-4"/></svg>
-      <div class="quote-hands-wrap" data-reveal-img>
-        <img class="quote-hand quote-hand--upper theme-img theme-img--light" src="assets/hand-upper-light.png" alt="" aria-hidden="true">
-        <img class="quote-hand quote-hand--upper theme-img theme-img--dark" src="assets/hand-upper-dark.png" alt="" aria-hidden="true">
-        <img class="quote-hand quote-hand--bottom theme-img theme-img--light" src="assets/hand-bottom-light.png" alt="" aria-hidden="true">
-        <img class="quote-hand quote-hand--bottom theme-img theme-img--dark" src="assets/hand-bottom-dark.png" alt="" aria-hidden="true">
+      <div class="quote-hands-wrap">
+        <img class="quote-hand quote-hand--upper theme-img theme-img--light" src="assets/hand-upper-light.png" alt="" aria-hidden="true" data-reveal-hand="right">
+        <img class="quote-hand quote-hand--upper theme-img theme-img--dark" src="assets/hand-upper-dark.png" alt="" aria-hidden="true" data-reveal-hand="right">
+        <img class="quote-hand quote-hand--bottom theme-img theme-img--light" src="assets/hand-bottom-light.png" alt="" aria-hidden="true" data-reveal-hand="left">
+        <img class="quote-hand quote-hand--bottom theme-img theme-img--dark" src="assets/hand-bottom-dark.png" alt="" aria-hidden="true" data-reveal-hand="left">
         <p class="cta" data-reveal>Change everyday habits to protect ocean health</p>
       </div>
     </section>
@@ -221,11 +226,11 @@
       <div class="footer-col">
         <h3>Game</h3>
         <ul>
-          <li><a href="https://kieuphuonggg.github.io/AFishySituu/" target="_blank" rel="noopener">A Fishy Situation</a></li>
-          <li><a href="https://phuongtung06.github.io/EmbraceA3/" target="_blank" rel="noopener">Embrace</a></li>
-          <li><a href="https://anphamb.github.io/Breath-of-the-Ocean/" target="_blank" rel="noopener">Breath of the Ocean</a></li>
-          <li><a href="../games/tuan-hung/index.html">The Last Catch</a></li>
-          <li><a href="../games/tieu-dinh-ngoc/index.html">Reeflect</a></li>
+          <li><a href="cabinet/index.html?game=fishy-situation">A Fishy Situation</a></li>
+          <li><a href="cabinet/index.html?game=embrace">Embrace</a></li>
+          <li><a href="cabinet/index.html?game=breath-of-the-ocean">Breath of the Ocean</a></li>
+          <li><a href="cabinet/index.html?game=the-last-catch">The Last Catch</a></li>
+          <li><a href="cabinet/index.html?game=reeflect">Reeflect</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -260,7 +265,8 @@
        entrance and scroll-reveal animations -- see animations.js. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="animations.js?v=1"></script>
+  <script src="animations.js?v=3"></script>
+  <script src="page-transition.js?v=1"></script>
 
   <script>
     (function () {
