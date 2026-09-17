@@ -91,9 +91,24 @@ document.addEventListener('DOMContentLoaded', () => {
     words.forEach((w) => {
       if (w.closest('.hl')) return;
       const wRect = w.getBoundingClientRect();
+      // Re-running this on a theme toggle can catch a word mid-animation,
+      // or still sitting in its hidden (translateY 22px) resting state
+      // if its section hasn't scrolled into view yet -- either way
+      // wRect includes that transform. Baking a background-position from
+      // it would be right for right now but wrong the instant the word
+      // finishes animating to its real position, showing as the
+      // gradient cutting off partway down the text (the "line across
+      // it" the transform-shifted slice no longer covers). Subtracting
+      // GSAP's own current x/y gets the word's untransformed layout
+      // position instead, so the baked position stays correct once the
+      // reveal animation settles.
+      const curX = gsap.getProperty(w, 'x') || 0;
+      const curY = gsap.getProperty(w, 'y') || 0;
+      const trueLeft = wRect.left - curX;
+      const trueTop = wRect.top - curY;
       w.style.backgroundImage = bgImage;
       w.style.backgroundSize = rect.width + 'px ' + rect.height + 'px';
-      w.style.backgroundPosition = (rect.left - wRect.left) + 'px ' + (rect.top - wRect.top) + 'px';
+      w.style.backgroundPosition = (rect.left - trueLeft) + 'px ' + (rect.top - trueTop) + 'px';
       w.style.backgroundRepeat = 'no-repeat';
       w.style.webkitBackgroundClip = 'text';
       w.style.backgroundClip = 'text';
