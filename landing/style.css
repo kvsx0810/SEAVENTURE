@@ -4,6 +4,17 @@
   box-sizing: border-box;
 }
 
+/* Nav-link jumps (header nav, footer anchors) ease into place instead of
+   an instant cut -- also what lets the scroll-reveal animations in
+   animations.js actually play when you jump via a link, since they key
+   off scroll position, not just wheel/touch scrolling. Skipped entirely
+   under reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 /* ==========================================================================
    Theme tokens -- pulled straight from the Figma dark/light frames
    (node 668:15 / 668:16). Light is the default palette. Dark applies
