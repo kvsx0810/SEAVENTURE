@@ -613,8 +613,12 @@ section[id] {
   flex-shrink: 0;
 }
 
+/* Bottom-aligned (not centered) to match .games-machine's own
+   flex-end -- with the bigger type below, this keeps the two columns'
+   bottoms level instead of the copy floating in the middle of a much
+   taller machine. */
 .games-copy {
-  align-self: center;
+  align-self: flex-end;
   max-width: 620px;
   text-align: center;
 }
@@ -623,7 +627,7 @@ section[id] {
   font-family: "Inter", sans-serif;
   font-weight: 900;
   letter-spacing: -0.02em;
-  font-size: clamp(22px, 3.74vw, 42px);
+  font-size: clamp(28px, 5vw, 56px);
   line-height: 1.25;
   margin: 0 0 16px;
   background: linear-gradient(-44deg, var(--explainer-grad-1) 12%, var(--explainer-grad-2) 88%);
@@ -638,7 +642,7 @@ section[id] {
 
 .games-desc {
   font-family: "Alata", sans-serif;
-  font-size: clamp(14px, 1.87vw, 22px);
+  font-size: var(--body-text-size);
   line-height: 1.6;
   color: var(--quote-color);
   opacity: 0.85;
