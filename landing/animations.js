@@ -101,25 +101,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Every reveal below is a TOGGLE, not a one-shot: scrolling a section
+  // out of view (either direction) hides it again, so scrolling back
+  // re-triggers the reveal instead of it staying permanently visible.
+  // `toggleActions: 'play reverse play reverse'` maps to the 4
+  // ScrollTrigger events in order -- onEnter/onLeave/onEnterBack/
+  // onLeaveBack -- play forward on the way in, run in reverse on the
+  // way out, from either direction.
   gsap.utils.toArray('[data-reveal]').forEach((el) => {
     const words = splitIntoWords(el);
     if (!words.length) return;
     const lines = lineIndexPerWord(words);
     applyGradientSlice(el, words);
     gsap.set(words, { opacity: 0, y: 22 });
+    const show = () => gsap.to(words, { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out', overwrite: true, stagger: (i) => lines[i] * 0.12 });
+    const hide = () => gsap.to(words, { opacity: 0, y: 22, duration: 0.35, ease: 'power2.in', overwrite: true });
     ScrollTrigger.create({
       trigger: el,
       start: 'top 85%',
-      once: true,
-      onEnter: () => {
-        gsap.to(words, {
-          opacity: 1,
-          y: 0,
-          duration: 0.55,
-          ease: 'power2.out',
-          stagger: (i) => lines[i] * 0.12,
-        });
-      },
+      end: 'bottom 15%',
+      onEnter: show,
+      onEnterBack: show,
+      onLeave: hide,
+      onLeaveBack: hide,
     });
   });
 
@@ -130,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
       x: 120,
       duration: 0.9,
       ease: 'power2.out',
-      scrollTrigger: { trigger: el.closest('.quote-hands-wrap'), start: 'top 85%', toggleActions: 'play none none none' },
+      scrollTrigger: { trigger: el.closest('.quote-hands-wrap'), start: 'top 85%', end: 'bottom 15%', toggleActions: 'play reverse play reverse' },
     });
   });
   gsap.utils.toArray('[data-reveal-hand="left"]').forEach((el) => {
@@ -139,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
       x: -120,
       duration: 0.9,
       ease: 'power2.out',
-      scrollTrigger: { trigger: el.closest('.quote-hands-wrap'), start: 'top 85%', toggleActions: 'play none none none' },
+      scrollTrigger: { trigger: el.closest('.quote-hands-wrap'), start: 'top 85%', end: 'bottom 15%', toggleActions: 'play reverse play reverse' },
     });
   });
 
@@ -154,7 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
       scrollTrigger: {
         trigger: group,
         start: 'top 88%',
-        toggleActions: 'play none none none',
+        end: 'bottom 12%',
+        toggleActions: 'play reverse play reverse',
       },
     });
   });
@@ -169,7 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
       scrollTrigger: {
         trigger: el,
         start: 'top 85%',
-        toggleActions: 'play none none none',
+        end: 'bottom 15%',
+        toggleActions: 'play reverse play reverse',
       },
     });
   });
