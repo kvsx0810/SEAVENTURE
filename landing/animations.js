@@ -108,11 +108,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // ScrollTrigger events in order -- onEnter/onLeave/onEnterBack/
   // onLeaveBack -- play forward on the way in, run in reverse on the
   // way out, from either direction.
+  //
+  // applyGradientSlice() bakes each word's gradient as literal computed
+  // colors (see its own comment) instead of a `var(--x-grad-1)`
+  // reference, so it goes stale the moment the light/dark toggle
+  // changes those variables -- the words kept showing the OLD theme's
+  // gradient until a full reload re-ran this whole script. Keeping a
+  // list of every (container, words) pair here lets the toggle handler
+  // (in index.html) just re-run applyGradientSlice on all of them
+  // instead of reloading the page.
+  const gradientRevealGroups = [];
+
   gsap.utils.toArray('[data-reveal]').forEach((el) => {
     const words = splitIntoWords(el);
     if (!words.length) return;
     const lines = lineIndexPerWord(words);
     applyGradientSlice(el, words);
+    gradientRevealGroups.push({ container: el, words: words });
     gsap.set(words, { opacity: 0, y: 22 });
     const show = () => gsap.to(words, { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out', overwrite: true, stagger: (i) => lines[i] * 0.12 });
     const hide = () => gsap.to(words, { opacity: 0, y: 22, duration: 0.35, ease: 'power2.in', overwrite: true });
@@ -178,6 +190,13 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleActions: 'play reverse play reverse',
       },
     });
+  });
+
+  // Re-bake every gradient-clipped word the moment the theme toggle
+  // fires (see index.html), so switching modes updates them live
+  // instead of needing a reload.
+  document.addEventListener('seaventure:themechange', () => {
+    gradientRevealGroups.forEach((g) => applyGradientSlice(g.container, g.words));
   });
 
   // -------------------- nav scroll-spy underline --------------------

@@ -17,7 +17,7 @@
   <!-- Apotek Wide -- same Adobe Fonts kit every other SEAVENTURE page uses -->
   <link rel="stylesheet" href="https://use.typekit.net/rav6zvx.css">
 
-  <link rel="stylesheet" href="style.css?v=32">
+  <link rel="stylesheet" href="style.css?v=33">
 
   <!-- Applies a saved light/dark override (from the toggle button, see
        the script near the end of body) before first paint, so the page
@@ -265,18 +265,42 @@
        entrance and scroll-reveal animations -- see animations.js. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="animations.js?v=4"></script>
+  <script src="animations.js?v=5"></script>
   <script src="page-transition.js?v=2"></script>
 
   <script>
     (function () {
       var root = document.documentElement;
       var btn = document.getElementById('themeToggle');
+      var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function applyTheme(next) {
+        root.dataset.theme = next;
+        try { localStorage.setItem('seaventure-theme', next); } catch (e) {}
+        // Lets animations.js re-bake the gradient-clipped word spans for
+        // the new theme (see its own comment) -- without this they kept
+        // showing the old theme's gradient until a full reload.
+        document.dispatchEvent(new CustomEvent('seaventure:themechange'));
+      }
+
       btn.addEventListener('click', function () {
         var current = root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         var next = current === 'dark' ? 'light' : 'dark';
-        root.dataset.theme = next;
-        try { localStorage.setItem('seaventure-theme', next); } catch (e) {}
+
+        if (reduceMotion || typeof gsap === 'undefined') {
+          applyTheme(next);
+          return;
+        }
+
+        // A quick dip-to-fade-back "blink" -- most colors on the page
+        // already cross-fade on their own via the CSS transition in
+        // style.css, but gradient text can't animate smoothly (a
+        // background-image swap is an instant snap in CSS), so this
+        // hides that snap inside the dip instead of showing it plainly.
+        gsap.timeline()
+          .to(document.body, { opacity: 0.4, duration: 0.16, ease: 'power1.out' })
+          .call(function () { applyTheme(next); })
+          .to(document.body, { opacity: 1, duration: 0.32, ease: 'power1.in' });
       });
     })();
   </script>
