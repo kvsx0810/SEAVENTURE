@@ -608,7 +608,7 @@ section[id] {
 .games .deco-fish--games-b { aspect-ratio: 96 / 36; width: clamp(30px, 3.6vw, 48px); bottom: 1%; left: 15%; transform: rotate(6deg) scaleX(-1); }
 
 .games-machine {
-  width: clamp(242px, 30.8vw, 462px);
+  width: clamp(187px, 23.7vw, 356px);
   height: auto;
   flex-shrink: 0;
 }
@@ -617,9 +617,15 @@ section[id] {
    flex-end -- with the bigger type below, this keeps the two columns'
    bottoms level instead of the copy floating in the middle of a much
    taller machine. */
+/* flex-shrink (not a fixed width) so this column narrows to fit
+   alongside the machine at in-between viewport widths instead of
+   being forced onto its own line -- a plain fixed max-width did that
+   once the two no longer summed to fit .games' own max-width, and the
+   wrapped copy then landed flush against the footer on its own row. */
 .games-copy {
   align-self: flex-end;
-  max-width: 620px;
+  flex: 1 1 300px;
+  max-width: 760px;
   text-align: center;
 }
 
