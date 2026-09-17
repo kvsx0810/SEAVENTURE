@@ -22,7 +22,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const mode = overlay.dataset.transitionMode;
 
   if (mode === 'arrive') {
-    gsap.to(overlay, { y: '100%', duration: 0.7, ease: 'power2.inOut', delay: 0.2 });
+    // Landing's own overlay reads its background from the same
+    // --page-grad-top/bottom tokens the rest of that page uses, so it's
+    // already theme-correct. The cabinet has no theme system of its own
+    // (always dark), so its copy of the overlay defaulted to a fixed
+    // dark background -- a visible color mismatch against the light
+    // overlay landing had just slid up if the visitor was in light mode.
+    // Read the same 'seaventure-theme' the toggle writes (same origin,
+    // so it's already there) and match landing's exact gradient values.
+    let theme = null;
+    try { theme = localStorage.getItem('seaventure-theme'); } catch (e) {}
+    if (theme !== 'light' && theme !== 'dark') {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    const GRADIENTS = { light: ['#bbe8fb', '#11aef3'], dark: ['#063e79', '#021427'] };
+    const g = GRADIENTS[theme];
+    overlay.style.background = 'linear-gradient(180deg,' + g[0] + ',' + g[1] + ')';
+    const lightMascot = overlay.querySelector('img[data-mascot="light"]');
+    const darkMascot = overlay.querySelector('img[data-mascot="dark"]');
+    if (lightMascot && darkMascot) {
+      lightMascot.style.display = theme === 'light' ? 'block' : 'none';
+      darkMascot.style.display = theme === 'light' ? 'none' : 'block';
+    }
+
+    // Extra beat before revealing -- the cover should hold for a moment
+    // (mascot fully in frame) instead of sliding away almost as soon as
+    // the new page has painted.
+    gsap.to(overlay, { y: '100%', duration: 0.7, ease: 'power2.inOut', delay: 1 });
   }
 
   if (mode === 'depart') {
