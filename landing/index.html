@@ -17,7 +17,7 @@
   <!-- Apotek Wide -- same Adobe Fonts kit every other SEAVENTURE page uses -->
   <link rel="stylesheet" href="https://use.typekit.net/rav6zvx.css">
 
-  <link rel="stylesheet" href="style.css?v=33">
+  <link rel="stylesheet" href="style.css?v=34">
 
   <!-- Applies a saved light/dark override (from the toggle button, see
        the script near the end of body) before first paint, so the page
@@ -124,8 +124,31 @@
           <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
         </svg>
       </button>
+      <!-- Off by default -- browsers block autoplay until a real click, so
+           there's no point defaulting this to "on". Same speaker-glyph
+           pattern (base + waves + mute-X, toggled via [aria-pressed]) as
+           games/tuan-hung's #sound-toggle, redrawn with currentColor so it
+           themes the same way as the sun/moon icons above instead of a
+           fixed navy fill. -->
+      <button type="button" class="music-toggle" id="musicToggle" aria-pressed="false" aria-label="Toggle background music">
+        <svg class="music-toggle-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 9.5V14.5C3 15.0523 3.44772 15.5 4 15.5H7L11.2929 19.7929C11.9229 20.4229 13 19.9749 13 19.0858V4.91421C13 4.02513 11.9229 3.57714 11.2929 4.20711L7 8.5H4C3.44772 8.5 3 8.94772 3 9.5Z" fill="currentColor"/>
+          <g class="music-waves">
+            <path d="M16.5 8.5C17.5 9.7 18 10.8 18 12C18 13.2 17.5 14.3 16.5 15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M19 6C20.5 7.8 21.3 9.8 21.3 12C21.3 14.2 20.5 16.2 19 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </g>
+          <path class="music-mute-x" d="M16.5 9L21 15M21 9L16.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
   </header>
+
+  <!-- Ambient loop for the outside/scrolling page only (the cabinet is its
+       own separate screen and keeps its own sound design once opened --
+       this element and its toggle live only here, never travel into
+       cabinet/index.html). preload="none": no point fetching 9MB of audio
+       before the visitor has asked for sound at all. -->
+  <audio id="bgm" src="assets/bgm.wav" loop preload="none"></audio>
 
   <main>
     <section class="hero" id="home">
@@ -301,6 +324,27 @@
           .to(document.body, { opacity: 0.4, duration: 0.16, ease: 'power1.out' })
           .call(function () { applyTheme(next); })
           .to(document.body, { opacity: 1, duration: 0.32, ease: 'power1.in' });
+      });
+    })();
+  </script>
+
+  <!-- Background music toggle -- plain play/pause, no persistence across
+       visits (same reasoning as games/tuan-hung: audio starts off every
+       load regardless of the last visit, since the browser blocks
+       autoplay either way, so remembering "on" couldn't resume it
+       unattended anyway). -->
+  <script>
+    (function () {
+      var btn = document.getElementById('musicToggle');
+      var bgm = document.getElementById('bgm');
+      if (!btn || !bgm) return;
+      bgm.volume = 0.35;
+      var on = false;
+      btn.addEventListener('click', function () {
+        on = !on;
+        btn.setAttribute('aria-pressed', String(on));
+        if (on) bgm.play().catch(function () { /* ignored -- blocked until a real user gesture, which this click already is, but fails silently on any other rejection (e.g. the file still loading) */ });
+        else bgm.pause();
       });
     })();
   </script>

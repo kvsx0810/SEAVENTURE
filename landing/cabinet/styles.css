@@ -364,3 +364,31 @@ body {
 }
 
 .popup-close:hover { background: rgba(255, 255, 255, 0.24); }
+
+/* -------------------- rotate-phone prompt -------------------- */
+/* Real viewport, not the .slide's own scaled/cover space -- the cabinet
+   itself stays hidden (see app.js's setupResponsiveLayout) while this
+   shows, so it doesn't matter that .slide's cover-scaling would otherwise
+   make a portrait phone unreadable. */
+#rotate-prompt {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  background: #021427;
+}
+
+#rotate-prompt[hidden] {
+  display: none;
+}
+
+#rotate-text {
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: #fff;
+}

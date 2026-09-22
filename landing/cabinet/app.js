@@ -3,6 +3,34 @@
 // page's START button is only meant to launch a game, not re-walk the
 // SDG/credit/reference slides that live on the landing page itself now.
 
+// Landscape-only on phones, same reasoning and detection as
+// games/tuan-hung/sketch.js's isPhoneTouch()/isPhonePortrait() (a phone's
+// SHORT side stays under 900px in either orientation, but whether that's
+// width or height flips with rotation, so both are checked) -- kept
+// independent of the carousel/popup logic below so it still runs even if
+// something in that logic throws.
+function isPhoneTouch() {
+  return (window.matchMedia('(max-width: 900px)').matches
+      || window.matchMedia('(max-height: 900px)').matches)
+    && window.matchMedia('(pointer: coarse)').matches;
+}
+function isPhonePortrait() {
+  return isPhoneTouch() && window.innerHeight > window.innerWidth;
+}
+function setupResponsiveLayout() {
+  const prompt = document.getElementById('rotate-prompt');
+  const stage = document.querySelector('.stage');
+  function apply() {
+    const portrait = isPhonePortrait();
+    prompt.hidden = !portrait;
+    stage.style.visibility = portrait ? 'hidden' : 'visible';
+  }
+  window.addEventListener('resize', apply);
+  window.addEventListener('orientationchange', apply);
+  apply();
+}
+setupResponsiveLayout();
+
 document.addEventListener('DOMContentLoaded', () => {
   const screenContent = document.getElementById('screenContent');
   const joyLeft = document.getElementById('joyLeft');
@@ -15,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const CAROUSEL = [
     { id: 'random', kind: 'random' },
     { id: 'fishy-situation', kind: 'game', label: 'A Fishy Situation', thumb: '../../assets/images/KieuPhuongThumbnail.png', src: 'https://kieuphuonggg.github.io/AFishySituu/' },
-    { id: 'embrace', kind: 'game', label: 'Embrace', thumb: '../../assets/images/TungPhuongThumbnail.png', src: 'https://phuongtung06.github.io/EmbraceA3/' },
+    { id: 'embrace', kind: 'game', label: 'Embrace', thumb: '../../assets/images/TungPhuongThumbnail.png', src: 'https://phuongtung06.github.io/COMM2754-2026-S2-A3w12-Embrace-code/' },
     { id: 'breath-of-the-ocean', kind: 'game', label: 'Breath of the Ocean', thumb: '../../assets/images/AnPhamThumbnail.png', src: 'https://anphamb.github.io/Breath-of-the-Ocean/' },
     { id: 'the-last-catch', kind: 'game', label: 'The Last Catch', thumb: '../../assets/images/TuanHungThumbnail.png', src: '../../games/tuan-hung/index.html' },
     { id: 'reeflect', kind: 'game', label: 'Reeflect', thumb: '../../assets/images/TieuDinhNgocThumbnail.png?v=3', src: 'https://ngoctieu0207.github.io/reeflect.2/' },
