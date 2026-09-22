@@ -157,10 +157,21 @@
    counts toward the page's own scrollable width in Chrome/WebKit,
    which a mouse never reveals but a real finger swiping right-to-left
    does (an actual horizontal pan, not a scrollbar drag). overflow-x:
-   hidden on both html and body is the standard, safe blanket fix --
-   nothing on this page is meant to be reachable by scrolling
-   sideways, so clipping any stray horizontal extent, from this or any
-   future cause, is never the wrong call here. */
+   hidden here on html is the fix -- html's own overflow is the one
+   that actually controls the document/viewport-level scroller in
+   every modern browser, so this alone is enough; nothing on this page
+   is meant to be reachable by scrolling sideways, so clipping any
+   stray horizontal extent, from this or any future cause, is never
+   the wrong call here.
+   Originally this was set on BOTH html and body -- body's copy broke
+   .site-header's position:sticky (any overflow other than visible on
+   an ANCESTOR of a sticky element, other than the true viewport,
+   turns that ancestor into its own scroll container and detaches the
+   sticky element from the real viewport instead -- confirmed directly:
+   the header scrolled away with the rest of the page instead of
+   staying pinned). html doesn't have this problem since its overflow
+   already IS the viewport-level scroller, not a separate clipping box
+   the header would stick to instead. */
 html {
   overflow-x: hidden;
 }
@@ -169,7 +180,6 @@ body {
   font-family: "Alata", sans-serif;
   background: linear-gradient(180deg, var(--page-grad-top), var(--page-grad-bottom));
   min-height: calc(100svh - var(--header-h));
-  overflow-x: hidden;
 }
 
 /* nav links jump to these -- without this, the browser scrolls the

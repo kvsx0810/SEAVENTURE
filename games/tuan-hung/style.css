@@ -18,6 +18,17 @@ html, body {
   height: 100%;
   background: #000;
   overflow: hidden;
+  /* Holding down anywhere on a touch device -- the move-left/right
+     buttons, the hook button, even the canvas itself -- was triggering
+     the platform's own long-press behavior (iOS's copy/share callout,
+     Android's equivalent), the touch version of a right-click context
+     menu. Nothing on this page is ever meant to be selected, copied, or
+     saved via a long press, so all of it is turned off globally rather
+     than chasing it element by element. */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #sketch-holder {

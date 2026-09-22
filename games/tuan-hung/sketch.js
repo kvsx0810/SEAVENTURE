@@ -566,6 +566,17 @@ function setupInfoPanel() {
 // hook button taps to cast (mirrors Space). Only shown once
 // setupResponsiveLayout() below decides this is actually a phone.
 // ==========================================================================
+// Backs up the CSS touch-callout/user-select fix in style.css -- some
+// Android browsers still fire a real 'contextmenu' event on a long
+// press regardless of those CSS properties, popping up a right-click-
+// style menu over the move/cast buttons (or the canvas itself) instead
+// of just holding the button down like the game expects. Blocked
+// document-wide since nothing on this page is ever meant to show a
+// context menu.
+function setupContextMenuBlock() {
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+}
+
 function setupTouchControls() {
   const left = document.getElementById('touch-left');
   const right = document.getElementById('touch-right');
@@ -684,6 +695,7 @@ function setup() {
   hookSwayPhase = random(TWO_PI);
   setupSoundToggle();
   setupInfoPanel();
+  setupContextMenuBlock();
   setupTouchControls();
   setupResponsiveLayout();
   buildCatchProgressSlots();
