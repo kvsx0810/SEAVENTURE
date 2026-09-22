@@ -25,6 +25,31 @@
   }
 }
 
+/* Prime suspect, found by actually reading document.documentElement's
+   own inline style at runtime instead of guessing at the positioning
+   mechanism yet again: scroll-behavior:smooth was here from before any
+   of the header/nav work in this whole thread even started, so it was
+   present in literally every variant tried (sticky, fixed, absolute)
+   and never once ruled out. On some real mobile browsers (this can't
+   be confirmed against real Android hardware in this session, same
+   caveat as everything else in this saga), smooth scrolling can force
+   the scroll timeline onto the main thread instead of letting the
+   compositor thread scroll independently -- and position:sticky /
+   position:fixed both rely on that fast compositor-thread path to stay
+   visually pinned without lag. That would explain BOTH still-open
+   reports with one shared cause: a header that fails to stay pinned,
+   and (plausibly, same underlying path) touch gesture handling at the
+   page edge behaving unreliably too. Overridden back to instant
+   (auto) specifically on phone/touch below -- desktop mouse-wheel
+   scrolling and non-touch anchor jumps don't share this compositor
+   conflict, so smooth stays there. */
+@media (prefers-reduced-motion: no-preference) and (pointer: coarse) and (max-width: 900px),
+       (prefers-reduced-motion: no-preference) and (pointer: coarse) and (max-height: 900px) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* Per-word wrapper the line-by-line reveal in animations.js splits
    [data-reveal] text into -- inline-block so GSAP's opacity/y transform
    actually applies (plain inline elements don't reliably transform). */
