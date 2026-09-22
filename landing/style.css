@@ -151,31 +151,17 @@
   --muted-opacity: 0.8;
 }
 
-/* The nav drawer (.nav-group, see the hamburger section further down)
-   is position:fixed + translateX(100%) while closed -- genuinely
-   off-screen and invisible, but its untransformed layout box still
-   counts toward the page's own scrollable width in Chrome/WebKit,
-   which a mouse never reveals but a real finger swiping right-to-left
-   does (an actual horizontal pan, not a scrollbar drag). overflow-x:
-   hidden here on html is the fix -- html's own overflow is the one
-   that actually controls the document/viewport-level scroller in
-   every modern browser, so this alone is enough; nothing on this page
-   is meant to be reachable by scrolling sideways, so clipping any
-   stray horizontal extent, from this or any future cause, is never
-   the wrong call here.
-   Originally this was set on BOTH html and body -- body's copy broke
-   .site-header's position:sticky (any overflow other than visible on
-   an ANCESTOR of a sticky element, other than the true viewport,
-   turns that ancestor into its own scroll container and detaches the
-   sticky element from the real viewport instead -- confirmed directly:
-   the header scrolled away with the rest of the page instead of
-   staying pinned). html doesn't have this problem since its overflow
-   already IS the viewport-level scroller, not a separate clipping box
-   the header would stick to instead. */
-html {
-  overflow-x: hidden;
-}
-
+/* NOTE: this used to also carry overflow-x:hidden here on html (and,
+   before that, on body too -- see git history), meant to blanket-clip
+   the nav drawer's closed-state overflow (below). Removed entirely --
+   still broke position:sticky on a real phone even with only html's
+   copy left (the "overflow on the root propagates to the viewport
+   scroller" behavior this relied on isn't consistent enough across
+   real mobile browsers to trust), AND didn't reliably stop the
+   horizontal overscroll there either. Fixed at the actual source
+   instead -- see .nav-group's own comment below, its closed-state
+   transform now stays within the viewport bound on its own, so
+   nothing needs clipping. */
 body {
   font-family: "Alata", sans-serif;
   background: linear-gradient(180deg, var(--page-grad-top), var(--page-grad-bottom));
@@ -1027,7 +1013,19 @@ section[id] {
      real viewport instead. Closed state stays in normal flow (no
      [hidden], no display:none) but faded+shifted out and hit-testing/
      AT-invisible; the open/close transition only ever animates
-     transform+opacity, never a layout-affecting property. */
+     transform+opacity, never a layout-affecting property.
+     The closed-state transform stays within the 12px `right` margin
+     (8px < 12px) ON PURPOSE -- this card sits 12px from the real edge,
+     so shifting it right by anything up to that keeps its rendered box
+     fully inside the viewport even while "hidden", instead of
+     poking a few px past the edge the way a bigger shift (or the old
+     edge-flush, full-width drawer's translateX(100%)) did. That's a
+     real, if small, horizontal overflow a mouse never reveals but a
+     phone's own right-to-left swipe does -- tried clipping it with
+     overflow-x:hidden on html/body instead first (see the comment
+     above body), which broke position:sticky on a real phone and
+     didn't fully fix the overflow there either, so this fixes it at
+     the source instead of trying to mask it after the fact. */
   .nav-group {
     position: fixed;
     z-index: 100;
@@ -1042,7 +1040,7 @@ section[id] {
     background: var(--header-bg);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
     opacity: 0;
-    transform: translateX(16px);
+    transform: translateX(8px);
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
