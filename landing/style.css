@@ -642,7 +642,7 @@ section[id] {
   position: relative;
   min-height: calc(100vh - var(--header-h));
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   gap: clamp(24px, 5vw, 80px);
   max-width: 1300px;
@@ -945,13 +945,25 @@ section[id] {
 @media (max-width: 640px) {
   :root {
     /* single row now (hamburger replaces the wrapped nav row the old
-       layout needed) -- back down near the desktop height */
-    --header-h: 72px;
+       layout needed), and the row itself is shorter -- smaller logo,
+       tighter padding (see below) -- so this comes down a lot further
+       than the desktop 104px */
+    --header-h: 56px;
   }
 
   .site-header {
     height: auto;
-    padding: 12px 16px;
+    min-height: 0;
+    padding: 10px 16px;
+  }
+
+  /* Smaller than desktop's own clamp(40px,6vw,74px) -- at 6vw that
+     clamp already bottoms out at its 40px floor well before phone
+     width, so it wasn't actually shrinking any further on its own; the
+     header bar itself read as oversized next to the compact hamburger
+     next to it. */
+  .brand-icon {
+    height: 32px;
   }
 
   /* Logo only -- "SEAVENTURE" wordmark drops, hamburger takes the nav's
@@ -964,28 +976,42 @@ section[id] {
     display: flex;
   }
 
-  /* Dropdown panel instead of the old wrap-to-second-row nav bar --
-     absolutely positioned under the header so it overlays the page
-     instead of pushing content down, collapsed (closed) by default via
-     max-height, matching the .site-header itself being sticky (a valid
-     containing block for this). */
+  /* Dropdown panel instead of the old wrap-to-second-row nav bar.
+     position:fixed (not absolute against the sticky header) so it's
+     never at the mercy of a browser's own handling of position:sticky
+     as an absolute-positioning containing block -- anchored directly
+     under the header at a fixed, known offset instead. Closed state
+     stays in normal flow (no [hidden], no display:none) but pushed
+     just above the header and hit-testing/AT-invisible, so the
+     open/close transition only ever animates cheap
+     opacity+transform, never a layout-affecting height -- avoids the
+     flex content briefly recalculating a wrong width mid-transition
+     that an animated max-height on a flex container is prone to. */
   .nav-group {
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: var(--header-h);
     left: 0;
     right: 0;
     flex-direction: column;
     align-items: stretch;
     gap: 0;
-    max-height: 0;
-    overflow: hidden;
+    max-height: calc(100svh - var(--header-h));
+    overflow-y: auto;
     background: var(--header-bg);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
-    transition: max-height 0.3s ease;
+    opacity: 0;
+    transform: translateY(-8px);
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
   }
 
   .nav-group.is-open {
-    max-height: 360px;
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
   .site-nav {

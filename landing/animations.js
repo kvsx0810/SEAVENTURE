@@ -12,6 +12,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduceMotion) return;
 
+  // Same isPhoneTouch() condition used everywhere else in this project
+  // (games/tuan-hung, the cabinet). Per feedback, the scroll-triggered
+  // reveals below (text hiding/showing, hands sliding in, staggered
+  // groups, image pop-ins) read as buggy on a phone rather than
+  // polished, so phones skip that whole system entirely -- every section
+  // just renders at its normal, fully-visible state from the start, the
+  // same as it would under prefers-reduced-motion. The one-time hero
+  // entrance on load isn't scroll-triggered, so it still plays.
+  const isPhoneTouch = (window.matchMedia('(max-width: 900px)').matches
+      || window.matchMedia('(max-height: 900px)').matches)
+    && window.matchMedia('(pointer: coarse)').matches;
+
   gsap.registerPlugin(ScrollTrigger);
 
   // -------------------- hero entrance (plays once, on load) --------------------
@@ -23,6 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
     .from(heroWaves, { opacity: 0, y: 40, duration: 1, stagger: 0.15 })
     .from(heroMascot, { opacity: 0, y: 30, scale: 0.85, duration: 0.8 }, '-=0.6')
     .from(heroTitle, { opacity: 0, y: 30, duration: 0.8 }, '-=0.5');
+
+  if (isPhoneTouch) {
+    // Nothing below this point ever hides anything on phone, so there's
+    // nothing to reveal -- skip straight to the nav scroll-spy at the
+    // bottom of the file (harmless there: it only toggles a class on the
+    // already-visible nav, not an opacity/transform reveal).
+  } else {
 
   // -------------------- line-by-line text reveal --------------------
   // Wraps every word of a [data-reveal] element in its own inline-block
@@ -213,6 +232,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('seaventure:themechange', () => {
     gradientRevealGroups.forEach((g) => applyGradientSlice(g.container, g.words));
   });
+
+  } // end !isPhoneTouch
 
   // -------------------- nav scroll-spy underline --------------------
   const navLinks = Array.from(document.querySelectorAll('.site-nav a'));

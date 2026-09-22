@@ -21,7 +21,14 @@ body {
   position: fixed;
   inset: 0;
   width: 100vw;
-  height: 100vh;
+  /* svh (small viewport height), not vh -- vh on a phone is the LARGE
+     viewport (as if the browser's address/tab bar were always hidden),
+     so sizing .slide's own contain-fit math (below) against it can
+     still compute a box taller than what's actually guaranteed
+     visible, cropping the same way the earlier cover-vs-contain fix
+     was meant to solve. svh is pinned to the guaranteed-visible minimum
+     regardless of the browser chrome's state. */
+  height: 100svh;
   overflow: hidden;
   background: #021427;
 }
@@ -481,11 +488,50 @@ body {
    severe. min() instead of max() below guarantees the whole composition
    -- including the center arcade button -- stays fully on-screen, at the
    cost of letting narrow letterbox bars show on the sides; those bars are
-   invisible in practice since .stage behind .slide is the same #021427. */
+   invisible in practice since .stage behind .slide is the same #021427.
+   svh, not vh, for the same reason as .stage above -- a phone's browser
+   chrome (address bar, and in landscape sometimes a tab-switcher strip
+   too) can eat into the nominal 100vh without shrinking svh, so using
+   plain vh here still let the composition compute taller than what's
+   actually visible even after switching to contain-fit. */
 @media (pointer: coarse) and (max-width: 900px),
        (pointer: coarse) and (max-height: 900px) {
   .slide {
-    width: min(100vw, calc(100vh * 1920 / 1080));
-    height: min(100vh, calc(100vw * 1080 / 1920));
+    width: min(100vw, calc(100svh * 1920 / 1080));
+    height: min(100svh, calc(100vw * 1080 / 1920));
+  }
+
+  /* The selected game needs real screen real estate on a phone, not a
+     small floating 16:9 box scaled down to fit a cabinet composition
+     that's already itself letterboxed to fit the phone -- goes properly
+     fullscreen instead. .popup-overlay switches from absolute (relative
+     to .slide, so it would only ever cover .slide's own -- possibly
+     letterboxed -- box) to fixed (relative to the real device viewport)
+     so it covers the true screen regardless of how small .slide itself
+     has shrunk to fit the phone. .popup-frame's sizing switches from
+     cqw (relative to .slide's own container-type box, which .popup-close
+     would still resolve against even under position:fixed, since
+     container-size queries follow DOM ancestry, not the positioning
+     scheme) to plain px, since there's no meaningful "percent of the
+     cabinet" left to be relative to once this is covering the whole
+     phone screen instead of a scaled-down cabinet. */
+  .popup-overlay {
+    position: fixed;
+  }
+
+  .popup-frame {
+    width: 100vw;
+    height: 100svh;
+    aspect-ratio: unset;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .popup-close {
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
   }
 }
