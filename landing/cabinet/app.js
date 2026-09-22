@@ -31,6 +31,26 @@ function setupResponsiveLayout() {
 }
 setupResponsiveLayout();
 
+// Background music toggle -- moved here from the landing page (per
+// feedback, this page is the arcade itself, the landing page should stay
+// quiet). No persistence across visits, same reasoning as every other
+// audio toggle in this project: the browser blocks autoplay regardless of
+// what was remembered, so there was never anything to resume unattended.
+function setupMusicToggle() {
+  const btn = document.getElementById('musicToggle');
+  const bgm = document.getElementById('bgm');
+  if (!btn || !bgm) return;
+  bgm.volume = 0.35;
+  let on = false;
+  btn.addEventListener('click', () => {
+    on = !on;
+    btn.setAttribute('aria-pressed', String(on));
+    if (on) bgm.play().catch(() => {});
+    else bgm.pause();
+  });
+}
+setupMusicToggle();
+
 document.addEventListener('DOMContentLoaded', () => {
   const screenContent = document.getElementById('screenContent');
   const joyLeft = document.getElementById('joyLeft');

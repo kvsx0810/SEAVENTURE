@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alata&family=Inter:ital,wght@0,400;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
 
@@ -39,8 +39,33 @@
        (no spinning phone icon/asset) to match this shell's own plainer,
        on-brand look instead of borrowing another game's art. -->
   <div id="rotate-prompt" hidden>
+    <svg id="rotate-icon" viewBox="0 0 60 100" aria-hidden="true">
+      <rect x="4" y="4" width="52" height="92" rx="10" fill="none" stroke="url(#rotateIconGrad)" stroke-width="4"/>
+      <circle cx="30" cy="85" r="3.2" fill="url(#rotateIconGrad)"/>
+      <linearGradient id="rotateIconGrad" x1="0" y1="0" x2="60" y2="100" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#62c9f6"/>
+        <stop offset="1" stop-color="#b8e7fb"/>
+      </linearGradient>
+    </svg>
     <p id="rotate-text">Rotate your phone to play</p>
   </div>
+
+  <!-- Off by default -- browsers block autoplay until a real click.
+       Fixed to the real viewport corner (not positioned inside .slide's
+       own 1920x1080 percentage system), same reason the rotate-prompt
+       above is fixed too: .slide's cover/contain scaling shouldn't be
+       able to push this out of reach. -->
+  <button type="button" class="music-toggle" id="musicToggle" aria-pressed="false" aria-label="Toggle background music">
+    <svg class="music-toggle-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M3 9.5V14.5C3 15.0523 3.44772 15.5 4 15.5H7L11.2929 19.7929C11.9229 20.4229 13 19.9749 13 19.0858V4.91421C13 4.02513 11.9229 3.57714 11.2929 4.20711L7 8.5H4C3.44772 8.5 3 8.94772 3 9.5Z" fill="currentColor"/>
+      <g class="music-waves">
+        <path d="M16.5 8.5C17.5 9.7 18 10.8 18 12C18 13.2 17.5 14.3 16.5 15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M19 6C20.5 7.8 21.3 9.8 21.3 12C21.3 14.2 20.5 16.2 19 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </g>
+      <path class="music-mute-x" d="M16.5 9L21 15M21 9L16.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
+  <audio id="bgm" src="../assets/bgm.wav" loop preload="none"></audio>
 
   <main class="stage">
     <div class="top-vignette" aria-hidden="true"></div>
@@ -77,6 +102,6 @@
   </main>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="../page-transition.js?v=2"></script>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

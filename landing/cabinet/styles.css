@@ -28,7 +28,11 @@ body {
 
 /* Scale the whole 1920x1080 composition as one rigid unit (never distort
    per-axis) -- COVER the viewport instead of fitting inside it, same as
-   the root cabinet's .slide. Desktop/laptop only. */
+   the root cabinet's .slide. Desktop/laptop only -- a real phone in
+   landscape overridden below cover()s to a landscape-phone aspect ratio
+   is enough wider than 16:9 (e.g. ~19.5:9) that cover-fit pushed the top
+   and bottom of the composition, including the center arcade button,
+   past the visible viewport -- unreachable and uncroppable. */
 .slide {
   position: absolute;
   top: 50%;
@@ -348,7 +352,14 @@ body {
    "slide up" copy of this overlay. See style.css for the full note. */
 .page-transition {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* 100svh, not inset:0's implicit bottom -- see the matching note on
+     landing/style.css's own .page-transition for why (a phone's address
+     bar can be in a different state at the end of that page's depart
+     animation vs the start of this page's arrive one, otherwise). */
+  height: 100svh;
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -365,6 +376,49 @@ body {
 
 .popup-close:hover { background: rgba(255, 255, 255, 0.24); }
 
+/* -------------------- music toggle -------------------- */
+/* Same speaker-glyph pattern as games/tuan-hung's #sound-toggle and the
+   toggle this used to sit on landing/index.html before moving here --
+   unmuted: waves show, X hidden; muted (the default): waves hidden, X
+   shows. Fixed to the real viewport's own top-left corner, above
+   everything else on the page (z-index above .slide's own stacking, and
+   above #rotate-prompt is unnecessary since that overlay hides .stage
+   itself, not this button). */
+.music-toggle {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(187, 232, 251, 0.16);
+  color: #bbe8fb;
+  cursor: pointer;
+}
+
+.music-toggle:hover {
+  background: rgba(187, 232, 251, 0.28);
+}
+
+.music-toggle-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.music-toggle[aria-pressed="true"] .music-mute-x {
+  display: none;
+}
+
+.music-toggle[aria-pressed="false"] .music-waves {
+  display: none;
+}
+
 /* -------------------- rotate-phone prompt -------------------- */
 /* Real viewport, not the .slide's own scaled/cover space -- the cabinet
    itself stays hidden (see app.js's setupResponsiveLayout) while this
@@ -375,8 +429,10 @@ body {
   inset: 0;
   z-index: 1000;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 20px;
   text-align: center;
   padding: 24px;
   background: #021427;
@@ -386,9 +442,50 @@ body {
   display: none;
 }
 
+/* Same beat as reeflect.2's own #rotate-phone spin (0.35s hold at 0deg,
+   snap into the turn, 0.35s hold at 90deg) -- an inline SVG phone outline
+   instead of an image asset, so nothing needs exporting/borrowing from
+   another game's art. */
+#rotate-icon {
+  width: 44px;
+  height: 74px;
+  animation: rotate-icon-spin 1.6s ease-in-out infinite;
+}
+
+@keyframes rotate-icon-spin {
+  0%, 20% { transform: rotate(0deg); }
+  50%, 70% { transform: rotate(90deg); }
+  100% { transform: rotate(90deg); }
+}
+
+/* Same brand gradient the rest of SEAVENTURE uses on a dark ground (dark
+   mode's --brand-grad-1/2 in landing/style.css -- the cabinet has no
+   light/dark toggle of its own, so those tokens are inlined directly
+   here rather than duplicating a whole theming system for one string). */
 #rotate-text {
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
   font-size: 28px;
-  color: #fff;
+  background-image: linear-gradient(90deg, #62c9f6, #b8e7fb);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* -------------------- phone landscape: contain instead of cover -------------------- */
+/* Same isPhoneTouch() condition app.js uses (checked here in pure CSS,
+   nothing to keep in sync with JS since this only ever needs to react to
+   viewport size). A landscape phone is real estate-desperate compared to
+   a desktop window, and its aspect ratio commonly runs well past 16:9
+   (~19.5:9 on an iPhone), where cover-fit's top/bottom crop above becomes
+   severe. min() instead of max() below guarantees the whole composition
+   -- including the center arcade button -- stays fully on-screen, at the
+   cost of letting narrow letterbox bars show on the sides; those bars are
+   invisible in practice since .stage behind .slide is the same #021427. */
+@media (pointer: coarse) and (max-width: 900px),
+       (pointer: coarse) and (max-height: 900px) {
+  .slide {
+    width: min(100vw, calc(100vh * 1920 / 1080));
+    height: min(100vh, calc(100vw * 1080 / 1920));
+  }
 }
