@@ -166,19 +166,40 @@ body {
   font-family: "Alata", sans-serif;
   background: linear-gradient(180deg, var(--page-grad-top), var(--page-grad-bottom));
   min-height: calc(100svh - var(--header-h));
+  /* Compensates for .site-header switching from sticky to fixed below
+     (fixed removes it from normal flow entirely, unlike sticky, which
+     still occupies its own slot until the scroll threshold) -- without
+     this the page's real content would start at y=0, right under/
+     behind the now-floating header, instead of below it. */
+  padding-top: var(--header-h);
 }
 
 /* nav links jump to these -- without this, the browser scrolls the
-   target's top edge to y=0, right where the sticky header floats, so
+   target's top edge to y=0, right where the fixed header floats, so
    the header covers the section's own top padding/centering space */
 section[id] {
   scroll-margin-top: var(--header-h);
 }
 
 /* -------------------- header -------------------- */
+/* position:fixed, not sticky -- screen-recorded proof from a real
+   phone (see chat) showed the header vanishing on some scrolled
+   positions but not others while scrolling in the same direction,
+   an intermittent failure pattern that points at a real Android
+   Chrome position:sticky rendering bug rather than anything
+   deterministic in this CSS (a genuine CSS mistake, like a stray
+   ancestor overflow, would fail the same way every time, not only
+   sometimes). fixed doesn't share sticky's containing-block/
+   scroll-container fragility -- it's a much more bulletproof
+   mechanism for "always pinned to the same spot on screen" across
+   real-world mobile browsers, at the cost of needing the padding-top
+   compensation on body above (sticky handles that part for free by
+   staying in normal flow; fixed doesn't). */
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   display: flex;
   flex-wrap: wrap;
