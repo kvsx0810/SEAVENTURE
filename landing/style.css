@@ -231,6 +231,25 @@ section[id] {
   min-height: 104px;
   padding: 12px clamp(16px, 4vw, 60px);
   background: var(--header-bg);
+  /* GPU-layer promotion, isolated to JUST this property this round (the
+     earlier attempt bundled it with the position:fixed experiment, so it
+     was never possible to tell which of the two changes did what -- this
+     is the same technique, tried alone, on the CURRENT sticky mechanism).
+     Matches the site owner's newly-precise description of bug #1: the
+     header visibly gets pulled along with the page and clipped at its
+     own top edge for a moment during a scroll-down gesture before
+     snapping into place -- exactly what it looks like when a sticky
+     element hasn't been promoted to its own compositor layer yet and
+     briefly gets painted as part of the normal scrolling content instead
+     of the fixed overlay layer. translateZ(0)+backface-visibility:hidden
+     forces that layer to exist from the start instead of only once the
+     browser decides it's needed mid-gesture.
+     A transform (or will-change:transform) on this element makes it a
+     new containing block for any position:fixed DESCENDANT -- #navBackdrop
+     used to be one; moved out to be a sibling of <header> in index.html
+     so its inset:0 still covers the whole viewport, not just this bar. */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .brand {
@@ -1123,7 +1142,19 @@ section[id] {
     background: var(--header-bg);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
     opacity: 0;
-    transform: translateX(8px);
+    /* -8px, not +8px -- this box already rests flush against the true
+       viewport edge (right:0, no margin), so ANY positive x offset here
+       pushes its real, painted box (which getBoundingClientRect sees,
+       unlike offsetLeft/computed width, which only reflect the
+       pre-transform layout box and looked perfectly flush) past the
+       edge -- real horizontal scrollable overflow, present on every
+       page load since this box stays in normal flow even while closed,
+       confirmed as the actual (non-testing-artifact) remaining source
+       after the .sdg decorations fix. Negative instead: same slide-in
+       distance and feel, just approaching from the other side, and it
+       can never overflow since it moves further from the edge, not
+       past it. */
+    transform: translateX(-8px);
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;

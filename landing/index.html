@@ -17,7 +17,7 @@
   <!-- Apotek Wide -- same Adobe Fonts kit every other SEAVENTURE page uses -->
   <link rel="stylesheet" href="https://use.typekit.net/rav6zvx.css">
 
-  <link rel="stylesheet" href="style.css?v=49">
+  <link rel="stylesheet" href="style.css?v=51">
 
   <!-- Applies a saved light/dark override (from the toggle button, see
        the script near the end of body) before first paint, so the page
@@ -113,11 +113,6 @@
       <span class="nav-toggle-bar"></span>
     </button>
 
-    <!-- Phone width only -- dims/blocks the page behind the open drawer,
-         see style.css. Sits outside .nav-group so it isn't clipped by
-         anything the drawer's own box might clip. -->
-    <div class="nav-backdrop" id="navBackdrop"></div>
-
     <div class="nav-group" id="navGroup">
       <nav class="site-nav" aria-label="Primary">
         <a href="#home">HOME</a>
@@ -141,6 +136,17 @@
       </button>
     </div>
   </header>
+
+  <!-- Phone width only -- dims/blocks the page behind the open drawer, see
+       style.css. A sibling of <header>, not a child of it: this needs
+       inset:0 to cover the WHOLE viewport, and position:fixed's
+       containing block becomes its nearest ancestor with a transform (or
+       will-change:transform) if one exists, not just the viewport --
+       .site-header picks up exactly that below, to give it its own
+       compositor layer, so this has to live outside header now to keep
+       covering the full page instead of shrinking to just the header
+       bar's own box. -->
+  <div class="nav-backdrop" id="navBackdrop"></div>
 
   <main>
     <section class="hero" id="home">
