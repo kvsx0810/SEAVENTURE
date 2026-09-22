@@ -166,40 +166,34 @@ body {
   font-family: "Alata", sans-serif;
   background: linear-gradient(180deg, var(--page-grad-top), var(--page-grad-bottom));
   min-height: calc(100svh - var(--header-h));
-  /* Compensates for .site-header switching from sticky to fixed below
-     (fixed removes it from normal flow entirely, unlike sticky, which
-     still occupies its own slot until the scroll threshold) -- without
-     this the page's real content would start at y=0, right under/
-     behind the now-floating header, instead of below it. */
-  padding-top: var(--header-h);
 }
 
 /* nav links jump to these -- without this, the browser scrolls the
-   target's top edge to y=0, right where the fixed header floats, so
+   target's top edge to y=0, right where the sticky header floats, so
    the header covers the section's own top padding/centering space */
 section[id] {
   scroll-margin-top: var(--header-h);
 }
 
 /* -------------------- header -------------------- */
-/* position:fixed, not sticky -- screen-recorded proof from a real
-   phone (see chat) showed the header vanishing on some scrolled
-   positions but not others while scrolling in the same direction,
-   an intermittent failure pattern that points at a real Android
-   Chrome position:sticky rendering bug rather than anything
-   deterministic in this CSS (a genuine CSS mistake, like a stray
-   ancestor overflow, would fail the same way every time, not only
-   sometimes). fixed doesn't share sticky's containing-block/
-   scroll-container fragility -- it's a much more bulletproof
-   mechanism for "always pinned to the same spot on screen" across
-   real-world mobile browsers, at the cost of needing the padding-top
-   compensation on body above (sticky handles that part for free by
-   staying in normal flow; fixed doesn't). */
+/* NOTE: this went through position:fixed (+ translateZ(0) GPU-layer
+   hacks) and back -- see git history. Traced the whole sticky/overflow
+   saga back to its actual origin instead of trying yet another fixed-
+   positioning variant: the very first version of the mobile hamburger
+   nav (before it became a right-side drawer) used position:sticky
+   here + position:absolute on .nav-group below, and the user confirms
+   that version genuinely had neither bug on their real phone. Every
+   attempt since switched .nav-group (and eventually this) to
+   position:fixed to build the slide-from-right drawer, and every fix
+   attempted on top of THAT foundation still failed on real hardware.
+   Reverted to the original working mechanism -- sticky here,
+   .nav-group back to absolute (see its own comment below) -- keeping
+   the visual redesign (hugs its content, right-aligned, slides in,
+   the active-section highlight) layered on top of it instead of on
+   top of position:fixed. */
 .site-header {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 100;
   display: flex;
   flex-wrap: wrap;
@@ -212,26 +206,6 @@ section[id] {
   min-height: 104px;
   padding: 12px clamp(16px, 4vw, 60px);
   background: var(--header-bg);
-  /* Confirmed by the user directly: this stayed pinned in every test
-     on a desktop-emulated mobile viewport, but lagged behind/scrolled
-     with the page on their real Android phone. Switching to fixed
-     (above) wasn't itself the missing piece -- this is a separate,
-     well-documented real-hardware issue: a plain position:fixed
-     element can still get painted as part of the scrolling content for
-     a frame or more during a fast touch fling on Android Chrome,
-     because the browser hasn't promoted it to its own GPU compositing
-     layer ahead of time, something desktop emulation doesn't reproduce
-     since it never runs the real touch-scroll compositing path.
-     translateZ(0) forces that layer promotion upfront, the standard
-     fix for exactly this. Not will-change:transform (tried and reverted
-     elsewhere in this file for a different, adjacent reason) --
-     translateZ(0) creates the same GPU layer without will-change's own
-     side effect of also keeping the browser watching for a transform
-     *change* on an element that, here, never actually transforms. */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 .brand {
@@ -1045,33 +1019,27 @@ section[id] {
     display: flex;
   }
 
-  /* Compact card near the hamburger, not a full-height drawer -- hugs
-     its own content (no bottom/height set, so it sizes to the nav
-     links + theme toggle) instead of stretching the full screen.
-     position:fixed (not absolute against the sticky header) so it's
-     never at the mercy of a browser's own handling of position:sticky
-     as an absolute-positioning containing block -- anchored to the
-     real viewport instead. Closed state stays in normal flow (no
-     [hidden], no display:none) but faded+shifted out and hit-testing/
-     AT-invisible; the open/close transition only ever animates
-     transform+opacity, never a layout-affecting property.
-     The closed-state transform stays within the 12px `right` margin
-     (8px < 12px) ON PURPOSE -- this card sits 12px from the real edge,
-     so shifting it right by anything up to that keeps its rendered box
-     fully inside the viewport even while "hidden", instead of
-     poking a few px past the edge the way a bigger shift (or the old
-     edge-flush, full-width drawer's translateX(100%)) did. That's a
-     real, if small, horizontal overflow a mouse never reveals but a
-     phone's own right-to-left swipe does -- tried clipping it with
-     overflow-x:hidden on html/body instead first (see the comment
-     above body), which broke position:sticky on a real phone and
-     didn't fully fix the overflow there either, so this fixes it at
-     the source instead of trying to mask it after the fact. */
+  /* NOTE: this went through position:fixed (anchored to the real
+     viewport, plus a translateZ(0) GPU-layer hack) and back -- see git
+     history and the comment on .site-header above. Back to
+     position:absolute against .site-header (which is position:sticky,
+     a valid containing block for this) -- the mechanism the very
+     first version of this dropdown used, before it became a
+     position:fixed right-side drawer, and the one the user confirms
+     genuinely didn't have the sticky/overflow bugs every fixed-
+     positioning variant since kept failing on real hardware. Visual
+     redesign kept on top of it: hugs its own content (no bottom/height
+     set) instead of stretching full-height, right-aligned and sitting
+     right below the header instead of a wrap-to-second-row bar, and
+     still fades+slides in rather than an instant show/hide. Closed
+     state stays in normal flow (no [hidden], no display:none) but
+     faded+shifted out and hit-testing/AT-invisible. */
   .nav-group {
-    position: fixed;
+    position: absolute;
     z-index: 100;
-    top: calc(var(--header-h) + 10px);
-    right: 12px;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
     width: min(70vw, 260px);
     flex-direction: column;
     align-items: stretch;
@@ -1081,14 +1049,7 @@ section[id] {
     background: var(--header-bg);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
     opacity: 0;
-    /* translateZ(0) alongside the real translateX -- same reasoning as
-       .site-header's own comment above: forces this position:fixed
-       element onto its own stable GPU layer upfront, instead of
-       leaving it to get promoted only once a transform is actively
-       animating, which real Android Chrome hardware (not this
-       session's desktop-emulated testing) can lag behind on during a
-       fast touch gesture. */
-    transform: translateX(8px) translateZ(0);
+    transform: translateX(8px);
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
@@ -1096,7 +1057,7 @@ section[id] {
 
   .nav-group.is-open {
     opacity: 1;
-    transform: translateX(0) translateZ(0);
+    transform: translateX(0);
     visibility: visible;
     pointer-events: auto;
     transition: opacity 0.2s ease, transform 0.2s ease;
