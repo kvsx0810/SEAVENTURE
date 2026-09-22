@@ -13,8 +13,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasGsap = typeof gsap !== 'undefined';
+  // Same isPhoneTouch() condition used everywhere else in this project.
+  // Per feedback, this transition isn't important on phone, and it's
+  // also the prime suspect for the still-unresolved fixed-header/
+  // horizontal-overflow reports: it's the single biggest position:fixed
+  // element on either page (full-screen, z-index:9999), present in the
+  // DOM for the visitor's entire visit even while hidden, and a
+  // plausible source of GPU layer/compositing contention with the
+  // header's own position:fixed layer on real hardware this session
+  // can't test against directly. display:none (not just visibility, a
+  // step further than the depart-branch idle state below already used)
+  // removes it from layout and compositing entirely on phone, the
+  // strongest way to rule it in or out.
+  const isPhoneTouch = (window.matchMedia('(max-width: 900px)').matches
+      || window.matchMedia('(max-height: 900px)').matches)
+    && window.matchMedia('(pointer: coarse)').matches;
 
-  if (reduceMotion || !hasGsap) {
+  if (reduceMotion || !hasGsap || isPhoneTouch) {
     overlay.style.display = 'none';
     return;
   }
