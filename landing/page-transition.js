@@ -48,10 +48,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // Extra beat before revealing -- the cover should hold for a moment
     // (mascot fully in frame) instead of sliding away almost as soon as
     // the new page has painted.
-    gsap.to(overlay, { y: '100%', duration: 0.7, ease: 'power2.inOut', delay: 1 });
+    gsap.to(overlay, {
+      y: '100%',
+      duration: 0.7,
+      ease: 'power2.inOut',
+      delay: 1,
+      onComplete: () => {
+        // See the matching comment in the 'depart' branch below -- once
+        // this is done revealing the cabinet, it has no more job to do
+        // for as long as the visitor stays on this page (which can be a
+        // while, browsing the carousel), so it's fully hidden instead of
+        // sitting there translated off-screen but still a live
+        // position:fixed layer the whole time.
+        overlay.style.visibility = 'hidden';
+      },
+    });
   }
 
   if (mode === 'depart') {
+    // Idle for as long as the visitor is just reading/scrolling this
+    // page (which, for the landing page, can be the whole visit) --
+    // fully hidden rather than merely translated off-screen. A
+    // position:fixed element that's only visually off-screen still has
+    // to be tracked by the browser as a real layer throughout every
+    // scroll on the page; reports of a solid block flickering in and
+    // out near the bottom of the screen while scrolling (see git
+    // history) point at exactly this staying resident the whole time
+    // being the actual problem, more than the will-change hint that was
+    // tried and reverted first. visibility:hidden removes it from
+    // painting/compositing entirely until a link click needs it back.
+    overlay.style.visibility = 'hidden';
+
     // Every link that heads into the cabinet (the games section's START
     // button, and the footer's per-game links) gets the same departure
     // animation before the browser actually navigates.
@@ -59,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         const dest = link.href;
+        overlay.style.visibility = 'visible';
         gsap.to(overlay, {
           y: '0%',
           duration: 0.6,

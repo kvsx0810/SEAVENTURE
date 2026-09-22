@@ -796,73 +796,33 @@ section[id] {
   width: clamp(223px, 37.9vw, 1222px);
 }
 
-.footer-top, .footer-bottom {
+/* Back to the original 4-column layout (per feedback: the asymmetric
+   brand-block redesign was only meant to be a mobile-only change, and
+   wasn't an improvement there either). Desktop is untouched; see the
+   640px block further down for the one mobile-only adjustment that
+   replaces it now. */
+.footer-cols, .footer-credit {
   position: relative;
   z-index: 1;
 }
 
-/* Brand block (left) + nav columns (right) -- replaces the old 4-equal-
-   centered-columns grid. A footer's own identity block reads as an
-   anchor the nav columns hang off of, the way most real sites structure
-   this, instead of every column (nav and brand alike) competing as
-   equal centered stacks with no clear starting point for the eye. */
-.footer-top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: clamp(32px, 6vw, 80px);
+.footer-cols {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(20px, 4vw, 40px);
   max-width: 1200px;
   margin: 0 auto;
   padding-bottom: clamp(24px, 5vw, 50px);
   border-bottom: 1px solid var(--footer-rule-color);
-  text-align: left;
-}
-
-.footer-brand-block {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-.footer-brand-block-icon {
-  height: clamp(40px, 4.5vw, 56px);
-  width: auto;
-}
-
-.footer-brand-block-name {
-  font-family: "apotek-wide", sans-serif;
-  font-weight: 700;
-  font-size: clamp(18px, 2.2vw, 26px);
-  background: linear-gradient(90deg, var(--brand-grad-1), var(--brand-grad-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  margin: 0;
-}
-
-.footer-brand-block-tag {
-  font-family: "Alata", sans-serif;
-  font-size: clamp(12px, 1.2vw, 15px);
-  color: var(--sdg-color);
-  opacity: var(--muted-opacity);
-  margin: 2px 0 0;
-}
-
-.footer-nav-cols {
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(28px, 5vw, 64px);
+  text-align: center;
 }
 
 .footer-col h3 {
   font-family: "Alata", sans-serif;
   font-weight: 400;
-  font-size: clamp(14px, 1.6vw, 20px);
+  font-size: clamp(16px, 2.6vw, 34px);
   color: var(--sdg-color);
-  opacity: var(--muted-opacity);
-  margin: 0 0 clamp(10px, 1.6vw, 16px);
+  margin: 0 0 clamp(10px, 2vw, 18px);
 }
 
 .footer-col ul {
@@ -871,12 +831,12 @@ section[id] {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .footer-col a {
   font-family: "Alata", sans-serif;
-  font-size: clamp(13px, 1.4vw, 17px);
+  font-size: clamp(12px, 1.4vw, 18px);
   text-decoration: none;
   background: linear-gradient(180deg, var(--footer-link-1), var(--footer-link-2));
   -webkit-background-clip: text;
@@ -888,68 +848,59 @@ section[id] {
   opacity: 0.75;
 }
 
-/* Thin bottom bar -- copyright+brand on one side, the academic credit +
-   citation on the other, one row instead of three centered paragraph
-   stacks floating under the nav columns with no clear relationship to
-   them. */
-.footer-bottom {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: clamp(16px, 3vw, 32px);
-  max-width: 1200px;
-  margin: clamp(20px, 4vw, 32px) auto 0;
+.footer-credit {
+  max-width: 700px;
+  margin: clamp(24px, 5vw, 50px) auto 0;
+  text-align: center;
   font-family: "Alata", sans-serif;
   color: var(--sdg-color);
 }
 
-.footer-copyright {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  font-size: clamp(12px, 1.3vw, 16px);
-  flex-shrink: 0;
+/* Three visual clusters -- RMIT/School/Program, the reference citation,
+   and copyright+logo -- each tight internally, with a bit of breathing
+   room between clusters instead of one flat uniform list. */
+.footer-credit-group + .footer-credit-group {
+  margin-top: clamp(18px, 3vw, 32px);
 }
 
-.footer-copyright-year {
+.footer-credit-group p {
+  margin: 0 0 6px;
+  font-size: clamp(12px, 1.4vw, 18px);
+  line-height: 1.6;
   opacity: var(--muted-opacity);
 }
 
+.footer-credit-group p:last-child {
+  margin-bottom: 0;
+}
+
+.footer-credit-group p.footer-copyright {
+  font-family: "apotek-wide", sans-serif;
+  font-weight: 700;
+  opacity: 1;
+}
+
+.footer-brand {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 .footer-brand-icon {
-  height: clamp(20px, 2.2vw, 28px);
+  height: clamp(24px, 3vw, 36px);
   width: auto;
 }
 
 .footer-brand-text {
   font-family: "apotek-wide", sans-serif;
   font-weight: 700;
-  font-size: clamp(13px, 1.6vw, 17px);
+  font-size: clamp(16px, 2.4vw, 30px);
   background: linear-gradient(90deg, var(--brand-grad-1), var(--brand-grad-2));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-/* Academic credit + citation, right side of the bottom bar on desktop.
-   Deliberately the quietest text on the page -- required information,
-   not something a visitor is meant to read every visit. */
-.footer-legal {
-  max-width: 640px;
-  text-align: right;
-}
-
-.footer-legal p {
-  margin: 0 0 4px;
-  font-size: clamp(11px, 1.1vw, 13px);
-  line-height: 1.6;
-  opacity: var(--muted-opacity);
-}
-
-.footer-legal p:last-child {
-  margin-bottom: 0;
 }
 
 /* -------------------- hamburger (phone width only) -------------------- */
@@ -962,6 +913,13 @@ section[id] {
    `display: flex` override regardless of viewport width. */
 .nav-toggle {
   display: none;
+  /* Above .nav-group's own z-index:100 -- the drawer runs the full
+     screen height (top:0 to bottom:0, including behind the header row
+     this button lives in), and without this explicit stacking the
+     drawer (an explicit z-index) painted over this button (no z-index
+     of its own -- flex items still need one to out-rank a sibling that
+     has one), hiding the one control that closes it. */
+  z-index: 101;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -993,6 +951,12 @@ section[id] {
 }
 .nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(3) {
   transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 800px) {
+  .footer-cols {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 640px) {
@@ -1122,29 +1086,8 @@ section[id] {
     text-align: center;
   }
 
-  .footer-top {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .footer-nav-cols {
-    justify-content: center;
-    text-align: center;
-    width: 100%;
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .footer-copyright {
-    justify-content: center;
-  }
-
-  .footer-legal {
+  .footer-cols {
+    grid-template-columns: 1fr;
     text-align: center;
   }
 }
