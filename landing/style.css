@@ -1072,6 +1072,20 @@ section[id] {
     --header-h: 56px;
   }
 
+  /* .hero-content itself sits at the exact mathematical center of .hero
+     (measured directly -- it does), so this isn't the same bug the
+     symmetric-padding fix above solved. The two wave shapes (.wave-1 at
+     top:42%, .wave-2 at top:60%) only occupy the LOWER half of the
+     section -- the upper half is plain gradient -- so the visual weight
+     is bottom-heavy even though the box-model center is exact, and a
+     dead-centered mascot+wordmark reads as sitting a little low against
+     that. Nudging the content up compensates for perceived, not
+     measured, imbalance -- scoped to phone specifically (where this was
+     reported), desktop is untouched since nobody's flagged it there. */
+  .hero-content {
+    margin-bottom: 40px;
+  }
+
   .site-header {
     height: auto;
     min-height: 0;
