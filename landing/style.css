@@ -507,15 +507,49 @@ section[id] {
    title/desc text lives in) -- 0%/100% is the text's own edge, not the
    page margin. Negative offsets push the decorations actually outside
    that column into the surrounding margin instead of just touching the
-   text's edge. */
-.sdg .deco-bubble--sdg-tl { top: 1%; left: -8%; }
-.sdg .deco-bubble--sdg-tl-mini { top: 8%; left: -4%; }
-.sdg .deco-fish--sdg-a { top: 0%; right: -8%; left: auto; transform: rotate(-18deg); }
-.sdg .deco-fish--sdg-b { aspect-ratio: 96 / 36; width: clamp(34px, 4vw, 56px); top: 11%; right: -4%; left: auto; transform: rotate(10deg) scaleX(-1); }
-.sdg .deco-fish--sdg-e { aspect-ratio: 203 / 263; width: clamp(40px, 5vw, 74px); bottom: 3%; left: -8%; transform: rotate(-6deg); }
-.sdg .deco-fish--sdg-f { aspect-ratio: 125 / 124; width: clamp(36px, 4.5vw, 64px); bottom: 12%; left: -4%; transform: rotate(4deg); }
-.sdg .deco-bubble--sdg-br { bottom: 1%; right: -8%; }
-.sdg .deco-bubble--sdg-br-mini { bottom: 8%; right: -4%; }
+   text's edge.
+
+   That margin only exists once .sdg has actually hit its 1100px cap --
+   below that (roughly everything under ~1300-1400px, which is every
+   phone, every tablet, and plenty of narrower desktop/laptop windows)
+   .sdg spans edge-to-edge with NO margin to bleed into, so the negative
+   offsets below pushed these decorations genuinely off the right edge
+   of the viewport: real horizontal scrollable overflow, confirmed via
+   document.documentElement.clientWidth (the true content width) vs each
+   decoration's getBoundingClientRect().right -- up to ~30px of it,
+   invisible to checks that compare against window.innerWidth instead,
+   since that can include a desktop/devtools scrollbar-gutter reservation
+   large enough to mask exactly this much overflow (real phones have no
+   such reserved gutter, so nothing there hides it). This is almost
+   certainly THE swipe-reveals-a-sliver-of-space bug, and per the
+   overflow-x:hidden note above (breaking position:sticky when applied
+   to html/body to clip exactly this), it should be fixed at the actual
+   source instead of clipped after the fact. Default to flush (0%), the
+   same treatment every OTHER section's decorations already use -- only
+   .sdg was ever given the bleed-into-the-margin treatment -- and only
+   restore the bleed once min-width below guarantees the margin to
+   receive it actually exists (1400px, well past the ~1276px these
+   specific offsets/widths/rotations need, so there's no per-decoration
+   arithmetic to keep in sync if any of those values change later). */
+.sdg .deco-bubble--sdg-tl { top: 1%; left: 0%; }
+.sdg .deco-bubble--sdg-tl-mini { top: 8%; left: 0%; }
+.sdg .deco-fish--sdg-a { top: 0%; right: 2%; left: auto; transform: rotate(-18deg); }
+.sdg .deco-fish--sdg-b { aspect-ratio: 96 / 36; width: clamp(34px, 4vw, 56px); top: 11%; right: 2%; left: auto; transform: rotate(10deg) scaleX(-1); }
+.sdg .deco-fish--sdg-e { aspect-ratio: 203 / 263; width: clamp(40px, 5vw, 74px); bottom: 3%; left: 0%; transform: rotate(-6deg); }
+.sdg .deco-fish--sdg-f { aspect-ratio: 125 / 124; width: clamp(36px, 4.5vw, 64px); bottom: 12%; left: 0%; transform: rotate(4deg); }
+.sdg .deco-bubble--sdg-br { bottom: 1%; right: 0%; }
+.sdg .deco-bubble--sdg-br-mini { bottom: 8%; right: 0%; }
+
+@media (min-width: 1400px) {
+  .sdg .deco-bubble--sdg-tl { left: -8%; }
+  .sdg .deco-bubble--sdg-tl-mini { left: -4%; }
+  .sdg .deco-fish--sdg-a { right: -8%; }
+  .sdg .deco-fish--sdg-b { right: -4%; }
+  .sdg .deco-fish--sdg-e { left: -8%; }
+  .sdg .deco-fish--sdg-f { left: -4%; }
+  .sdg .deco-bubble--sdg-br { right: -8%; }
+  .sdg .deco-bubble--sdg-br-mini { right: -4%; }
+}
 
 /* -------------------- quote + CTA -------------------- */
 /* Figma reference (see chat): the quote/author are left/right-aligned
@@ -541,7 +575,7 @@ section[id] {
 .quote .deco-bubble--quote-mini { top: 8%; left: 7%; }
 /* Right side, opposite the left-aligned text column and the bubble
    cluster -- clear of both. */
-.quote .deco-fish--quote-a { aspect-ratio: 96 / 36; width: clamp(34px, 4vw, 56px); top: 2%; right: 0%; transform: rotate(8deg) scaleX(-1); }
+.quote .deco-fish--quote-a { aspect-ratio: 96 / 36; width: clamp(34px, 4vw, 56px); top: 2%; right: 2%; transform: rotate(8deg) scaleX(-1); }
 .quote .deco-fish--quote-b { aspect-ratio: 96 / 36; width: clamp(30px, 3.6vw, 48px); bottom: 3%; right: 6%; transform: rotate(-6deg); }
 
 .quote-text {
@@ -1058,14 +1092,29 @@ section[id] {
      right below the header instead of a wrap-to-second-row bar, and
      still fades+slides in rather than an instant show/hide. Closed
      state stays in normal flow (no [hidden], no display:none) but
-     faded+shifted out and hit-testing/AT-invisible. */
+     faded+shifted out and hit-testing/AT-invisible.
+
+     width is min(70%, 260px), NOT min(70vw, 260px) -- with vw, this
+     box's measured right edge came out a few px past .site-header's own
+     true right edge (confirmed live: ~8px past a true content width of
+     360px) even though `right: 0` is otherwise correct, whereas with a
+     plain percentage the width can never resolve larger than its own
+     containing block allows. Left as a residual, unconfirmed-on-real-
+     hardware ~8px in this session's own testing (didn't actually let
+     the page scroll there -- scrollTo() couldn't move scrollX off 0 --
+     so it may be specific to how the desktop test harness sizes a
+     position:fixed/absolute box's containing block rather than a real
+     bug), but % is strictly the more correct, portable unit for a width
+     that has to stay inside a specific ancestor's box regardless, so
+     kept even without full certainty on the original vw number's exact
+     mechanism. */
   .nav-group {
     position: absolute;
     z-index: 100;
     top: 100%;
     right: 0;
     margin-top: 10px;
-    width: min(70vw, 260px);
+    width: min(70%, 260px);
     flex-direction: column;
     align-items: stretch;
     gap: 0;
