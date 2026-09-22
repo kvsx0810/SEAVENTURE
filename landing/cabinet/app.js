@@ -51,6 +51,47 @@ function setupMusicToggle() {
 }
 setupMusicToggle();
 
+// Real Fullscreen API -- the actual browser chrome (address bar, tabs)
+// only goes away in a browser that supports this at all (mainly Android
+// Chrome; iOS Safari doesn't implement it for an arbitrary element, only
+// for <video>), so the button stays [hidden] entirely everywhere else
+// rather than sitting there doing nothing when tapped. Vendor-prefixed
+// fallbacks cover older WebKit/Firefox builds that only shipped the
+// prefixed form.
+function setupFullscreenToggle() {
+  const btn = document.getElementById('fullscreenToggle');
+  if (!btn) return;
+
+  const requestFs = document.documentElement.requestFullscreen
+    || document.documentElement.webkitRequestFullscreen
+    || document.documentElement.mozRequestFullScreen;
+  const exitFs = document.exitFullscreen
+    || document.webkitExitFullscreen
+    || document.mozCancelFullScreen;
+  if (!requestFs || !exitFs) return; // stays hidden
+
+  btn.hidden = false;
+
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+  }
+
+  btn.addEventListener('click', () => {
+    if (isFullscreen()) exitFs.call(document);
+    else requestFs.call(document.documentElement).catch(() => {}); // rejects if not called from a direct user gesture, or if the browser denies it -- nothing more to do either way
+  });
+
+  // Keeps the icon/aria-pressed in sync even when fullscreen is left a
+  // different way than this button -- the Esc key, a system back
+  // gesture, etc.
+  ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange'].forEach((evt) => {
+    document.addEventListener(evt, () => {
+      btn.setAttribute('aria-pressed', String(isFullscreen()));
+    });
+  });
+}
+setupFullscreenToggle();
+
 document.addEventListener('DOMContentLoaded', () => {
   const screenContent = document.getElementById('screenContent');
   const joyLeft = document.getElementById('joyLeft');

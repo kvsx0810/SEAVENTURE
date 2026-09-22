@@ -17,7 +17,7 @@
   <!-- Apotek Wide -- same Adobe Fonts kit every other SEAVENTURE page uses -->
   <link rel="stylesheet" href="https://use.typekit.net/rav6zvx.css">
 
-  <link rel="stylesheet" href="style.css?v=38">
+  <link rel="stylesheet" href="style.css?v=40">
 
   <!-- Applies a saved light/dark override (from the toggle button, see
        the script near the end of body) before first paint, so the page
@@ -112,6 +112,11 @@
       <span class="nav-toggle-bar"></span>
       <span class="nav-toggle-bar"></span>
     </button>
+
+    <!-- Phone width only -- dims/blocks the page behind the open drawer,
+         see style.css. Sits outside .nav-group so it isn't clipped by
+         anything the drawer's own box might clip. -->
+    <div class="nav-backdrop" id="navBackdrop"></div>
 
     <div class="nav-group" id="navGroup">
       <nav class="site-nav" aria-label="Primary">
@@ -217,56 +222,64 @@
     <img class="footer-reef footer-reef--left theme-img theme-img--dark" src="assets/reef-left-dark.png" alt="" aria-hidden="true" data-reveal-img>
     <img class="footer-reef footer-reef--right theme-img theme-img--light" src="assets/reef-right-light.png" alt="" aria-hidden="true" data-reveal-img>
     <img class="footer-reef footer-reef--right theme-img theme-img--dark" src="assets/reef-right-dark.png" alt="" aria-hidden="true" data-reveal-img>
-    <div class="footer-cols" data-reveal-group>
-      <div class="footer-col">
-        <h3>About</h3>
-        <ul>
-          <li><a href="#home">Us</a></li>
-          <li><a href="#about">Project</a></li>
-        </ul>
+
+    <!-- Brand block (left) + nav columns (right), both left-aligned --
+         replaces the old 4-equal-centered-columns grid, whose 4th column
+         (just one "Robert Swan" link) read as thin/unbalanced next to
+         the other three. That link now lives inside Content instead. -->
+    <div class="footer-top" data-reveal-group>
+      <div class="footer-brand-block">
+        <img class="footer-brand-block-icon theme-img theme-img--light" src="assets/mascot-light.png" alt="">
+        <img class="footer-brand-block-icon theme-img theme-img--dark" src="assets/mascot-dark.png" alt="">
+        <div>
+          <p class="footer-brand-block-name">SEAVENTURE</p>
+          <p class="footer-brand-block-tag">SDG 14: Life Below Water</p>
+        </div>
       </div>
-      <div class="footer-col">
-        <h3>Content</h3>
-        <ul>
-          <li><a href="#quote">Quote</a></li>
-          <li><a href="#cta">CTA</a></li>
-          <li><a href="#para">Paragraph</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h3>Game</h3>
-        <ul>
-          <li><a href="cabinet/index.html?game=fishy-situation">A Fishy Situation</a></li>
-          <li><a href="cabinet/index.html?game=embrace">Embrace</a></li>
-          <li><a href="cabinet/index.html?game=breath-of-the-ocean">Breath of the Ocean</a></li>
-          <li><a href="cabinet/index.html?game=the-last-catch">The Last Catch</a></li>
-          <li><a href="cabinet/index.html?game=reeflect">Reeflect</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h3>Ref</h3>
-        <ul>
-          <li><a href="#quote">Robert Swan</a></li>
-        </ul>
-      </div>
+
+      <nav class="footer-nav-cols" aria-label="Footer">
+        <div class="footer-col">
+          <h3>About</h3>
+          <ul>
+            <li><a href="#home">Us</a></li>
+            <li><a href="#about">Project</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Content</h3>
+          <ul>
+            <li><a href="#quote">Quote</a></li>
+            <li><a href="#cta">CTA</a></li>
+            <li><a href="#para">Paragraph</a></li>
+            <li><a href="#quote">Robert Swan</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Game</h3>
+          <ul>
+            <li><a href="cabinet/index.html?game=fishy-situation">A Fishy Situation</a></li>
+            <li><a href="cabinet/index.html?game=embrace">Embrace</a></li>
+            <li><a href="cabinet/index.html?game=breath-of-the-ocean">Breath of the Ocean</a></li>
+            <li><a href="cabinet/index.html?game=the-last-catch">The Last Catch</a></li>
+            <li><a href="cabinet/index.html?game=reeflect">Reeflect</a></li>
+          </ul>
+        </div>
+      </nav>
     </div>
 
-    <div class="footer-credit" data-reveal-group>
-      <div class="footer-credit-group">
-        <p>RMIT University Vietnam, Saigon South Campus</p>
-        <p>School of Communication and Design</p>
-        <p>Digital Media Program</p>
-      </div>
-      <div class="footer-credit-group">
+    <!-- Bottom bar: copyright+brand on one side, the academic credit +
+         citation on the other -- a single thin row instead of three
+         centered paragraph stacks floating under the nav columns. -->
+    <div class="footer-bottom" data-reveal-group>
+      <p class="footer-copyright">
+        <img class="footer-brand-icon theme-img theme-img--light" src="assets/mascot-light.png" alt="">
+        <img class="footer-brand-icon theme-img theme-img--dark" src="assets/mascot-dark.png" alt="">
+        <span class="footer-brand-text">N5CC</span>
+        <span class="footer-copyright-year">&copy; 2026. All rights reserved.</span>
+      </p>
+      <div class="footer-legal">
+        <p>RMIT University Vietnam, Saigon South Campus &middot; School of Communication and Design &middot; Digital Media Program</p>
         <p>Stevenson A (2012) Robert Swan OBE: &ldquo;The greatest threat to our planet is the belief that someone else will save it&rdquo;, HuffPost website, accessed 19 August 2026. https://www.huffpost.com/entry/robert-swan-antarctica_b_1315047</p>
-      </div>
-      <div class="footer-credit-group">
-        <p class="footer-copyright">&copy; N5CC (2026). All rights reserved.</p>
-        <p class="footer-brand">
-          <img class="footer-brand-icon theme-img theme-img--light" src="assets/mascot-light.png" alt="">
-          <img class="footer-brand-icon theme-img theme-img--dark" src="assets/mascot-dark.png" alt="">
-          <span class="footer-brand-text">N5CC</span>
-        </p>
       </div>
     </div>
   </footer>
@@ -284,21 +297,26 @@
     (function () {
       var toggle = document.getElementById('navToggle');
       var group = document.getElementById('navGroup');
+      var backdrop = document.getElementById('navBackdrop');
       if (!toggle || !group) return;
 
       function closeMenu() {
         toggle.setAttribute('aria-expanded', 'false');
         group.classList.remove('is-open');
+        if (backdrop) backdrop.classList.remove('is-open');
       }
 
       toggle.addEventListener('click', function () {
         var open = toggle.getAttribute('aria-expanded') === 'true';
         toggle.setAttribute('aria-expanded', String(!open));
         group.classList.toggle('is-open', !open);
+        if (backdrop) backdrop.classList.toggle('is-open', !open);
       });
 
+      if (backdrop) backdrop.addEventListener('click', closeMenu);
+
       // Anchor links already smooth-scroll the page via CSS -- close the
-      // dropdown at the same time instead of leaving it open over the
+      // drawer at the same time instead of leaving it open over the
       // section the visitor just jumped to.
       group.querySelectorAll('.site-nav a').forEach(function (link) {
         link.addEventListener('click', closeMenu);

@@ -374,6 +374,10 @@ body {
   background: #021427;
   transform: translateY(0);
   pointer-events: none;
+  /* NOTE: no will-change:transform here -- see the matching note on
+     landing/style.css's own .page-transition for why it was removed
+     (caught it causing a worse bug: this element rendering as a solid
+     black rectangle mid-scroll). */
 }
 
 .page-transition-mascot {
@@ -423,6 +427,55 @@ body {
 }
 
 .music-toggle[aria-pressed="false"] .music-waves {
+  display: none;
+}
+
+/* -------------------- fullscreen toggle -------------------- */
+/* Mirrors .music-toggle exactly, just the opposite corner. Starts
+   [hidden] -- app.js only reveals it once it's confirmed the
+   Fullscreen API actually exists in this browser, so it's simply never
+   there to tap on a browser that couldn't do anything with it anyway. */
+.fullscreen-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 7px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(187, 232, 251, 0.16);
+  color: #bbe8fb;
+  cursor: pointer;
+}
+
+.fullscreen-toggle:hover {
+  background: rgba(187, 232, 251, 0.28);
+}
+
+/* Same reason #rotate-prompt needs this below -- this rule's own
+   display:flex above is an author style, which beats the [hidden]
+   attribute's default display:none (a UA-stylesheet-level rule) in the
+   cascade regardless of selector specificity, unless this is stated
+   explicitly. */
+.fullscreen-toggle[hidden] {
+  display: none;
+}
+
+.fullscreen-toggle-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.fullscreen-toggle[aria-pressed="true"] .fullscreen-icon-enter {
+  display: none;
+}
+
+.fullscreen-toggle[aria-pressed="false"] .fullscreen-icon-exit {
   display: none;
 }
 

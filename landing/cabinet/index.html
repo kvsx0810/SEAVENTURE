@@ -4,10 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SEAVENTURE - Games</title>
+<!-- A page can't force its own browser chrome away -- that's the browser's
+     call, not a site's, for the same reason a site can't fake its own URL
+     bar. The one thing that's real and in this page's control is: if the
+     visitor adds this page to their home screen, these two tags make it
+     launch with NO browser chrome at all (full native-app-style
+     fullscreen) instead of opening as just another browser tab -- apple-
+     mobile-web-app-capable for iOS, mobile-web-app-capable for Android.
+     The in-page Fullscreen button below (app.js) is the other half: real
+     fullscreen from right inside a normal tab, via the Fullscreen API,
+     where the browser actually supports it (mainly Android Chrome --
+     iOS Safari doesn't expose it for an arbitrary page). -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#021427">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alata&family=Inter:ital,wght@0,400;0,700;0,900;1,700;1,900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=6">
+<link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
 
@@ -67,6 +82,17 @@
   </button>
   <audio id="bgm" src="../assets/bgm.wav" loop preload="none"></audio>
 
+  <!-- Real Fullscreen API, not a CSS trick -- hidden entirely by app.js
+       when the browser doesn't expose it at all (mainly iOS Safari; see
+       the meta tags in <head> for that platform's own path to a
+       chrome-less launch instead, via Add to Home Screen). -->
+  <button type="button" class="fullscreen-toggle" id="fullscreenToggle" aria-pressed="false" aria-label="Toggle fullscreen" hidden>
+    <svg class="fullscreen-toggle-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path class="fullscreen-icon-enter" d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="fullscreen-icon-exit" d="M9 4H5a1 1 0 0 0-1 1v4M15 4h4a1 1 0 0 1 1 1v4M9 20H5a1 1 0 0 1-1-1v-4M15 20h4a1 1 0 0 0 1-1v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
   <main class="stage">
     <div class="top-vignette" aria-hidden="true"></div>
 
@@ -102,6 +128,6 @@
   </main>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="../page-transition.js?v=2"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
