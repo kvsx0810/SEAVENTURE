@@ -151,10 +151,25 @@
   --muted-opacity: 0.8;
 }
 
+/* The nav drawer (.nav-group, see the hamburger section further down)
+   is position:fixed + translateX(100%) while closed -- genuinely
+   off-screen and invisible, but its untransformed layout box still
+   counts toward the page's own scrollable width in Chrome/WebKit,
+   which a mouse never reveals but a real finger swiping right-to-left
+   does (an actual horizontal pan, not a scrollbar drag). overflow-x:
+   hidden on both html and body is the standard, safe blanket fix --
+   nothing on this page is meant to be reachable by scrolling
+   sideways, so clipping any stray horizontal extent, from this or any
+   future cause, is never the wrong call here. */
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: "Alata", sans-serif;
   background: linear-gradient(180deg, var(--page-grad-top), var(--page-grad-bottom));
   min-height: calc(100svh - var(--header-h));
+  overflow-x: hidden;
 }
 
 /* nav links jump to these -- without this, the browser scrolls the
@@ -993,32 +1008,34 @@ section[id] {
     display: flex;
   }
 
-  /* Right-side drawer instead of the old wrap-to-second-row nav bar.
+  /* Compact card near the hamburger, not a full-height drawer -- hugs
+     its own content (no bottom/height set, so it sizes to the nav
+     links + theme toggle) instead of stretching the full screen.
      position:fixed (not absolute against the sticky header) so it's
      never at the mercy of a browser's own handling of position:sticky
      as an absolute-positioning containing block -- anchored to the
      real viewport instead. Closed state stays in normal flow (no
-     [hidden], no display:none) but translated off-screen to the right
-     and hit-testing/AT-invisible; the open/close transition only ever
-     animates transform+opacity, never a layout-affecting property. */
+     [hidden], no display:none) but faded+shifted out and hit-testing/
+     AT-invisible; the open/close transition only ever animates
+     transform+opacity, never a layout-affecting property. */
   .nav-group {
     position: fixed;
     z-index: 100;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: min(78vw, 320px);
+    top: calc(var(--header-h) + 10px);
+    right: 12px;
+    width: min(70vw, 260px);
     flex-direction: column;
     align-items: stretch;
-    justify-content: center;
     gap: 0;
+    padding: 8px;
+    border-radius: 16px;
     background: var(--header-bg);
-    box-shadow: -12px 0 24px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateX(16px);
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
   }
 
   .nav-group.is-open {
@@ -1026,7 +1043,7 @@ section[id] {
     transform: translateX(0);
     visibility: visible;
     pointer-events: auto;
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
   /* Dims and blocks the page behind the open drawer, same show/hide
@@ -1059,16 +1076,27 @@ section[id] {
 
   .site-nav a {
     width: 100%;
-    padding: 14px 16px;
+    padding: 12px 16px;
+    border-radius: 10px;
     text-align: center;
+    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
   }
 
-  /* the scroll-spy underline reads oddly full-width in a stacked list --
-     keep the active link's own color/weight change (from wherever else
-     is-active is styled) without the underline geometry that assumed a
-     horizontal bar */
+  /* the scroll-spy underline (::after, desktop) reads oddly full-width
+     in a stacked list -- a filled rectangle behind the current section
+     instead, showing which part of the page is in view same as the
+     underline did. Reuses the exact light/dark pairing the START
+     button's own tokens already encode -- dark mode is a light fill
+     with dark text, light mode is a dark fill with light text -- the
+     same pair the rest of the page already uses for "the one filled
+     control", not a new color invented for this one spot. */
   .site-nav a::after {
     display: none;
+  }
+
+  .site-nav a.is-active {
+    background: linear-gradient(160deg, var(--start-btn-bg-1), var(--start-btn-bg-2));
+    color: var(--start-btn-text);
   }
 
   .theme-toggle {
