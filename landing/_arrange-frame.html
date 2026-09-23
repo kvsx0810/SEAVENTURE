@@ -24,8 +24,23 @@
      straight from style.css above, untouched. */
   html, body { overflow-x: hidden; }
 
+  /* Without an actual <header> here, --header-h's "leave 104px for it"
+     math (baked into every section's min-height AND body's own) left
+     body's own rendered box 104px shorter than this frame's real
+     iframe height -- the gradient stopped there and the browser's
+     default (dark-mode) canvas color showed through as a flat strip
+     below it. Stretching html/body to the full frame lets the SAME
+     gradient (body's own background) reach the bottom edge instead. */
+  html, body { height: 100%; }
+
   .deco {
     cursor: grab;
+    /* SVG hit-testing defaults to painted pixels only (visiblePainted) --
+       these fish/bubble shapes are thin curvy paths with a lot of
+       transparent space inside their own bounding box, so almost every
+       click landed on nothing. `all` makes the whole box (painted or
+       not) draggable, which is what a drag handle needs. */
+    pointer-events: all;
     touch-action: none; /* we handle the drag ourselves, don't let the
                             browser also try to pan/scroll on touch */
   }
