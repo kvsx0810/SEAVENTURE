@@ -393,17 +393,16 @@ let caughtFish = null; // {name, h}, at most one fish per cast, still dangling o
 let soundOn = false;
 let ambientSound, waterAmbienceSound, windAmbienceSound, backgroundMusicSound, hookSplashSound, reelSound, largeFishLostSound, juvenileLostSound, npcVoSound;
 let prevRigState = 'moving';
-const REEL_SOUND_VOLUME = 0.5;
-const FISH_LOST_VOLUME = 1.8; // 3x the original 0.6 -- both catch cues, per feedback
-const NPC_VO_VOLUME = 0.7;
-// Placeholder mix levels for the 3 new ambient/music layers -- added
-// alongside the existing ambient-underwater loop rather than replacing it
-// (per feedback). Real levels come from the standalone mixer tool (see
-// _sound-mixer.html) once the final JSON mix is exported; update these 3
-// from that JSON when it comes in.
-const WATER_AMBIENCE_VOLUME = 0.18;
-const WIND_AMBIENCE_VOLUME = 0.12;
-const BACKGROUND_MUSIC_VOLUME = 0.2;
+// Final mix levels from the _sound-mixer.html tool (Hưng's exported JSON).
+const AMBIENT_UNDERWATER_VOLUME = 0.12;
+const WATER_AMBIENCE_VOLUME = 0.27;
+const WIND_AMBIENCE_VOLUME = 0.42;
+const BACKGROUND_MUSIC_VOLUME = 0.17;
+const NPC_VO_VOLUME = 0.35;
+const HOOK_SPLASH_VOLUME = 0.22;
+const REEL_SOUND_VOLUME = 0.22;
+const LARGE_FISH_LOST_VOLUME = 0.28;
+const JUVENILE_FISH_LOST_VOLUME = 0.74;
 
 function loadSounds() {
   ambientSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-ambient-underwater.wav');
@@ -428,7 +427,7 @@ function setupSoundToggle() {
       // wipe out the icon <img>/<span> markup nested inside the button).
       btn.setAttribute('aria-pressed', String(soundOn));
       if (soundOn) {
-        ambientSound.setVolume(0.25);
+        ambientSound.setVolume(AMBIENT_UNDERWATER_VOLUME);
         ambientSound.loop();
         waterAmbienceSound.setVolume(WATER_AMBIENCE_VOLUME);
         waterAmbienceSound.loop();
@@ -452,7 +451,7 @@ function setupSoundToggle() {
 function updateLoopingSoundsForRigState() {
   if (!soundOn || rigState === prevRigState) { prevRigState = rigState; return; }
   if (prevRigState === 'reeling') reelSound.stop();
-  if (rigState === 'casting') { hookSplashSound.setVolume(0.5); hookSplashSound.play(); }
+  if (rigState === 'casting') { hookSplashSound.setVolume(HOOK_SPLASH_VOLUME); hookSplashSound.play(); }
   if (rigState === 'reeling') { reelSound.setVolume(REEL_SOUND_VOLUME); reelSound.loop(); }
   prevRigState = rigState;
 }
@@ -1425,7 +1424,7 @@ function onCatchLanded(fish) {
   const isMature = fish.h >= HERO_FISH_MATURE_THRESHOLD;
   if (soundOn) {
     const sfx = isMature ? largeFishLostSound : juvenileLostSound;
-    sfx.setVolume(FISH_LOST_VOLUME);
+    sfx.setVolume(isMature ? LARGE_FISH_LOST_VOLUME : JUVENILE_FISH_LOST_VOLUME);
     sfx.play();
   }
   if (gameOutcome) return;
