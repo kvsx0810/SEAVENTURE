@@ -148,13 +148,35 @@
     'fish-4':      { symbol: 'deco-fish-4', viewBox: '0 0 96 36',   defaultSize: 56 }
   };
 
-  const key = new URLSearchParams(location.search).get('section');
+  const params = new URLSearchParams(location.search);
+  const key = params.get('section');
+  const vp = params.get('vp') || 'default';
   document.getElementById('sectionMount').innerHTML = SECTIONS[key] || '<p style="padding:20px">Unknown section: ' + key + '</p>';
   const section = document.querySelector('#sectionMount > section');
 
-  let items = []; // { id, type, x, y (center %), size (px), rotation (deg), mirror (bool) }
+  let items = []; // { id, type, x, y (center %), size (px), rotation (deg), flipH (bool), flipV (bool) }
   let nextId = 1;
   let selectedId = null;
+
+  // Auto-persisted per section+viewport so a page reload (browser crash,
+  // Claude pushing a code update, teammate accidentally closing the tab)
+  // never wipes out in-progress arranging -- separate origin from the
+  // real site already isolates this storage, and section+vp keeps
+  // desktop/mobile of the SAME section from overwriting each other even
+  // though they load the exact same URL pattern otherwise.
+  const STORAGE_KEY = 'seaventure-arrange:' + key + ':' + vp;
+  function saveLocal() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ items, nextId })); } catch (e) {}
+  }
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.items)) items = data.items;
+      if (typeof data.nextId === 'number') nextId = data.nextId;
+    } catch (e) {}
+  }
 
   function findItem(id) { return items.filter((it) => it.id === id)[0] || null; }
 
@@ -173,7 +195,9 @@
       el.style.left = item.x + '%';
       el.style.top = item.y + '%';
       el.style.width = item.size + 'px';
-      el.style.transform = 'translate(-50%, -50%) rotate(' + item.rotation + 'deg)' + (item.mirror ? ' scaleX(-1)' : '');
+      el.style.transform = 'translate(-50%, -50%) rotate(' + item.rotation + 'deg)'
+        + ' scaleX(' + (item.flipH ? -1 : 1) + ')'
+        + ' scaleY(' + (item.flipV ? -1 : 1) + ')';
 
       const svgNS = 'http://www.w3.org/2000/svg';
       const svg = document.createElementNS(svgNS, 'svg');
@@ -215,7 +239,7 @@
     notifySelection();
   });
   window.addEventListener('pointerup', () => {
-    if (dragEl) dragEl.classList.remove('is-dragging');
+    if (dragEl) { dragEl.classList.remove('is-dragging'); saveLocal(); }
     dragItem = null; dragEl = null;
   });
 
@@ -234,23 +258,26 @@
       y: 50 + (Math.random() * 20 - 10),
       size: info.defaultSize,
       rotation: Math.round(Math.random() * 20 - 10),
-      mirror: false
+      flipH: false,
+      flipV: false
     };
     items.push(item);
     selectedId = item.id;
     render();
     notifySelection();
+    saveLocal();
   }
 
   window.addEventListener('message', (e) => {
     if (!e.data) return;
     if (e.data.type === 'add-item') addItem(e.data.itemType);
-    if (e.data.type === 'clear-items') { items = []; selectedId = null; render(); notifySelection(); }
+    if (e.data.type === 'clear-items') { items = []; selectedId = null; render(); notifySelection(); saveLocal(); }
     if (e.data.type === 'delete-item') {
       items = items.filter((it) => it.id !== e.data.id);
       if (selectedId === e.data.id) selectedId = null;
       render();
       notifySelection();
+      saveLocal();
     }
     if (e.data.type === 'update-item') {
       const item = findItem(e.data.id);
@@ -258,7 +285,19 @@
         Object.assign(item, e.data.patch);
         render();
         notifySelection();
+        saveLocal();
       }
+    }
+    // Restores a previously-exported JSON backup for this exact
+    // section+viewport -- e.g. after a code update, paste the JSON
+    // copied before the update back in and hit "Nhập JSON" to pick up
+    // exactly where things left off instead of starting over.
+    if (e.data.type === 'load-items' && Array.isArray(e.data.items)) {
+      items = e.data.items.map((it) => ({ flipH: false, flipV: false, ...it, id: nextId++ }));
+      selectedId = null;
+      render();
+      notifySelection();
+      saveLocal();
     }
     if (e.data.type === 'export-request') {
       window.parent.postMessage({
@@ -269,6 +308,7 @@
     }
   });
 
+  loadLocal();
   render();
 </script>
 </body>

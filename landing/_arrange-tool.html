@@ -188,18 +188,25 @@
   (File này không thuộc trang web thật -- tên bắt đầu bằng <code>_</code>
   để không lẫn với trang thật.)
 </p>
+<p class="lede">
+  <strong>Tiến độ tự lưu vào trình duyệt</strong> (mỗi khung tự nhớ riêng) --
+  reload trang, hay Claude cập nhật code tool này, không làm mất gì đang sắp.
+  Nhỡ có sự cố thật thì dán JSON đã <strong>Xuất</strong> trước đó vào ô bên
+  dưới rồi bấm <strong>Nhập JSON</strong> để khôi phục lại đúng y như cũ.
+</p>
 
 <div class="toolbar">
   <button class="primary" id="exportBtn">Xuất JSON</button>
   <button id="copyBtn">Copy JSON</button>
+  <button id="importBtn">Nhập JSON</button>
   <button id="clearAllBtn">Xoá hết tất cả</button>
   <span class="status" id="status"></span>
 </div>
 
 <div id="sections"></div>
 
-<h2 style="font-size:14px;margin:0 0 8px;">JSON kết quả</h2>
-<textarea id="jsonOut" readonly placeholder="Bấm &quot;Xuất JSON&quot; sau khi sắp xếp xong..."></textarea>
+<h2 style="font-size:14px;margin:0 0 8px;">JSON kết quả (Xuất ra đây, hoặc dán vào đây để Nhập lại)</h2>
+<textarea id="jsonOut" placeholder="Bấm &quot;Xuất JSON&quot; sau khi sắp xếp xong, hoặc dán JSON đã lưu trước đó vào đây rồi bấm &quot;Nhập JSON&quot;..."></textarea>
 
 <!-- Same 4 fish + bubble symbols as _arrange-frame.html, duplicated here
      only so the palette buttons (which live in THIS page, outside every
@@ -284,13 +291,14 @@
       ref.selected = item;
       const active = el.contains(document.activeElement) ? document.activeElement : null;
       const fx = el.querySelector('#fx'), fy = el.querySelector('#fy'), fs = el.querySelector('#fs'),
-            fr = el.querySelector('#fr'), fm = el.querySelector('#fm'), fsOut = el.querySelector('#fsOut'),
-            frOut = el.querySelector('#frOut');
+            fr = el.querySelector('#fr'), fmh = el.querySelector('#fmh'), fmv = el.querySelector('#fmv'),
+            fsOut = el.querySelector('#fsOut'), frOut = el.querySelector('#frOut');
       if (active !== fx) fx.value = Math.round(item.x * 10) / 10;
       if (active !== fy) fy.value = Math.round(item.y * 10) / 10;
       if (active !== fs) { fs.value = item.size; fsOut.textContent = item.size + 'px'; }
       if (active !== fr) { fr.value = item.rotation; frOut.textContent = item.rotation + '°'; }
-      if (active !== fm) fm.checked = !!item.mirror;
+      if (active !== fmh) fmh.checked = !!item.flipH;
+      if (active !== fmv) fmv.checked = !!item.flipV;
       return;
     }
     ref.selected = item;
@@ -299,19 +307,21 @@
       '<div class="field"><label>Y %</label><input type="number" id="fy" step="0.1"></div>' +
       '<div class="field"><label>Size</label><input type="range" id="fs" min="16" max="240" step="2"><span class="readout" id="fsOut"></span></div>' +
       '<div class="field"><label>Xoay</label><input type="range" id="fr" min="-45" max="45" step="1"><span class="readout" id="frOut"></span></div>' +
-      '<div class="checkrow"><input type="checkbox" id="fm"><label for="fm">Lật ngang</label></div>' +
+      '<div class="checkrow"><input type="checkbox" id="fmh"><label for="fmh">Lật ngang</label></div>' +
+      '<div class="checkrow"><input type="checkbox" id="fmv"><label for="fmv">Lật dọc</label></div>' +
       '<button class="del" id="fdel">Xoá con này</button>';
 
     const fx = el.querySelector('#fx'), fy = el.querySelector('#fy'), fs = el.querySelector('#fs'),
-          fr = el.querySelector('#fr'), fm = el.querySelector('#fm'), fsOut = el.querySelector('#fsOut'),
-          frOut = el.querySelector('#frOut');
+          fr = el.querySelector('#fr'), fmh = el.querySelector('#fmh'), fmv = el.querySelector('#fmv'),
+          fsOut = el.querySelector('#fsOut'), frOut = el.querySelector('#frOut');
     fx.value = Math.round(item.x * 10) / 10;
     fy.value = Math.round(item.y * 10) / 10;
     fs.value = item.size;
     fsOut.textContent = item.size + 'px';
     fr.value = item.rotation;
     frOut.textContent = item.rotation + '°';
-    fm.checked = !!item.mirror;
+    fmh.checked = !!item.flipH;
+    fmv.checked = !!item.flipV;
 
     function sendPatch(patch) {
       ref.el.contentWindow.postMessage({ type: 'update-item', id: item.id, patch }, '*');
@@ -320,7 +330,8 @@
     fy.addEventListener('input', () => sendPatch({ y: Number(fy.value) }));
     fs.addEventListener('input', () => { fsOut.textContent = fs.value + 'px'; sendPatch({ size: Number(fs.value) }); });
     fr.addEventListener('input', () => { frOut.textContent = fr.value + '°'; sendPatch({ rotation: Number(fr.value) }); });
-    fm.addEventListener('change', () => sendPatch({ mirror: fm.checked }));
+    fmh.addEventListener('change', () => sendPatch({ flipH: fmh.checked }));
+    fmv.addEventListener('change', () => sendPatch({ flipV: fmv.checked }));
     el.querySelector('#fdel').addEventListener('click', () => {
       ref.el.contentWindow.postMessage({ type: 'delete-item', id: item.id }, '*');
     });
@@ -371,7 +382,7 @@
       wrap.style.borderRadius = '8px';
 
       const iframe = document.createElement('iframe');
-      iframe.src = '_arrange-frame.html?section=' + sec.key;
+      iframe.src = '_arrange-frame.html?section=' + sec.key + '&vp=' + vp.key;
       iframe.width = vp.width;
       iframe.height = vp.height;
       iframe.style.transform = 'scale(' + vp.scale + ')';
@@ -452,6 +463,25 @@
       document.getElementById('jsonOut').select();
       document.getElementById('status').textContent = 'Không tự copy được -- đã bôi đen sẵn, Ctrl+C thủ công.';
     }
+  });
+
+  document.getElementById('importBtn').addEventListener('click', () => {
+    const text = document.getElementById('jsonOut').value.trim();
+    if (!text) { document.getElementById('status').textContent = 'Dán JSON vào ô bên dưới trước đã.'; return; }
+    let data;
+    try { data = JSON.parse(text); } catch (e) {
+      document.getElementById('status').textContent = 'JSON không hợp lệ -- kiểm tra lại đã dán đủ/đúng chưa.';
+      return;
+    }
+    let total = 0;
+    frameRefs.forEach((ref) => {
+      const items = data[ref.sectionKey] && data[ref.sectionKey][ref.vpKey];
+      if (Array.isArray(items)) {
+        ref.el.contentWindow.postMessage({ type: 'load-items', items }, '*');
+        total += items.length;
+      }
+    });
+    document.getElementById('status').textContent = 'Đã nhập ' + total + ' element từ JSON vào các khung tương ứng.';
   });
 
   document.getElementById('clearAllBtn').addEventListener('click', () => {
