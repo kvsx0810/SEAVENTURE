@@ -99,8 +99,9 @@
     gap: 16px;
     overflow-x: auto;
     padding: 16px;
+    align-items: flex-start;
   }
-  .frame-card { flex: none; }
+  .frame-card { flex: none; width: max-content; }
   .frame-card .label {
     font-size: 12px;
     font-weight: 600;
@@ -112,16 +113,64 @@
     border: 1px solid var(--line);
     border-radius: 8px;
   }
-  .frame-actions {
+
+  /* -------- palette: click a piece to add it to that canvas -------- */
+  .palette {
     display: flex;
-    gap: 6px;
-    margin-top: 8px;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
   }
-  .frame-actions button {
-    padding: 6px 10px;
+  .palette button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    border-radius: 8px;
+  }
+  .palette button svg { width: 100%; height: 100%; fill: #0a3f66; }
+
+  /* -------- inspector: fields for whichever item is selected -------- */
+  .inspector {
+    margin-top: 10px;
+    width: 220px;
     font-size: 12px;
+    color: #35506b;
   }
-  .frame-actions button.danger { color: #9c2836; border-color: #f0c9ce; }
+  .inspector .empty { color: #90a9bb; font-style: italic; }
+  .inspector .field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 7px;
+  }
+  .inspector .field label { flex: none; width: 46px; }
+  .inspector .field input[type="number"] {
+    width: 60px;
+    padding: 4px 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font: inherit;
+  }
+  .inspector .field input[type="range"] { flex: 1; accent-color: var(--accent); }
+  .inspector .readout {
+    width: 40px;
+    text-align: right;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    flex: none;
+  }
+  .inspector .checkrow { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .inspector button.del {
+    width: 100%;
+    font-size: 12px;
+    padding: 6px 10px;
+    color: #9c2836;
+    border-color: #f0c9ce;
+  }
 
   textarea#jsonOut {
     width: 100%;
@@ -140,12 +189,13 @@
 
 <h1>Sắp xếp cá &amp; bong bóng trang trí -- tool tạm</h1>
 <p class="lede">
-  Mỗi section bắt đầu <strong>trống trơn</strong> -- bấm <strong>+ Cá</strong> /
-  <strong>+ Bong bóng</strong> dưới mỗi khung để thêm, kéo tới vị trí muốn,
-  di chuột vào 1 con để hiện nút <strong>⟳ đổi hình cá / − nhỏ lại / + to
-  ra / × xoá</strong>. Mỗi section có 1 ô chọn <strong>màu</strong> áp cho
-  cả cá lẫn bong bóng trong section đó (2 khung Desktop/Mobile dùng chung
-  màu, nhưng số lượng/vị trí/size mỗi khung set riêng). Đây là <em>trang
+  Mỗi khung (Desktop/Mobile) bắt đầu <strong>trống trơn</strong> -- bấm 1
+  hình trong hàng palette dưới khung để thêm nó vào canvas. Click 1 con đã
+  thêm để chọn (viền đỏ) -- panel <strong>Chỉnh</strong> bên dưới hiện ra
+  cho chỉnh chính xác toạ độ X/Y%, size, góc xoay, lật ngang, hoặc xoá.
+  Kéo trực tiếp trên canvas cũng được. Mỗi section có 1 ô <strong>màu</strong>
+  áp cho toàn bộ cá/bong bóng trong section đó (2 khung Desktop/Mobile dùng
+  chung màu, số lượng/vị trí/size mỗi khung set riêng). Đây là <em>trang
   thật</em> đang dùng <code>style.css</code> thật, không phải hình chụp.
   Xong hết thì bấm <strong>Xuất JSON</strong> rồi <strong>Copy JSON</strong>,
   gửi lại cho tui, tui áp thẳng vào trang thật.
@@ -165,6 +215,24 @@
 <h2 style="font-size:14px;margin:0 0 8px;">JSON kết quả</h2>
 <textarea id="jsonOut" readonly placeholder="Bấm &quot;Xuất JSON&quot; sau khi sắp xếp xong..."></textarea>
 
+<!-- Same 4 fish + bubble symbols as _arrange-frame.html, duplicated here
+     only so the palette buttons (which live in THIS page, outside every
+     iframe, so they don't clutter the real section preview) can show an
+     accurate icon instead of a generic placeholder. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="p-deco-bubble-cluster" viewBox="0 0 207 204">
+      <path opacity="0.5" d="M26.891 124.047C12.7747 77.7459 35.0525 49.6528 57.903 35.5557C62.5047 32.7168 66.3402 38.7008 63.0144 42.9639C39.2566 73.4173 32.4667 112.902 29.3872 124.295C28.8274 126.366 27.5167 126.099 26.891 124.047Z"/>
+      <ellipse opacity="0.5" cx="83" cy="28" rx="9" ry="8"/>
+      <ellipse opacity="0.5" cx="103.5" cy="102" rx="103.5" ry="102"/>
+    </symbol>
+    <symbol id="p-deco-fish-1" viewBox="0 0 176 122"><path d="M4.359 102.549C-20.7183 48.2975 68.5127 27.3879 116.263 23.7146C185.023 -19.2348 163.339 5.819 143.902 23.7146C210.774 51.7447 157.833 44.2474 123.004 36.995C21.2117 39.2555 35.7056 170.364 4.359 102.549Z"/></symbol>
+    <symbol id="p-deco-fish-2" viewBox="0 0 125 124"><path d="M10.0942 120.655C-9.56338 112.244 -6.563 59.5342 74.6955 28.8156C135.35 -23.3723 125.034 7.07068 112.294 28.8156C142.373 62.3442 109.332 52.9902 89.0514 44.1221C37.4365 67.5342 53.0251 139.022 10.0942 120.655Z"/></symbol>
+    <symbol id="p-deco-fish-3" viewBox="0 0 203 263"><path d="M13.1364 249.455C-18.1736 192.71 2.94722 124.5 115.035 73.2152C174.27 -51.4149 168.159 10.8421 157.699 57.5494C249.654 81.5703 178.854 93.3776 131.959 96.2787C33.4473 169 44.4464 306.2 13.1364 249.455Z"/></symbol>
+    <symbol id="p-deco-fish-4" viewBox="0 0 96 36"><path d="M8.88767 14.5535C25.8091 -3.42513 48.512 1.5163 60.7694 7.61164C62.6722 8.55788 65.1827 7.45346 66.5676 5.82439C71.1449 0.440479 82.1608 -0.394834 90.6188 0.137091C93.9666 0.347634 96.639 3.39709 94.6001 6.04423C93.4961 7.47754 91.9482 8.65292 90.1921 9.60554C87.3651 11.1391 85.9416 18.1587 87.9623 20.5747C89.0155 21.834 89.9162 23.1336 90.6778 24.413C92.9847 28.2886 89.4464 32.4118 85.1174 30.9315C79.658 29.0647 75.3454 25.9604 72.3619 23.067C69.6424 20.4297 66.221 18.3065 62.3931 18.8032C58.4846 19.3104 53.841 20.2656 49.1452 21.247C37.1837 24.7821 27.5649 29.0592 21.1976 33.4282C15.6186 37.2563 -14.7515 39.6697 8.88767 14.5535Z"/></symbol>
+  </defs>
+</svg>
+
 <script>
   const SECTIONS = [
     { key: 'intro', title: 'Intro (team)', color: '#042549' },
@@ -178,9 +246,17 @@
     { key: 'desktop', label: 'Desktop (1800px)', width: 1800, height: 900, scale: 0.48 },
     { key: 'mobile', label: 'Mobile (390px)', width: 390, height: 760, scale: 0.85 }
   ];
+  const PALETTE = [
+    { type: 'bubble', symbol: 'p-deco-bubble-cluster', viewBox: '0 0 207 204', title: 'Bong bóng' },
+    { type: 'bubble-mini', symbol: 'p-deco-bubble-cluster', viewBox: '0 0 207 204', title: 'Bong bóng (nhỏ)' },
+    { type: 'fish-1', symbol: 'p-deco-fish-1', viewBox: '0 0 176 122', title: 'Cá 1' },
+    { type: 'fish-2', symbol: 'p-deco-fish-2', viewBox: '0 0 125 124', title: 'Cá 2' },
+    { type: 'fish-3', symbol: 'p-deco-fish-3', viewBox: '0 0 203 263', title: 'Cá 3' },
+    { type: 'fish-4', symbol: 'p-deco-fish-4', viewBox: '0 0 96 36', title: 'Cá 4 (dẹt)' }
+  ];
 
   const sectionsEl = document.getElementById('sections');
-  const frameRefs = []; // { key: 'sdg:desktop', sectionKey, el: iframeElement }
+  const frameRefs = []; // { key, sectionKey, vpKey, el: iframeElement, inspectorEl, selected: null }
   const colorInputs = {}; // sectionKey -> <input type=color>
 
   function broadcastColor(sectionKey) {
@@ -189,6 +265,94 @@
       r.el.contentWindow.postMessage({ type: 'set-color', color }, '*');
     });
   }
+
+  function buildPalette(iframe) {
+    const wrap = document.createElement('div');
+    wrap.className = 'palette';
+    PALETTE.forEach((p) => {
+      const btn = document.createElement('button');
+      btn.title = p.title;
+      btn.innerHTML = '<svg viewBox="' + p.viewBox + '"><use href="#' + p.symbol + '"></use></svg>';
+      btn.addEventListener('click', () => iframe.contentWindow.postMessage({ type: 'add-item', itemType: p.type }, '*'));
+      wrap.appendChild(btn);
+    });
+    return wrap;
+  }
+
+  function buildInspector() {
+    const el = document.createElement('div');
+    el.className = 'inspector';
+    el.innerHTML = '<p class="empty">Chưa chọn con nào -- click 1 con trên canvas.</p>';
+    return el;
+  }
+
+  function renderInspector(ref, item) {
+    const el = ref.inspectorEl;
+    if (!item) {
+      ref.selected = null;
+      el.innerHTML = '<p class="empty">Chưa chọn con nào -- click 1 con trên canvas.</p>';
+      return;
+    }
+    // Same item still selected (this fires again on every drag frame, and
+    // as an echo after every inspector-driven edit) -- just refresh the
+    // displayed values in place instead of rebuilding the DOM, and skip
+    // whichever field the user currently has focus/is dragging on so we
+    // never fight their own in-progress input.
+    if (ref.selected && ref.selected.id === item.id) {
+      ref.selected = item;
+      const active = el.contains(document.activeElement) ? document.activeElement : null;
+      const fx = el.querySelector('#fx'), fy = el.querySelector('#fy'), fs = el.querySelector('#fs'),
+            fr = el.querySelector('#fr'), fm = el.querySelector('#fm'), fsOut = el.querySelector('#fsOut'),
+            frOut = el.querySelector('#frOut');
+      if (active !== fx) fx.value = Math.round(item.x * 10) / 10;
+      if (active !== fy) fy.value = Math.round(item.y * 10) / 10;
+      if (active !== fs) { fs.value = item.size; fsOut.textContent = item.size + 'px'; }
+      if (active !== fr) { fr.value = item.rotation; frOut.textContent = item.rotation + '°'; }
+      if (active !== fm) fm.checked = !!item.mirror;
+      return;
+    }
+    ref.selected = item;
+    el.innerHTML =
+      '<div class="field"><label>X %</label><input type="number" id="fx" step="0.1"></div>' +
+      '<div class="field"><label>Y %</label><input type="number" id="fy" step="0.1"></div>' +
+      '<div class="field"><label>Size</label><input type="range" id="fs" min="16" max="240" step="2"><span class="readout" id="fsOut"></span></div>' +
+      '<div class="field"><label>Xoay</label><input type="range" id="fr" min="-45" max="45" step="1"><span class="readout" id="frOut"></span></div>' +
+      '<div class="checkrow"><input type="checkbox" id="fm"><label for="fm">Lật ngang</label></div>' +
+      '<button class="del" id="fdel">Xoá con này</button>';
+
+    const fx = el.querySelector('#fx'), fy = el.querySelector('#fy'), fs = el.querySelector('#fs'),
+          fr = el.querySelector('#fr'), fm = el.querySelector('#fm'), fsOut = el.querySelector('#fsOut'),
+          frOut = el.querySelector('#frOut');
+    fx.value = Math.round(item.x * 10) / 10;
+    fy.value = Math.round(item.y * 10) / 10;
+    fs.value = item.size;
+    fsOut.textContent = item.size + 'px';
+    fr.value = item.rotation;
+    frOut.textContent = item.rotation + '°';
+    fm.checked = !!item.mirror;
+
+    function sendPatch(patch) {
+      ref.el.contentWindow.postMessage({ type: 'update-item', id: item.id, patch }, '*');
+    }
+    fx.addEventListener('input', () => sendPatch({ x: Number(fx.value) }));
+    fy.addEventListener('input', () => sendPatch({ y: Number(fy.value) }));
+    fs.addEventListener('input', () => { fsOut.textContent = fs.value + 'px'; sendPatch({ size: Number(fs.value) }); });
+    fr.addEventListener('input', () => { frOut.textContent = fr.value + '°'; sendPatch({ rotation: Number(fr.value) }); });
+    fm.addEventListener('change', () => sendPatch({ mirror: fm.checked }));
+    el.querySelector('#fdel').addEventListener('click', () => {
+      ref.el.contentWindow.postMessage({ type: 'delete-item', id: item.id }, '*');
+    });
+  }
+
+  window.addEventListener('message', (e) => {
+    if (!e.data || e.data.type !== 'selection-changed') return;
+    const ref = frameRefs.filter((r) => r.el.contentWindow === e.source)[0];
+    if (!ref) return;
+    // Don't clobber the field the user is actively typing/dragging in --
+    // only re-render when the SELECTED item itself changes, not on every
+    // keystroke echo (dragging still needs live X/Y updates though).
+    renderInspector(ref, e.data.item);
+  });
 
   SECTIONS.forEach((sec) => {
     const block = document.createElement('div');
@@ -246,27 +410,23 @@
 
       wrap.appendChild(iframe);
       card.appendChild(wrap);
+      card.appendChild(buildPalette(iframe));
 
-      const actions = document.createElement('div');
-      actions.className = 'frame-actions';
-      const addFish = document.createElement('button');
-      addFish.textContent = '+ Cá';
-      addFish.addEventListener('click', () => iframe.contentWindow.postMessage({ type: 'add-item', itemType: 'fish' }, '*'));
-      const addBubble = document.createElement('button');
-      addBubble.textContent = '+ Bong bóng';
-      addBubble.addEventListener('click', () => iframe.contentWindow.postMessage({ type: 'add-item', itemType: 'bubble' }, '*'));
+      const ref = { key: sec.key + ':' + vp.key, sectionKey: sec.key, vpKey: vp.key, el: iframe, selected: null };
+      const inspectorEl = buildInspector(ref);
+      ref.inspectorEl = inspectorEl;
+      card.appendChild(inspectorEl);
+
       const clearFrame = document.createElement('button');
-      clearFrame.textContent = 'Xoá hết';
-      clearFrame.className = 'danger';
+      clearFrame.textContent = 'Xoá hết khung này';
+      clearFrame.style.marginTop = '8px';
+      clearFrame.style.width = '220px';
+      clearFrame.style.fontSize = '12px';
       clearFrame.addEventListener('click', () => iframe.contentWindow.postMessage({ type: 'clear-items' }, '*'));
-      actions.appendChild(addFish);
-      actions.appendChild(addBubble);
-      actions.appendChild(clearFrame);
-      card.appendChild(actions);
+      card.appendChild(clearFrame);
 
       row.appendChild(card);
-
-      frameRefs.push({ key: sec.key + ':' + vp.key, sectionKey: sec.key, vpKey: vp.key, el: iframe });
+      frameRefs.push(ref);
     });
 
     block.appendChild(row);
