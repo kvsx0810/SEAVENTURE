@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Last Catch — sound mixer (local tool, not part of the site)</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #0a1a2e;
+    color: #eaf6ff;
+    padding: 24px;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.hint { color: #8fb4d8; font-size: 13px; margin: 0 0 20px; max-width: 720px; line-height: 1.5; }
+  .group-title { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: #7fe0c8; margin: 24px 0 8px; }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #10253f;
+    margin-bottom: 6px;
+  }
+  .row .name { font-size: 14px; flex: 1 1 180px; min-width: 160px; }
+  .row .name small { display: block; color: #6f93b8; font-size: 11px; }
+  .row .slider-wrap { display: flex; align-items: center; gap: 8px; flex: 2 1 200px; min-width: 160px; }
+  .row .slider-wrap input[type=range] { flex: 1; }
+  button {
+    background: #2ec2b4;
+    border: none;
+    color: #021427;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  button.stop { background: #ed8495; }
+  button:active { transform: scale(0.96); }
+  input[type=range] { width: 100%; accent-color: #8fec83; }
+  .vol-val { font-variant-numeric: tabular-nums; font-size: 12px; text-align: right; min-width: 34px; }
+  label.loop { font-size: 12px; display: flex; align-items: center; gap: 4px; justify-content: center; }
+  .toolbar { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+  .toolbar button { padding: 10px 16px; font-size: 13px; }
+  #playAllAmbient { background: #8fec83; }
+  #stopAll { background: #ed8495; }
+  textarea {
+    width: 100%;
+    height: 220px;
+    margin-top: 10px;
+    background: #071527;
+    color: #bff4b8;
+    border: 1px solid #1c3a5e;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: "Consolas", monospace;
+    font-size: 12px;
+    resize: vertical;
+  }
+</style>
+</head>
+<body>
+
+<h1>Last Catch — Sound Mixer</h1>
+<p class="hint">
+  Local-only tool, not part of the shipped site (never linked from anywhere). Preview each sound,
+  drag its volume, toggle loop for the ambient/music layers to hear how they blend, then hit
+  <strong>Export JSON</strong> and send that back — the numbers get copied into the matching
+  volume constants in <code>sketch.js</code>. Sliders start at whatever's currently in the code.
+</p>
+
+<div class="toolbar">
+  <button id="playAllAmbient">▶ Play all ambient layers together</button>
+  <button id="stopAll">■ Stop everything</button>
+</div>
+
+<div class="group-title">Ambient / music (loop, all 4 layer together)</div>
+<div id="ambientRows"></div>
+
+<div class="group-title">One-shot SFX / VO</div>
+<div id="sfxRows"></div>
+
+<div class="group-title">Export</div>
+<button id="exportBtn">Copy / show JSON mix</button>
+<textarea id="exportOut" readonly placeholder="Click 'Copy / show JSON mix' above..."></textarea>
+
+<script>
+const SOUNDS = [
+  // ambient/music layer -- all loop together, played at once by "Play all ambient"
+  { key: 'ambient-underwater', label: 'Ambient underwater', sub: 'existing A2 loop', file: 'assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-ambient-underwater.wav', volume: 0.25, loop: true, group: 'ambient' },
+  { key: 'water-ambience', label: 'Water ambience', sub: 'new A3 layer', file: 'assets/sounds/COMM2754-2026-S2-A3w12-LastCatch-water-ambience.wav', volume: 0.18, loop: true, group: 'ambient' },
+  { key: 'wind-ambience', label: 'Wind ambience', sub: 'new A3 layer', file: 'assets/sounds/COMM2754-2026-S2-A3w12-LastCatch-wind-ambience.wav', volume: 0.12, loop: true, group: 'ambient' },
+  { key: 'background-music', label: 'Background music', sub: 'new A3 layer', file: 'assets/sounds/COMM2754-2026-S2-A3w12-LastCatch-background-music.wav', volume: 0.2, loop: true, group: 'ambient' },
+  // one-shots
+  { key: 'npc-vo', label: 'NPC VO', sub: 'plays on every dialogue line', file: 'assets/sounds/COMM2754-2026-S2-A3w12-LastCatch-npc-vo.wav', volume: 0.7, loop: false, group: 'sfx' },
+  { key: 'hook-water-splash', label: 'Hook splash', sub: 'on cast', file: 'assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-hook-water-splash.wav', volume: 0.5, loop: false, group: 'sfx' },
+  { key: 'fishing-reel', label: 'Fishing reel', sub: 'loops while reeling up', file: 'assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-fishing-reel.wav', volume: 0.5, loop: true, group: 'sfx' },
+  { key: 'large-fish-lost', label: 'Large fish caught', sub: 'plays once fish lands', file: 'assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-large-fish-lost.wav', volume: 1.8, loop: false, group: 'sfx' },
+  { key: 'juvenile-fish-lost', label: 'Juvenile fish caught', sub: 'plays once fish lands', file: 'assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-juvenile-fish-lost.wav', volume: 1.8, loop: false, group: 'sfx' }
+];
+
+const audios = {};
+const state = {};
+
+function buildRow(s) {
+  const row = document.createElement('div');
+  row.className = 'row';
+
+  const audio = new Audio(s.file);
+  audio.loop = s.loop;
+  audio.volume = Math.min(1, s.volume); // <audio>.volume caps at 1, higher mix values (e.g. 1.8) just mean "louder than unity" once ported into p5.sound, preview clamps here
+  audios[s.key] = audio;
+  state[s.key] = { volume: s.volume, loop: s.loop };
+
+  const name = document.createElement('div');
+  name.className = 'name';
+  name.innerHTML = s.label + '<small>' + s.sub + '</small>';
+
+  const playBtn = document.createElement('button');
+  playBtn.textContent = '▶ Play';
+  playBtn.onclick = () => { audio.currentTime = 0; audio.play(); };
+
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.min = 0;
+  slider.max = 2;
+  slider.step = 0.01;
+  slider.value = s.volume;
+
+  const volVal = document.createElement('div');
+  volVal.className = 'vol-val';
+  volVal.textContent = s.volume.toFixed(2);
+
+  slider.oninput = () => {
+    const v = parseFloat(slider.value);
+    state[s.key].volume = v;
+    volVal.textContent = v.toFixed(2);
+    audio.volume = Math.min(1, v);
+  };
+
+  const loopLabel = document.createElement('label');
+  loopLabel.className = 'loop';
+  const loopBox = document.createElement('input');
+  loopBox.type = 'checkbox';
+  loopBox.checked = s.loop;
+  loopBox.onchange = () => { state[s.key].loop = loopBox.checked; audio.loop = loopBox.checked; };
+  loopLabel.appendChild(loopBox);
+  loopLabel.appendChild(document.createTextNode('loop'));
+
+  const stopBtn = document.createElement('button');
+  stopBtn.className = 'stop';
+  stopBtn.textContent = '■';
+  stopBtn.onclick = () => { audio.pause(); audio.currentTime = 0; };
+
+  const sliderWrap = document.createElement('div');
+  sliderWrap.className = 'slider-wrap';
+  sliderWrap.append(slider, volVal);
+
+  row.append(name, playBtn, sliderWrap, loopLabel, stopBtn);
+  return row;
+}
+
+SOUNDS.forEach(s => {
+  const target = document.getElementById(s.group === 'ambient' ? 'ambientRows' : 'sfxRows');
+  target.appendChild(buildRow(s));
+});
+
+document.getElementById('playAllAmbient').onclick = () => {
+  SOUNDS.filter(s => s.group === 'ambient').forEach(s => {
+    const a = audios[s.key];
+    a.currentTime = 0;
+    a.loop = true;
+    a.play();
+  });
+};
+
+document.getElementById('stopAll').onclick = () => {
+  Object.values(audios).forEach(a => { a.pause(); a.currentTime = 0; });
+};
+
+document.getElementById('exportBtn').onclick = () => {
+  document.getElementById('exportOut').value = JSON.stringify(state, null, 2);
+};
+</script>
+</body>
+</html>

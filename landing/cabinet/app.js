@@ -87,6 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // still finishing.
   const sfxButton = new Audio('../assets/button.wav');
   const sfxRandom = new Audio('../assets/random-game.wav');
+  const sfxLeverLeft = new Audio('../assets/lever-left.wav');
+  const sfxLeverRight = new Audio('../assets/lever-right.wav');
   function playSfx(sound) {
     sound.currentTime = 0;
     sound.play().catch(() => {});
@@ -216,8 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmCarousel();
   });
 
-  joyLeft.addEventListener('click', () => { if (mode !== 'spinning') goCarousel(-1, joyLeft); });
-  joyRight.addEventListener('click', () => { if (mode !== 'spinning') goCarousel(1, joyRight); });
+  joyLeft.addEventListener('click', () => { if (mode !== 'spinning') { playSfx(sfxLeverLeft); goCarousel(-1, joyLeft); } });
+  joyRight.addEventListener('click', () => { if (mode !== 'spinning') { playSfx(sfxLeverRight); goCarousel(1, joyRight); } });
 
   popupClose.addEventListener('click', closePopup);
   popupOverlay.addEventListener('click', (e) => {

@@ -510,10 +510,10 @@ main {
 
 .games .deco-d1 { width: 126px; aspect-ratio: 176 / 122; top: 12.9%; left: 38.9%; transform: translate(-50%, -50%) rotate(-1deg) scaleX(1) scaleY(1); }
 .games .deco-d2 { width: 56px; aspect-ratio: 125 / 124; top: 3.4%; left: 43.8%; transform: translate(-50%, -50%) rotate(17deg) scaleX(1) scaleY(1); }
-.games .deco-d3 { width: 88px; aspect-ratio: 203 / 263; top: 72.2%; left: 8.2%; transform: translate(-50%, -50%) rotate(25deg) scaleX(-1) scaleY(-1); }
-.games .deco-d4 { width: 56px; aspect-ratio: 96 / 36; top: 81%; left: 4.9%; transform: translate(-50%, -50%) rotate(-10deg) scaleX(-1) scaleY(-1); }
-.games .deco-m1 { width: 46px; aspect-ratio: 203 / 263; top: 36.4%; left: 30%; transform: translate(-50%, -50%) rotate(24deg) scaleX(-1) scaleY(-1); }
-.games .deco-m2 { width: 42px; aspect-ratio: 96 / 36; top: 41.8%; left: 27.8%; transform: translate(-50%, -50%) rotate(-20deg) scaleX(-1) scaleY(-1); }
+.games .deco-d3 { width: 88px; aspect-ratio: 203 / 263; top: 4%; left: 12%; transform: translate(-50%, -50%) rotate(25deg) scaleX(-1) scaleY(-1); }
+.games .deco-d4 { width: 56px; aspect-ratio: 96 / 36; top: 18%; left: 4.5%; transform: translate(-50%, -50%) rotate(-10deg) scaleX(-1) scaleY(-1); }
+.games .deco-m1 { width: 46px; aspect-ratio: 203 / 263; top: 12%; left: 12%; transform: translate(-50%, -50%) rotate(24deg) scaleX(-1) scaleY(-1); }
+.games .deco-m2 { width: 42px; aspect-ratio: 96 / 36; top: 20%; left: 9%; transform: translate(-50%, -50%) rotate(-20deg) scaleX(-1) scaleY(-1); }
 .games .deco-m3 { width: 76px; aspect-ratio: 176 / 122; top: 4.6%; left: 77.7%; transform: translate(-50%, -50%) rotate(8deg) scaleX(1) scaleY(1); }
 .games .deco-m4 { width: 34px; aspect-ratio: 125 / 124; top: 6.8%; left: 87.1%; transform: translate(-50%, -50%) rotate(5deg) scaleX(1) scaleY(1); }
 

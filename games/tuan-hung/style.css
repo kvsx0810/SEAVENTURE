@@ -225,6 +225,47 @@ html, body {
   100% { transform: rotate(-45deg) scale(1); }
 }
 
+/* -------------------- NPC narrative dialogue -------------------- */
+/* left/top are set from JS every frame it's visible (positionDialogueBox()
+   in sketch.js) -- the rig it has to stay next to moves and flips, so it
+   can't be a fixed Figma percentage like the rest of the HUD. Everything
+   else here matches the Figma frame directly (339x61 design px, converted
+   to % of the same 1920x1080 space #hud-overlay uses). */
+#dialogue-box {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 1.2% 1.56%;   /* 13px / 1080, 30px / 1920 */
+  gap: 0.52%;            /* 10px / 1920 */
+  width: 17.66%;         /* 339px / 1920 */
+  min-height: 5.65%;     /* 61px / 1080 -- min, not fixed, so a line that
+                            wraps to 2 lines grows the box instead of
+                            clipping, rather than forcing every line into
+                            one cramped row */
+  background: linear-gradient(90deg, #8fec83 0%, #bff4b8 100%);
+  border: 1px solid #021427;
+  border-radius: clamp(6px, 0.68vw, 13px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  z-index: 20;
+}
+
+#dialogue-box.is-visible {
+  opacity: 1;
+}
+
+#dialogue-text {
+  font-family: "Alata", sans-serif;
+  font-weight: 400;
+  font-size: clamp(10px, 1.25vw, 24px);
+  line-height: 1.375; /* 33px / 24px */
+  color: #021427;
+  text-align: center;
+}
+
 /* -------------------- mobile touch controls -------------------- */
 #touch-controls {
   position: absolute;

@@ -296,6 +296,36 @@ const REEF_HEALTH_PENALTY_SMALL = 0.15; // cost of catching the smallest fish --
 const REEF_HEALTH_PENALTY_LARGE = 0.05; // cost of catching the largest fish
 const REEF_HEALTH_VITALITY_FLOOR = 0.15; // reef sway never fully freezes, just reads as barely alive
 
+// A3 narrative dialogue: per prof feedback, the game was reading as "try to
+// win" more than "notice what winning costs", so a handful of short NPC
+// lines land at specific story beats (never every catch -- that would just
+// turn into more gamified noise) to pull focus back to the message. Each
+// line fires at most once per round, see dialogueShown below and its reset
+// in restartGame(). DRAFT COPY -- reviewed/approved by Tuấn Hưng, edit here
+// directly if the wording needs another pass.
+const DIALOGUE_LINES = {
+  firstCatch: "Got one... but every catch has a cost below the surface.",
+  firstJuvenile: "That one was still young. It never got the chance to grow.",
+  health50: "The reef's getting quieter. Fewer fish, fewer places left to hide.",
+  health25: "This isn't a reef anymore. It's what's left of one.",
+  win: "Ten catches... but look what it took to get there.",
+  lose: "Nothing left to catch. This is what overfishing looks like."
+};
+let dialogueShown = { firstCatch: false, firstJuvenile: false, health50: false, health25: false };
+// How long each line stays on screen before fading out on its own --
+// gameplay is never paused for it (see showDialogue()/positionDialogueBox()).
+const DIALOGUE_VISIBLE_MS = 4200;
+// Bubble center's offset from the head's own center, in design-space px,
+// forward = towards whichever way the rig currently faces (mirrors with
+// rigDir the same way the rest of the rig does), up = screen-space (flip
+// never touches vertical). Matches the Figma placement (bubble center
+// ~(1194, 232) vs head center ~(967, 292) at the rig's default facing-right
+// pose) so the box pops up right beside/above the NPC's head, and keeps
+// tracking that same relative spot as the boat sails and turns.
+const DIALOGUE_OFFSET_FORWARD = 227;
+const DIALOGUE_OFFSET_UP = 60;
+const DIALOGUE_BOX_W = 339, DIALOGUE_BOX_H = 61; // px, matches the Figma frame -- CSS width/min-height in style.css
+
 // Boat/character rig: A3 puts the player in control of the fishing action,
 // Gold Miner style. Hold A/D to sail left/right, press Space to drop the
 // hook -- once it drops, the catch (or miss) and the reel back up are both
@@ -350,32 +380,41 @@ let hookSwayPhase;
 let rigX = RIG_ANCHOR_X0;
 let rigDir = 1; // 1 = facing/travelling right, -1 = facing/travelling left
 let rigState = 'idle'; // 'idle' (free to sail with A/D, Space casts) | 'casting' | 'reeling'
-let isMovingNow = false; // true while A or D is actually moving the boat this frame, drives the boat-moving sound
 let touchMoveDir = 0; // -1 / 0 / 1, set by holding the mobile touch-left/touch-right buttons, see setupTouchControls()
 let hookY = HOOK_REST_Y; // stateful, the descent can stop early on a catch, so this isn't a simple lerp between two fixed points
 let caughtFish = null; // {name, h}, at most one fish per cast, still dangling on the way up
 
 // Sound, off by default (browsers block audio until the visitor
 // interacts once), toggled on via #sound-toggle in index.html. Ambient
-// and the reel loop start/stop with soundOn and with rigState; boat-moving
-// is a one-shot re-triggered on a random interval (not a seamless loop,
-// looping the raw file back-to-back read as a rapid, mechanical repeat).
-// The other one-shot cues (splash, catches) just check soundOn before playing.
+// layers and the reel loop start/stop with soundOn and with rigState. The
+// other one-shot cues (splash, catches, NPC VO) just check soundOn before
+// playing. Boat-moving SFX was tried and dropped (read as cheesy/mechanical
+// per feedback) -- no sound is tied to A/D movement anymore.
 let soundOn = false;
-let ambientSound, boatMovingSound, hookSplashSound, reelSound, largeFishLostSound, juvenileLostSound;
+let ambientSound, waterAmbienceSound, windAmbienceSound, backgroundMusicSound, hookSplashSound, reelSound, largeFishLostSound, juvenileLostSound, npcVoSound;
 let prevRigState = 'moving';
-const BOAT_SOUND_VOLUME = 0.4;
 const REEL_SOUND_VOLUME = 0.5;
 const FISH_LOST_VOLUME = 1.8; // 3x the original 0.6 -- both catch cues, per feedback
-const BOAT_SOUND_MIN_GAP = 6600, BOAT_SOUND_MAX_GAP = 12000; // ms between boat-moving plays
+const NPC_VO_VOLUME = 0.7;
+// Placeholder mix levels for the 3 new ambient/music layers -- added
+// alongside the existing ambient-underwater loop rather than replacing it
+// (per feedback). Real levels come from the standalone mixer tool (see
+// _sound-mixer.html) once the final JSON mix is exported; update these 3
+// from that JSON when it comes in.
+const WATER_AMBIENCE_VOLUME = 0.18;
+const WIND_AMBIENCE_VOLUME = 0.12;
+const BACKGROUND_MUSIC_VOLUME = 0.2;
 
 function loadSounds() {
   ambientSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-ambient-underwater.wav');
-  boatMovingSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-boat-moving.wav');
+  waterAmbienceSound = loadSound('assets/sounds/COMM2754-2026-S2-A3w12-LastCatch-water-ambience.wav');
+  windAmbienceSound = loadSound('assets/sounds/COMM2754-2026-S2-A3w12-LastCatch-wind-ambience.wav');
+  backgroundMusicSound = loadSound('assets/sounds/COMM2754-2026-S2-A3w12-LastCatch-background-music.wav');
   hookSplashSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-hook-water-splash.wav');
   reelSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-fishing-reel.wav');
   largeFishLostSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-large-fish-lost.wav');
   juvenileLostSound = loadSound('assets/sounds/COMM2754-2026-S2-A2w08-LastCatch-juvenile-fish-lost.wav');
+  npcVoSound = loadSound('assets/sounds/COMM2754-2026-S2-A3w12-LastCatch-npc-vo.wav');
 }
 
 function setupSoundToggle() {
@@ -391,29 +430,21 @@ function setupSoundToggle() {
       if (soundOn) {
         ambientSound.setVolume(0.25);
         ambientSound.loop();
-        scheduleBoatSound();
+        waterAmbienceSound.setVolume(WATER_AMBIENCE_VOLUME);
+        waterAmbienceSound.loop();
+        windAmbienceSound.setVolume(WIND_AMBIENCE_VOLUME);
+        windAmbienceSound.loop();
+        backgroundMusicSound.setVolume(BACKGROUND_MUSIC_VOLUME);
+        backgroundMusicSound.loop();
       } else {
         ambientSound.stop();
-        boatMovingSound.stop();
+        waterAmbienceSound.stop();
+        windAmbienceSound.stop();
+        backgroundMusicSound.stop();
         reelSound.stop();
       }
     });
   });
-}
-
-// Re-triggers boat-moving on its own randomized timer, independent of the
-// draw loop, and only actually plays while the player is actually holding
-// A/D -- keeps rescheduling itself either way so it doesn't need
-// restarting on state changes.
-function scheduleBoatSound() {
-  const gap = random(BOAT_SOUND_MIN_GAP, BOAT_SOUND_MAX_GAP);
-  setTimeout(() => {
-    if (soundOn && isMovingNow) {
-      boatMovingSound.setVolume(BOAT_SOUND_VOLUME);
-      boatMovingSound.play();
-    }
-    if (soundOn) scheduleBoatSound();
-  }, gap);
 }
 
 // Reel is the one loop still tied directly to rigState -- start/stop it
@@ -470,7 +501,58 @@ function syncHud() {
     }
   }
 
+  syncDialoguePosition();
   if (gameOutcome) showEndScreen();
+}
+
+// ==========================================================================
+// NPC narrative dialogue -- a DOM speech bubble (see #dialogue-box in
+// index.html/style.css), same reasoning as the rest of the HUD being DOM
+// (Alata renders reliably there, not reliably inside a p5 canvas
+// textFont() call). Unlike the rest of the HUD, its position isn't a fixed
+// Figma percentage: the rig it needs to stay next to moves and flips, so
+// it's recomputed every frame it's visible from the rig's own current
+// state (see positionDialogueBox()) instead of being pinned once.
+// ==========================================================================
+
+let dialogueHideTimer = null;
+
+// Head's own center in rig-local space (the same "offset from
+// RIG_ANCHOR_X0" space drawRig() draws every rig part in), independent of
+// the rig's current position/facing.
+function headCenterLocal() {
+  return { x: (HEAD_IMG_DEF.x - RIG_ANCHOR_X0) + HEAD_IMG_DEF.w / 2, y: HEAD_IMG_DEF.y + HEAD_IMG_DEF.h / 2 };
+}
+
+// world x/y = rigX + rigDir * localX, rigY unaffected -- the same
+// translate(rigX,0) + scale(-1,1)-when-facing-left transform drawRig()
+// itself draws every part through (see localX()/drawRig()).
+function positionDialogueBox(el) {
+  const head = headCenterLocal();
+  const cx = rigX + rigDir * (head.x + DIALOGUE_OFFSET_FORWARD);
+  const cy = head.y - DIALOGUE_OFFSET_UP;
+  el.style.left = ((cx - DIALOGUE_BOX_W / 2) / CANVAS_W * 100) + '%';
+  el.style.top = ((cy - DIALOGUE_BOX_H / 2) / CANVAS_H * 100) + '%';
+}
+
+// Called every frame from syncHud() while the box is showing, so it keeps
+// tracking the head even though gameplay (and the boat) keeps moving --
+// the narrative beats are deliberately non-blocking, see DIALOGUE_VISIBLE_MS.
+function syncDialoguePosition() {
+  const box = document.getElementById('dialogue-box');
+  if (box && box.classList.contains('is-visible')) positionDialogueBox(box);
+}
+
+function showDialogue(text) {
+  const box = document.getElementById('dialogue-box');
+  const textEl = document.getElementById('dialogue-text');
+  if (!box || !textEl) return;
+  textEl.textContent = text;
+  positionDialogueBox(box);
+  box.classList.add('is-visible');
+  if (soundOn) { npcVoSound.setVolume(NPC_VO_VOLUME); npcVoSound.play(); }
+  clearTimeout(dialogueHideTimer);
+  dialogueHideTimer = setTimeout(() => box.classList.remove('is-visible'), DIALOGUE_VISIBLE_MS);
 }
 
 // Reveals/hides an overlay with a fade (see the matching .is-open CSS on
@@ -524,6 +606,10 @@ function restartGame() {
     img.src = 'assets/BackFish3.png';
   });
   hideOverlay(document.getElementById('end-screen'), 250);
+  dialogueShown = { firstCatch: false, firstJuvenile: false, health50: false, health25: false };
+  clearTimeout(dialogueHideTimer);
+  const dialogueBox = document.getElementById('dialogue-box');
+  if (dialogueBox) dialogueBox.classList.remove('is-visible');
 }
 
 // ==========================================================================
@@ -1301,7 +1387,12 @@ function moveRig(dir) {
 // Checks every live fish against the hook's current world position and
 // grabs the first one within CATCH_RADIUS, at most one catch per cast, so
 // once caughtFish is set this is a no-op for the rest of the trip (called
-// again on the way up in case nothing bit on the way down).
+// again on the way up in case nothing bit on the way down). The catch/lost
+// SFX and narrative dialogue don't fire here -- they wait for the fish to
+// actually finish reeling in (see onCatchLanded(), called from updateRig()
+// once the hook is back at rest), so the player sees the catch land before
+// hearing/reading a reaction to it, not the instant the hook merely touches
+// the fish.
 function tryCatchAtHook() {
   if (caughtFish) return;
   const hx = hookWorldX(), hy = hookY;
@@ -1315,17 +1406,41 @@ function tryCatchAtHook() {
     // replacement grows in after a delay. A juvenile catch is permanent.
     if (fish.h >= HERO_FISH_MATURE_THRESHOLD) {
       pendingRespawns.push({ framesLeft: Math.floor(random(HERO_FISH_RESPAWN_FRAMES_MIN, HERO_FISH_RESPAWN_FRAMES_MAX)) });
-      if (soundOn) { largeFishLostSound.setVolume(FISH_LOST_VOLUME); largeFishLostSound.play(); }
-    } else if (soundOn) {
-      juvenileLostSound.setVolume(FISH_LOST_VOLUME);
-      juvenileLostSound.play();
     }
     if (!gameOutcome) {
       catchProgress.push(fish.name);
-      if (reefHealth <= 0) gameOutcome = 'lose';
-      else if (catchProgress.length >= WIN_CATCH_TARGET) gameOutcome = 'win';
+      if (reefHealth <= 0) { gameOutcome = 'lose'; showDialogue(DIALOGUE_LINES.lose); }
+      else if (catchProgress.length >= WIN_CATCH_TARGET) { gameOutcome = 'win'; showDialogue(DIALOGUE_LINES.win); }
     }
     return;
+  }
+}
+
+// Fired once a caught fish is fully reeled back up to the surface (hookY
+// back at HOOK_REST_Y), not at the moment it was hooked -- see the comment
+// above tryCatchAtHook(). Plays the size-appropriate lost-fish SFX, then at
+// most one narrative dialogue line (skipped if this catch already ended the
+// round -- the win/lose line above already covers it).
+function onCatchLanded(fish) {
+  const isMature = fish.h >= HERO_FISH_MATURE_THRESHOLD;
+  if (soundOn) {
+    const sfx = isMature ? largeFishLostSound : juvenileLostSound;
+    sfx.setVolume(FISH_LOST_VOLUME);
+    sfx.play();
+  }
+  if (gameOutcome) return;
+  if (!dialogueShown.firstCatch) {
+    dialogueShown.firstCatch = true;
+    showDialogue(DIALOGUE_LINES.firstCatch);
+  } else if (!isMature && !dialogueShown.firstJuvenile) {
+    dialogueShown.firstJuvenile = true;
+    showDialogue(DIALOGUE_LINES.firstJuvenile);
+  } else if (!dialogueShown.health25 && reefHealth < 0.25) {
+    dialogueShown.health25 = true;
+    showDialogue(DIALOGUE_LINES.health25);
+  } else if (!dialogueShown.health50 && reefHealth < 0.5) {
+    dialogueShown.health50 = true;
+    showDialogue(DIALOGUE_LINES.health50);
   }
 }
 
@@ -1335,10 +1450,9 @@ function updateRig() {
     // buttons, see touchMoveDir below) move, Space/touch-cast drops the
     // hook and hands off to the automatic casting/reeling. Locked once the
     // round has a winner/loser, see gameOutcome above.
-    isMovingNow = false;
     if (gameOutcome) return;
-    if (keyIsDown(65) || touchMoveDir === -1) { moveRig(-1); isMovingNow = true; } // A
-    else if (keyIsDown(68) || touchMoveDir === 1) { moveRig(1); isMovingNow = true; } // D
+    if (keyIsDown(65) || touchMoveDir === -1) moveRig(-1); // A
+    else if (keyIsDown(68) || touchMoveDir === 1) moveRig(1); // D
   } else if (rigState === 'casting') {
     hookY = Math.min(hookY + HOOK_CAST_SPEED, HOOK_MAX_DEPTH_Y);
     tryCatchAtHook();
@@ -1349,6 +1463,7 @@ function updateRig() {
     hookY = Math.max(hookY - HOOK_REEL_SPEED, HOOK_REST_Y);
     tryCatchAtHook();
     if (hookY <= HOOK_REST_Y) {
+      if (caughtFish) onCatchLanded(caughtFish);
       rigState = 'idle';
       caughtFish = null;
     }
