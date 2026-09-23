@@ -63,14 +63,36 @@
     background: #fff;
     overflow: hidden;
   }
-  .section-block h2 {
-    font-size: 14px;
-    margin: 0;
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     padding: 10px 14px;
     background: #e4f2fa;
     border-bottom: 1px solid var(--line);
+  }
+  .section-head h2 {
+    font-size: 14px;
+    margin: 0;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+  }
+  .color-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #35506b;
+  }
+  .color-field input[type="color"] {
+    width: 30px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    cursor: pointer;
+    background: none;
   }
   .frames-row {
     display: flex;
@@ -90,6 +112,16 @@
     border: 1px solid var(--line);
     border-radius: 8px;
   }
+  .frame-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .frame-actions button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .frame-actions button.danger { color: #9c2836; border-color: #f0c9ce; }
 
   textarea#jsonOut {
     width: 100%;
@@ -108,21 +140,23 @@
 
 <h1>Sắp xếp cá &amp; bong bóng trang trí -- tool tạm</h1>
 <p class="lede">
-  Mỗi section có 2 khung: <strong>Desktop</strong> (rộng 1800px, để lộ khoảng
-  trống 2 bên nếu ông muốn thả cá/bong bóng tràn ra ngoài như hiện tại) và
-  <strong>Mobile</strong> (rộng 390px). Đây là <em>trang thật</em> đang dùng
-  <code>style.css</code> thật, không phải hình chụp -- kéo-thả trực tiếp
-  từng con cá/bong bóng tới vị trí ông muốn. Double-click một con để trả nó
-  về vị trí gốc hiện tại. Xong hết thì bấm <strong>Copy JSON</strong> và gửi
-  lại cho tui, tui sẽ áp thẳng vào <code>style.css</code>.
-  (File này không thuộc trang web thật, không cần xoá nếu ông muốn sắp lại
-  sau này -- tên bắt đầu bằng <code>_</code> để không lẫn với trang thật.)
+  Mỗi section bắt đầu <strong>trống trơn</strong> -- bấm <strong>+ Cá</strong> /
+  <strong>+ Bong bóng</strong> dưới mỗi khung để thêm, kéo tới vị trí muốn,
+  di chuột vào 1 con để hiện nút <strong>⟳ đổi hình cá / − nhỏ lại / + to
+  ra / × xoá</strong>. Mỗi section có 1 ô chọn <strong>màu</strong> áp cho
+  cả cá lẫn bong bóng trong section đó (2 khung Desktop/Mobile dùng chung
+  màu, nhưng số lượng/vị trí/size mỗi khung set riêng). Đây là <em>trang
+  thật</em> đang dùng <code>style.css</code> thật, không phải hình chụp.
+  Xong hết thì bấm <strong>Xuất JSON</strong> rồi <strong>Copy JSON</strong>,
+  gửi lại cho tui, tui áp thẳng vào trang thật.
+  (File này không thuộc trang web thật -- tên bắt đầu bằng <code>_</code>
+  để không lẫn với trang thật.)
 </p>
 
 <div class="toolbar">
   <button class="primary" id="exportBtn">Xuất JSON</button>
   <button id="copyBtn">Copy JSON</button>
-  <button id="resetBtn">Reset tất cả về vị trí gốc</button>
+  <button id="clearAllBtn">Xoá hết tất cả</button>
   <span class="status" id="status"></span>
 </div>
 
@@ -133,27 +167,51 @@
 
 <script>
   const SECTIONS = [
-    { key: 'intro', title: 'Intro (team)' },
-    { key: 'sdg', title: 'SDG 14 overview' },
-    { key: 'quote', title: 'Quote' },
-    { key: 'cta', title: 'CTA (change habits)' },
-    { key: 'explainer', title: 'Explainer paragraph' },
-    { key: 'games', title: 'Games / arcade' }
+    { key: 'intro', title: 'Intro (team)', color: '#042549' },
+    { key: 'sdg', title: 'SDG 14 overview', color: '#042549' },
+    { key: 'quote', title: 'Quote', color: '#042549' },
+    { key: 'cta', title: 'CTA (change habits)', color: '#042549' },
+    { key: 'explainer', title: 'Explainer paragraph', color: '#042549' },
+    { key: 'games', title: 'Games / arcade', color: '#042549' }
   ];
   const VIEWPORTS = [
-    { key: 'desktop', label: 'Desktop (1800px)', width: 1800, height: 900, scale: 0.42 },
+    { key: 'desktop', label: 'Desktop (1800px)', width: 1800, height: 900, scale: 0.48 },
     { key: 'mobile', label: 'Mobile (390px)', width: 390, height: 760, scale: 0.85 }
   ];
 
   const sectionsEl = document.getElementById('sections');
-  const frameRefs = []; // { key: 'sdg:desktop', el: iframeElement }
+  const frameRefs = []; // { key: 'sdg:desktop', sectionKey, el: iframeElement }
+  const colorInputs = {}; // sectionKey -> <input type=color>
+
+  function broadcastColor(sectionKey) {
+    const color = colorInputs[sectionKey].value;
+    frameRefs.filter((r) => r.sectionKey === sectionKey).forEach((r) => {
+      r.el.contentWindow.postMessage({ type: 'set-color', color }, '*');
+    });
+  }
 
   SECTIONS.forEach((sec) => {
     const block = document.createElement('div');
     block.className = 'section-block';
+
+    const head = document.createElement('div');
+    head.className = 'section-head';
     const h2 = document.createElement('h2');
     h2.textContent = sec.title;
-    block.appendChild(h2);
+    head.appendChild(h2);
+
+    const colorField = document.createElement('label');
+    colorField.className = 'color-field';
+    colorField.textContent = 'Màu: ';
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = sec.color;
+    colorField.appendChild(colorInput);
+    head.appendChild(colorField);
+    colorInputs[sec.key] = colorInput;
+    colorInput.addEventListener('input', () => broadcastColor(sec.key));
+
+    block.appendChild(head);
 
     const row = document.createElement('div');
     row.className = 'frames-row';
@@ -184,12 +242,31 @@
       iframe.style.transform = 'scale(' + vp.scale + ')';
       iframe.style.transformOrigin = 'top left';
       iframe.style.border = 'none';
+      iframe.addEventListener('load', () => broadcastColor(sec.key));
 
       wrap.appendChild(iframe);
       card.appendChild(wrap);
+
+      const actions = document.createElement('div');
+      actions.className = 'frame-actions';
+      const addFish = document.createElement('button');
+      addFish.textContent = '+ Cá';
+      addFish.addEventListener('click', () => iframe.contentWindow.postMessage({ type: 'add-item', itemType: 'fish' }, '*'));
+      const addBubble = document.createElement('button');
+      addBubble.textContent = '+ Bong bóng';
+      addBubble.addEventListener('click', () => iframe.contentWindow.postMessage({ type: 'add-item', itemType: 'bubble' }, '*'));
+      const clearFrame = document.createElement('button');
+      clearFrame.textContent = 'Xoá hết';
+      clearFrame.className = 'danger';
+      clearFrame.addEventListener('click', () => iframe.contentWindow.postMessage({ type: 'clear-items' }, '*'));
+      actions.appendChild(addFish);
+      actions.appendChild(addBubble);
+      actions.appendChild(clearFrame);
+      card.appendChild(actions);
+
       row.appendChild(card);
 
-      frameRefs.push({ key: sec.key + ':' + vp.key, el: iframe });
+      frameRefs.push({ key: sec.key + ':' + vp.key, sectionKey: sec.key, vpKey: vp.key, el: iframe });
     });
 
     block.appendChild(row);
@@ -203,13 +280,13 @@
   // system) -- so positions read back via postMessage are already correct
   // percentages, no un-scaling needed here.
 
-  function requestPositions(iframeEl) {
+  function requestItems(iframeEl) {
     return new Promise((resolve) => {
       const requestId = Math.random().toString(36).slice(2);
       function handler(e) {
         if (e.source === iframeEl.contentWindow && e.data && e.data.type === 'export-response' && e.data.requestId === requestId) {
           window.removeEventListener('message', handler);
-          resolve(e.data.positions);
+          resolve(e.data.items);
         }
       }
       window.addEventListener('message', handler);
@@ -219,19 +296,20 @@
   }
 
   document.getElementById('exportBtn').addEventListener('click', async () => {
-    document.getElementById('status').textContent = 'Đang đọc vị trí...';
+    document.getElementById('status').textContent = 'Đang đọc dữ liệu...';
     const result = {};
+    let total = 0;
+    for (const sec of SECTIONS) {
+      result[sec.key] = { color: colorInputs[sec.key].value, desktop: [], mobile: [] };
+    }
     for (const ref of frameRefs) {
-      const [sectionKey, vpKey] = ref.key.split(':');
-      const positions = await requestPositions(ref.el);
-      if (!positions) continue;
-      Object.entries(positions).forEach(([selector, pos]) => {
-        if (!result[selector]) result[selector] = {};
-        result[selector][vpKey] = pos;
-      });
+      const items = await requestItems(ref.el);
+      if (!items) continue;
+      result[ref.sectionKey][ref.vpKey] = items;
+      total += items.length;
     }
     document.getElementById('jsonOut').value = JSON.stringify(result, null, 2);
-    document.getElementById('status').textContent = 'Xong -- ' + Object.keys(result).length + ' element.';
+    document.getElementById('status').textContent = 'Xong -- ' + total + ' element trên tất cả section/khung.';
   });
 
   document.getElementById('copyBtn').addEventListener('click', async () => {
@@ -246,9 +324,9 @@
     }
   });
 
-  document.getElementById('resetBtn').addEventListener('click', () => {
-    frameRefs.forEach((ref) => ref.el.contentWindow.postMessage({ type: 'reset-all' }, '*'));
-    document.getElementById('status').textContent = 'Đã reset về vị trí gốc trong style.css.';
+  document.getElementById('clearAllBtn').addEventListener('click', () => {
+    frameRefs.forEach((ref) => ref.el.contentWindow.postMessage({ type: 'clear-items' }, '*'));
+    document.getElementById('status').textContent = 'Đã xoá hết cá/bong bóng ở mọi section.';
   });
 </script>
 </body>

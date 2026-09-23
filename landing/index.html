@@ -17,7 +17,7 @@
   <!-- Apotek Wide -- same Adobe Fonts kit every other SEAVENTURE page uses -->
   <link rel="stylesheet" href="https://use.typekit.net/rav6zvx.css">
 
-  <link rel="stylesheet" href="style.css?v=52">
+  <link rel="stylesheet" href="style.css?v=53">
 
   <!-- Applies a saved light/dark override (from the toggle button, see
        the script near the end of body) before first paint, so the page
@@ -37,60 +37,11 @@
        before this gets wired into the real site (rename this file to the
        new root index.html, move the current cabinet into cabinet/). -->
 
-  <!-- Shared defs for the decorations (bubbles/fish/light rays) -- real
-       <svg> symbols, not CSS mask-image. Paths are Hung's actual Figma
-       exports (pasted in chat), not hand-approximated shapes. Same
-       hidden-defs pattern the cabinet's own index.html already uses for
-       its screen clip-path. -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <defs>
-      <symbol id="deco-bubble-cluster" viewBox="0 0 207 204">
-        <path opacity="0.1" d="M26.891 124.047C12.7747 77.7459 35.0525 49.6528 57.903 35.5557C62.5047 32.7168 66.3402 38.7008 63.0144 42.9639C39.2566 73.4173 32.4667 112.902 29.3872 124.295C28.8274 126.366 27.5167 126.099 26.891 124.047Z" fill="#BBE8FB"/>
-        <ellipse opacity="0.1" cx="83" cy="28" rx="9" ry="8" fill="#BBE8FB"/>
-        <ellipse opacity="0.1" cx="103.5" cy="102" rx="103.5" ry="102" fill="#BBE8FB"/>
-      </symbol>
-      <symbol id="deco-fish-1" viewBox="0 0 176 122">
-        <path d="M4.359 102.549C-20.7183 48.2975 68.5127 27.3879 116.263 23.7146C185.023 -19.2348 163.339 5.819 143.902 23.7146C210.774 51.7447 157.833 44.2474 123.004 36.995C21.2117 39.2555 35.7056 170.364 4.359 102.549Z" fill="#042549"/>
-      </symbol>
-      <symbol id="deco-fish-2" viewBox="0 0 125 124">
-        <path d="M10.0942 120.655C-9.56338 112.244 -6.563 59.5342 74.6955 28.8156C135.35 -23.3723 125.034 7.07068 112.294 28.8156C142.373 62.3442 109.332 52.9902 89.0514 44.1221C37.4365 67.5342 53.0251 139.022 10.0942 120.655Z" fill="#042549"/>
-      </symbol>
-      <symbol id="deco-fish-3" viewBox="0 0 203 263">
-        <path d="M13.1364 249.455C-18.1736 192.71 2.94722 124.5 115.035 73.2152C174.27 -51.4149 168.159 10.8421 157.699 57.5494C249.654 81.5703 178.854 93.3776 131.959 96.2787C33.4473 169 44.4464 306.2 13.1364 249.455Z" fill="#042549"/>
-      </symbol>
-      <symbol id="deco-fish-4" viewBox="0 0 96 36">
-        <path d="M8.88767 14.5535C25.8091 -3.42513 48.512 1.5163 60.7694 7.61164C62.6722 8.55788 65.1827 7.45346 66.5676 5.82439C71.1449 0.440479 82.1608 -0.394834 90.6188 0.137091C93.9666 0.347634 96.639 3.39709 94.6001 6.04423C93.4961 7.47754 91.9482 8.65292 90.1921 9.60554C87.3651 11.1391 85.9416 18.1587 87.9623 20.5747C89.0155 21.834 89.9162 23.1336 90.6778 24.413C92.9847 28.2886 89.4464 32.4118 85.1174 30.9315C79.658 29.0647 75.3454 25.9604 72.3619 23.067C69.6424 20.4297 66.221 18.3065 62.3931 18.8032C58.4846 19.3104 53.841 20.2656 49.1452 21.247C37.1837 24.7821 27.5649 29.0592 21.1976 33.4282C15.6186 37.2563 -14.7515 39.6697 8.88767 14.5535Z" fill="#042549"/>
-      </symbol>
-      <symbol id="deco-light-rays" viewBox="0 0 1920 1969">
-        <g opacity="0.6">
-          <path opacity="0.2" d="M322.672 236.334L385.663 219.051L1378.26 1742.86L1026.21 1810.95L322.672 236.334Z" fill="url(#rayGrad0)"/>
-          <path opacity="0.2" d="M422.379 207.243L514.081 183.614L1919.5 1550.63L1374.46 1679.49L422.379 207.243Z" fill="url(#rayGrad1)"/>
-          <path opacity="0.2" d="M250.194 247.164L280.643 247.164L984.182 1821.78L904.116 1866.82L250.194 247.164Z" fill="url(#rayGrad2)"/>
-          <path opacity="0.2" d="M145.111 279.576L228.038 256.335L875.921 1849.68L393.259 1921.54L145.111 279.576Z" fill="url(#rayGrad3)"/>
-        </g>
-      </symbol>
-      <linearGradient id="rayGrad0" x1="443.03" y1="205.322" x2="867.301" y2="1851.9" gradientUnits="userSpaceOnUse">
-        <stop stop-color="#BBE8FB" stop-opacity="0"/>
-        <stop offset="0.254894" stop-color="#11AEF3"/>
-        <stop offset="1" stop-color="#6F8A95" stop-opacity="0"/>
-      </linearGradient>
-      <linearGradient id="rayGrad1" x1="536.207" y1="171.8" x2="964.386" y2="1833.55" gradientUnits="userSpaceOnUse">
-        <stop stop-color="#BBE8FB" stop-opacity="0"/>
-        <stop offset="0.312587" stop-color="#11AEF3"/>
-        <stop offset="1" stop-color="#6F8A95" stop-opacity="0"/>
-      </linearGradient>
-      <linearGradient id="rayGrad2" x1="257.081" y1="253.235" x2="681.351" y2="1899.81" gradientUnits="userSpaceOnUse">
-        <stop stop-color="#95B9C8" stop-opacity="0"/>
-        <stop offset="0.254894" stop-color="#11AEF3"/>
-        <stop offset="1" stop-color="#6F8A95" stop-opacity="0"/>
-      </linearGradient>
-      <linearGradient id="rayGrad3" x1="65.9199" y1="286.313" x2="494.1" y2="1948.06" gradientUnits="userSpaceOnUse">
-        <stop stop-color="#BBE8FB" stop-opacity="0"/>
-        <stop offset="0.240471" stop-color="#11AEF3"/>
-        <stop offset="1" stop-color="#6F8A95" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-  </svg>
+  <!-- The old hand-placed deco-fish/deco-bubble <svg> defs + per-section
+       <use> instances (bubbles/fish) that used to live here are gone --
+       removed per feedback, being redesigned from scratch with
+       landing/_arrange-tool.html (see that file's own header comment).
+       Re-add a defs block here once a new arrangement is ready to ship. -->
 
   <div class="page-transition" id="pageTransition" data-transition-mode="depart" aria-hidden="true">
     <img class="page-transition-mascot theme-img theme-img--light" src="assets/mascot-light.png" alt="">
@@ -162,37 +113,20 @@
     </section>
 
     <section class="intro">
-      <svg class="deco deco-bubble" viewBox="0 0 207 204" aria-hidden="true"><use href="#deco-bubble-cluster"/></svg>
-      <svg class="deco deco-bubble deco-bubble--mini deco-bubble--intro-mini" viewBox="0 0 207 204" aria-hidden="true"><use href="#deco-bubble-cluster"/></svg>
-      <svg class="deco deco-fish deco-fish--2" viewBox="0 0 125 124" aria-hidden="true"><use href="#deco-fish-2"/></svg>
       <p class="intro-text" data-reveal>N5CC (Ngã 5 Chuồng Chó) is a team of five - Hồ Kiều Phương, Tiêu Dĩnh Ngọc, Trần Tùng Phương, Phạm Hoài An, and Trịnh Tuấn Hưng. Together, we created Seaventure, a website and interactive games exploring different goals of SDG 14: Life Below Water.</p>
     </section>
 
     <section class="sdg" id="about">
-      <svg class="deco deco-bubble deco-bubble--sdg-tl" viewBox="0 0 207 204" aria-hidden="true"><use href="#deco-bubble-cluster"/></svg>
-      <svg class="deco deco-bubble deco-bubble--mini deco-bubble--sdg-tl-mini" viewBox="0 0 207 204" aria-hidden="true"><use href="#deco-bubble-cluster"/></svg>
-      <svg class="deco deco-fish deco-fish--sdg-a" viewBox="0 0 176 122" aria-hidden="true"><use href="#deco-fish-1"/></svg>
-      <svg class="deco deco-fish deco-fish--sdg-b" viewBox="0 0 96 36" aria-hidden="true"><use href="#deco-fish-4"/></svg>
-      <svg class="deco deco-fish deco-fish--sdg-e" viewBox="0 0 203 263" aria-hidden="true"><use href="#deco-fish-3"/></svg>
-      <svg class="deco deco-fish deco-fish--sdg-f" viewBox="0 0 125 124" aria-hidden="true"><use href="#deco-fish-2"/></svg>
-      <svg class="deco deco-bubble deco-bubble--sdg-br" viewBox="0 0 207 204" aria-hidden="true"><use href="#deco-bubble-cluster"/></svg>
-      <svg class="deco deco-bubble deco-bubble--mini deco-bubble--sdg-br-mini" viewBox="0 0 207 204" aria-hidden="true"><use href="#deco-bubble-cluster"/></svg>
       <h2 class="sdg-title" data-reveal>SDG 14:<br>Life Below Water</h2>
       <p class="sdg-desc" data-reveal>This project focuses on <span class="hl">Sustainable Development Goal 14: Life Below Water</span>, aiming to raise awareness among Generation Z about protecting marine environments. This project aims to highlights how everyday actions can impact oceans and marine ecosystems, encouraging young people to make more sustainable choices.</p>
     </section>
 
     <section class="quote" id="quote">
-      <svg class="deco deco-bubble deco-bubble--quote" viewBox="0 0 207 204" aria-hidden="true"><use href="#deco-bubble-cluster"/></svg>
-      <svg class="deco deco-bubble deco-bubble--mini deco-bubble--quote-mini" viewBox="0 0 207 204" aria-hidden="true"><use href="#deco-bubble-cluster"/></svg>
-      <svg class="deco deco-fish deco-fish--quote-a" viewBox="0 0 96 36" aria-hidden="true"><use href="#deco-fish-4"/></svg>
-      <svg class="deco deco-fish deco-fish--quote-b" viewBox="0 0 96 36" aria-hidden="true"><use href="#deco-fish-4"/></svg>
       <p class="quote-text" data-reveal>“The greatest threat to our planet is the belief that someone else will save it”</p>
       <p class="quote-author" data-reveal>Robert Swan</p>
     </section>
 
     <section class="cta-section" id="cta">
-      <svg class="deco deco-fish deco-fish--cta-a" viewBox="0 0 96 36" aria-hidden="true"><use href="#deco-fish-4"/></svg>
-      <svg class="deco deco-fish deco-fish--cta-b" viewBox="0 0 96 36" aria-hidden="true"><use href="#deco-fish-4"/></svg>
       <div class="quote-hands-wrap">
         <img class="quote-hand quote-hand--upper theme-img theme-img--light" src="assets/hand-upper-light.png" alt="" aria-hidden="true" data-reveal-hand="right">
         <img class="quote-hand quote-hand--upper theme-img theme-img--dark" src="assets/hand-upper-dark.png" alt="" aria-hidden="true" data-reveal-hand="right">
@@ -203,15 +137,10 @@
     </section>
 
     <section class="explainer" id="para">
-      <svg class="deco deco-bubble deco-bubble--explainer" viewBox="0 0 207 204" aria-hidden="true"><use href="#deco-bubble-cluster"/></svg>
-      <svg class="deco deco-bubble deco-bubble--mini deco-bubble--explainer-mini" viewBox="0 0 207 204" aria-hidden="true"><use href="#deco-bubble-cluster"/></svg>
-      <svg class="deco deco-fish" viewBox="0 0 176 122" aria-hidden="true"><use href="#deco-fish-1"/></svg>
       <p class="explainer-text" data-reveal><span class="hl">“The greatest threat to our planet is the belief that someone else will save it”</span> reminds us that protecting the ocean starts with individual action. SDG 14 addresses issues such as pollution, overfishing, ocean acidification, and ecosystem loss, all of which are affected by our everyday choices. Small changes in how we consume, use resources, and manage waste can collectively make a difference. <span class="hl">Change everyday habits to protect ocean health.</span></p>
     </section>
 
     <section class="games" id="game">
-      <svg class="deco deco-fish deco-fish--games-a" viewBox="0 0 125 124" aria-hidden="true"><use href="#deco-fish-2"/></svg>
-      <svg class="deco deco-fish deco-fish--games-b" viewBox="0 0 96 36" aria-hidden="true"><use href="#deco-fish-4"/></svg>
       <img class="games-machine theme-img theme-img--light" src="assets/arcade-light.png" alt="Arcade cabinet" data-reveal-img>
       <img class="games-machine theme-img theme-img--dark" src="assets/arcade-dark.png" alt="Arcade cabinet" data-reveal-img>
       <div class="games-copy">

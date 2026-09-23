@@ -8,47 +8,83 @@
 <!-- Same fonts + same style.css as the real landing page (loaded relative
      to this file, which sits next to index.html on purpose) -- this frame
      is not a mockup, it IS the real CSS rendering the real section markup,
-     so drag positions read off it are exactly what will end up back in
-     style.css. -->
+     so drag/size/color values read off it are exactly what will end up
+     back in the real page. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alata&family=Inter:wght@900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://use.typekit.net/rav6zvx.css">
-<link rel="stylesheet" href="style.css?v=52">
+<link rel="stylesheet" href="style.css?v=53">
 
 <style>
-  /* This frame only ever renders ONE section, isolated -- no header
-     exists above it here, so drop the "content dimmed while
-     hamburger open" affordances and just let the section breathe.
-     Everything else (colors, type, .deco placement) still comes
-     straight from style.css above, untouched. */
   html, body { overflow-x: hidden; }
-
   /* Without an actual <header> here, --header-h's "leave 104px for it"
      math (baked into every section's min-height AND body's own) left
-     body's own rendered box 104px shorter than this frame's real
-     iframe height -- the gradient stopped there and the browser's
-     default (dark-mode) canvas color showed through as a flat strip
-     below it. Stretching html/body to the full frame lets the SAME
-     gradient (body's own background) reach the bottom edge instead. */
+     body's own rendered box shorter than this frame's real iframe
+     height -- the gradient stopped short and the browser's default
+     canvas color showed through as a flat strip. Stretching html/body
+     to the full frame lets the same gradient reach the bottom edge. */
   html, body { height: 100%; }
 
-  .deco {
+  /* The old hand-placed .deco-fish/.deco-bubble markup + CSS is gone --
+     everything on screen here comes from the item list below, driven
+     entirely by inline style + this one shared color variable. */
+  :root { --deco-color: #042549; }
+
+  .deco-item {
+    position: absolute;
     cursor: grab;
-    /* SVG hit-testing defaults to painted pixels only (visiblePainted) --
-       these fish/bubble shapes are thin curvy paths with a lot of
-       transparent space inside their own bounding box, so almost every
-       click landed on nothing. `all` makes the whole box (painted or
-       not) draggable, which is what a drag handle needs. */
-    pointer-events: all;
-    touch-action: none; /* we handle the drag ourselves, don't let the
-                            browser also try to pan/scroll on touch */
+    user-select: none;
+    -webkit-user-select: none;
   }
-  .deco.is-dragging { cursor: grabbing; }
-  .deco:hover, .deco.is-dragging {
+  .deco-item.is-dragging { cursor: grabbing; }
+  .deco-item svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    pointer-events: all; /* SVG default hit-testing only counts painted
+                             pixels -- these shapes have a lot of
+                             transparent space in their own box, so the
+                             whole box needs to count instead */
+  }
+  .deco-item[data-type="fish"] svg { fill: var(--deco-color); }
+  /* Bubble paths keep their own baked-in opacity (0.1) per shape so they
+     still read as translucent water bubbles, just recolored. */
+  .deco-item[data-type="bubble"] svg { fill: var(--deco-color); }
+
+  .deco-item:hover, .deco-item.is-dragging {
     outline: 2px dashed #ff5c5c;
-    outline-offset: 3px;
+    outline-offset: 4px;
   }
+
+  .deco-controls {
+    position: absolute;
+    left: 50%;
+    top: -46px;
+    transform: translateX(-50%);
+    display: none;
+    gap: 5px;
+    background: #0b1f33;
+    border-radius: 8px;
+    padding: 5px;
+    white-space: nowrap;
+    z-index: 10;
+  }
+  .deco-item:hover .deco-controls,
+  .deco-item.is-dragging .deco-controls { display: flex; }
+  .deco-controls button {
+    font: 18px/1 system-ui, sans-serif;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 6px;
+    background: #16324f;
+    color: #fff;
+    cursor: pointer;
+  }
+  .deco-controls button:hover { background: #234b75; }
+  .deco-controls button.del { background: #7a1f2b; }
+  .deco-controls button.del:hover { background: #9c2836; }
 </style>
 </head>
 <body>
@@ -56,67 +92,50 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="deco-bubble-cluster" viewBox="0 0 207 204">
-      <path opacity="0.1" d="M26.891 124.047C12.7747 77.7459 35.0525 49.6528 57.903 35.5557C62.5047 32.7168 66.3402 38.7008 63.0144 42.9639C39.2566 73.4173 32.4667 112.902 29.3872 124.295C28.8274 126.366 27.5167 126.099 26.891 124.047Z" fill="#BBE8FB"/>
-      <ellipse opacity="0.1" cx="83" cy="28" rx="9" ry="8" fill="#BBE8FB"/>
-      <ellipse opacity="0.1" cx="103.5" cy="102" rx="103.5" ry="102" fill="#BBE8FB"/>
+      <path opacity="0.1" d="M26.891 124.047C12.7747 77.7459 35.0525 49.6528 57.903 35.5557C62.5047 32.7168 66.3402 38.7008 63.0144 42.9639C39.2566 73.4173 32.4667 112.902 29.3872 124.295C28.8274 126.366 27.5167 126.099 26.891 124.047Z"/>
+      <ellipse opacity="0.1" cx="83" cy="28" rx="9" ry="8"/>
+      <ellipse opacity="0.1" cx="103.5" cy="102" rx="103.5" ry="102"/>
     </symbol>
     <symbol id="deco-fish-1" viewBox="0 0 176 122">
-      <path d="M4.359 102.549C-20.7183 48.2975 68.5127 27.3879 116.263 23.7146C185.023 -19.2348 163.339 5.819 143.902 23.7146C210.774 51.7447 157.833 44.2474 123.004 36.995C21.2117 39.2555 35.7056 170.364 4.359 102.549Z" fill="#042549"/>
+      <path d="M4.359 102.549C-20.7183 48.2975 68.5127 27.3879 116.263 23.7146C185.023 -19.2348 163.339 5.819 143.902 23.7146C210.774 51.7447 157.833 44.2474 123.004 36.995C21.2117 39.2555 35.7056 170.364 4.359 102.549Z"/>
     </symbol>
     <symbol id="deco-fish-2" viewBox="0 0 125 124">
-      <path d="M10.0942 120.655C-9.56338 112.244 -6.563 59.5342 74.6955 28.8156C135.35 -23.3723 125.034 7.07068 112.294 28.8156C142.373 62.3442 109.332 52.9902 89.0514 44.1221C37.4365 67.5342 53.0251 139.022 10.0942 120.655Z" fill="#042549"/>
+      <path d="M10.0942 120.655C-9.56338 112.244 -6.563 59.5342 74.6955 28.8156C135.35 -23.3723 125.034 7.07068 112.294 28.8156C142.373 62.3442 109.332 52.9902 89.0514 44.1221C37.4365 67.5342 53.0251 139.022 10.0942 120.655Z"/>
     </symbol>
     <symbol id="deco-fish-3" viewBox="0 0 203 263">
-      <path d="M13.1364 249.455C-18.1736 192.71 2.94722 124.5 115.035 73.2152C174.27 -51.4149 168.159 10.8421 157.699 57.5494C249.654 81.5703 178.854 93.3776 131.959 96.2787C33.4473 169 44.4464 306.2 13.1364 249.455Z" fill="#042549"/>
+      <path d="M13.1364 249.455C-18.1736 192.71 2.94722 124.5 115.035 73.2152C174.27 -51.4149 168.159 10.8421 157.699 57.5494C249.654 81.5703 178.854 93.3776 131.959 96.2787C33.4473 169 44.4464 306.2 13.1364 249.455Z"/>
     </symbol>
     <symbol id="deco-fish-4" viewBox="0 0 96 36">
-      <path d="M8.88767 14.5535C25.8091 -3.42513 48.512 1.5163 60.7694 7.61164C62.6722 8.55788 65.1827 7.45346 66.5676 5.82439C71.1449 0.440479 82.1608 -0.394834 90.6188 0.137091C93.9666 0.347634 96.639 3.39709 94.6001 6.04423C93.4961 7.47754 91.9482 8.65292 90.1921 9.60554C87.3651 11.1391 85.9416 18.1587 87.9623 20.5747C89.0155 21.834 89.9162 23.1336 90.6778 24.413C92.9847 28.2886 89.4464 32.4118 85.1174 30.9315C79.658 29.0647 75.3454 25.9604 72.3619 23.067C69.6424 20.4297 66.221 18.3065 62.3931 18.8032C58.4846 19.3104 53.841 20.2656 49.1452 21.247C37.1837 24.7821 27.5649 29.0592 21.1976 33.4282C15.6186 37.2563 -14.7515 39.6697 8.88767 14.5535Z" fill="#042549"/>
+      <path d="M8.88767 14.5535C25.8091 -3.42513 48.512 1.5163 60.7694 7.61164C62.6722 8.55788 65.1827 7.45346 66.5676 5.82439C71.1449 0.440479 82.1608 -0.394834 90.6188 0.137091C93.9666 0.347634 96.639 3.39709 94.6001 6.04423C93.4961 7.47754 91.9482 8.65292 90.1921 9.60554C87.3651 11.1391 85.9416 18.1587 87.9623 20.5747C89.0155 21.834 89.9162 23.1336 90.6778 24.413C92.9847 28.2886 89.4464 32.4118 85.1174 30.9315C79.658 29.0647 75.3454 25.9604 72.3619 23.067C69.6424 20.4297 66.221 18.3065 62.3931 18.8032C58.4846 19.3104 53.841 20.2656 49.1452 21.247C37.1837 24.7821 27.5649 29.0592 21.1976 33.4282C15.6186 37.2563 -14.7515 39.6697 8.88767 14.5535Z"/>
     </symbol>
   </defs>
 </svg>
 
-<main id="sectionMount"><!-- one <section> injected by script below --></main>
+<main id="sectionMount"><!-- one <section> injected by script below, no
+  .deco markup of its own any more -- items render into it dynamically --></main>
 
 <script>
-  // Verbatim copies of the 6 decorated sections from landing/index.html --
-  // same classes, same nesting, so every rule in style.css (including the
-  // .sdg >=1400px bleed override) applies exactly as it does on the real
-  // page. Static copy text/example only -- this frame never ships, so it
-  // doesn't need to track edits to the real copy, only the .deco markup.
+  // Verbatim copies of the 6 sections from landing/index.html, minus every
+  // .deco-fish/.deco-bubble svg -- those are gone from the real page too
+  // (per feedback: start the arrangement over from scratch instead of
+  // editing the old hand-placed set).
   const SECTIONS = {
     intro: `
       <section class="intro">
-        <svg class="deco deco-bubble" viewBox="0 0 207 204" aria-hidden="true" data-deco-id=".intro .deco-bubble"><title>.intro .deco-bubble</title><use href="#deco-bubble-cluster"/></svg>
-        <svg class="deco deco-bubble deco-bubble--mini deco-bubble--intro-mini" viewBox="0 0 207 204" aria-hidden="true" data-deco-id=".intro .deco-bubble--intro-mini"><title>.intro .deco-bubble--intro-mini</title><use href="#deco-bubble-cluster"/></svg>
-        <svg class="deco deco-fish deco-fish--2" viewBox="0 0 125 124" aria-hidden="true" data-deco-id=".intro .deco-fish--2"><title>.intro .deco-fish--2</title><use href="#deco-fish-2"/></svg>
         <p class="intro-text">N5CC (Ngã 5 Chuồng Chó) is a team of five - Hồ Kiều Phương, Tiêu Dĩnh Ngọc, Trần Tùng Phương, Phạm Hoài An, and Trịnh Tuấn Hưng. Together, we created Seaventure, a website and interactive games exploring different goals of SDG 14: Life Below Water.</p>
       </section>`,
     sdg: `
       <section class="sdg">
-        <svg class="deco deco-bubble deco-bubble--sdg-tl" viewBox="0 0 207 204" aria-hidden="true" data-deco-id=".sdg .deco-bubble--sdg-tl"><title>.sdg .deco-bubble--sdg-tl</title><use href="#deco-bubble-cluster"/></svg>
-        <svg class="deco deco-bubble deco-bubble--mini deco-bubble--sdg-tl-mini" viewBox="0 0 207 204" aria-hidden="true" data-deco-id=".sdg .deco-bubble--sdg-tl-mini"><title>.sdg .deco-bubble--sdg-tl-mini</title><use href="#deco-bubble-cluster"/></svg>
-        <svg class="deco deco-fish deco-fish--sdg-a" viewBox="0 0 176 122" aria-hidden="true" data-deco-id=".sdg .deco-fish--sdg-a"><title>.sdg .deco-fish--sdg-a</title><use href="#deco-fish-1"/></svg>
-        <svg class="deco deco-fish deco-fish--sdg-b" viewBox="0 0 96 36" aria-hidden="true" data-deco-id=".sdg .deco-fish--sdg-b"><title>.sdg .deco-fish--sdg-b</title><use href="#deco-fish-4"/></svg>
-        <svg class="deco deco-fish deco-fish--sdg-e" viewBox="0 0 203 263" aria-hidden="true" data-deco-id=".sdg .deco-fish--sdg-e"><title>.sdg .deco-fish--sdg-e</title><use href="#deco-fish-3"/></svg>
-        <svg class="deco deco-fish deco-fish--sdg-f" viewBox="0 0 125 124" aria-hidden="true" data-deco-id=".sdg .deco-fish--sdg-f"><title>.sdg .deco-fish--sdg-f</title><use href="#deco-fish-2"/></svg>
-        <svg class="deco deco-bubble deco-bubble--sdg-br" viewBox="0 0 207 204" aria-hidden="true" data-deco-id=".sdg .deco-bubble--sdg-br"><title>.sdg .deco-bubble--sdg-br</title><use href="#deco-bubble-cluster"/></svg>
-        <svg class="deco deco-bubble deco-bubble--mini deco-bubble--sdg-br-mini" viewBox="0 0 207 204" aria-hidden="true" data-deco-id=".sdg .deco-bubble--sdg-br-mini"><title>.sdg .deco-bubble--sdg-br-mini</title><use href="#deco-bubble-cluster"/></svg>
         <h2 class="sdg-title">SDG 14:<br>Life Below Water</h2>
         <p class="sdg-desc">This project focuses on <span class="hl">Sustainable Development Goal 14: Life Below Water</span>, aiming to raise awareness among Generation Z about protecting marine environments. This project aims to highlights how everyday actions can impact oceans and marine ecosystems, encouraging young people to make more sustainable choices.</p>
       </section>`,
     quote: `
       <section class="quote">
-        <svg class="deco deco-bubble deco-bubble--quote" viewBox="0 0 207 204" aria-hidden="true" data-deco-id=".quote .deco-bubble--quote"><title>.quote .deco-bubble--quote</title><use href="#deco-bubble-cluster"/></svg>
-        <svg class="deco deco-bubble deco-bubble--mini deco-bubble--quote-mini" viewBox="0 0 207 204" aria-hidden="true" data-deco-id=".quote .deco-bubble--quote-mini"><title>.quote .deco-bubble--quote-mini</title><use href="#deco-bubble-cluster"/></svg>
-        <svg class="deco deco-fish deco-fish--quote-a" viewBox="0 0 96 36" aria-hidden="true" data-deco-id=".quote .deco-fish--quote-a"><title>.quote .deco-fish--quote-a</title><use href="#deco-fish-4"/></svg>
-        <svg class="deco deco-fish deco-fish--quote-b" viewBox="0 0 96 36" aria-hidden="true" data-deco-id=".quote .deco-fish--quote-b"><title>.quote .deco-fish--quote-b</title><use href="#deco-fish-4"/></svg>
         <p class="quote-text">&ldquo;The greatest threat to our planet is the belief that someone else will save it&rdquo;</p>
         <p class="quote-author">Robert Swan</p>
       </section>`,
     cta: `
       <section class="cta-section">
-        <svg class="deco deco-fish deco-fish--cta-a" viewBox="0 0 96 36" aria-hidden="true" data-deco-id=".cta-section .deco-fish--cta-a"><title>.cta-section .deco-fish--cta-a</title><use href="#deco-fish-4"/></svg>
-        <svg class="deco deco-fish deco-fish--cta-b" viewBox="0 0 96 36" aria-hidden="true" data-deco-id=".cta-section .deco-fish--cta-b"><title>.cta-section .deco-fish--cta-b</title><use href="#deco-fish-4"/></svg>
         <div class="quote-hands-wrap">
           <img class="quote-hand quote-hand--upper" src="assets/hand-upper-light.png" alt="" aria-hidden="true">
           <img class="quote-hand quote-hand--bottom" src="assets/hand-bottom-light.png" alt="" aria-hidden="true">
@@ -125,15 +144,10 @@
       </section>`,
     explainer: `
       <section class="explainer">
-        <svg class="deco deco-bubble deco-bubble--explainer" viewBox="0 0 207 204" aria-hidden="true" data-deco-id=".explainer .deco-bubble--explainer"><title>.explainer .deco-bubble--explainer</title><use href="#deco-bubble-cluster"/></svg>
-        <svg class="deco deco-bubble deco-bubble--mini deco-bubble--explainer-mini" viewBox="0 0 207 204" aria-hidden="true" data-deco-id=".explainer .deco-bubble--explainer-mini"><title>.explainer .deco-bubble--explainer-mini</title><use href="#deco-bubble-cluster"/></svg>
-        <svg class="deco deco-fish" viewBox="0 0 176 122" aria-hidden="true" data-deco-id=".explainer .deco-fish"><title>.explainer .deco-fish</title><use href="#deco-fish-1"/></svg>
         <p class="explainer-text"><span class="hl">&ldquo;The greatest threat to our planet is the belief that someone else will save it&rdquo;</span> reminds us that protecting the ocean starts with individual action. SDG 14 addresses issues such as pollution, overfishing, ocean acidification, and ecosystem loss, all of which are affected by our everyday choices. Small changes in how we consume, use resources, and manage waste can collectively make a difference. <span class="hl">Change everyday habits to protect ocean health.</span></p>
       </section>`,
     games: `
       <section class="games">
-        <svg class="deco deco-fish deco-fish--games-a" viewBox="0 0 125 124" aria-hidden="true" data-deco-id=".games .deco-fish--games-a"><title>.games .deco-fish--games-a</title><use href="#deco-fish-2"/></svg>
-        <svg class="deco deco-fish deco-fish--games-b" viewBox="0 0 96 36" aria-hidden="true" data-deco-id=".games .deco-fish--games-b"><title>.games .deco-fish--games-b</title><use href="#deco-fish-4"/></svg>
         <img class="games-machine" src="assets/arcade-light.png" alt="Arcade cabinet">
         <div class="games-copy">
           <h2 class="games-heading">Explore games inspired by <span class="hl">SDG 14: Life Below Water</span></h2>
@@ -144,103 +158,129 @@
       </section>`
   };
 
+  const FISH_VIEWBOX = { 1: '0 0 176 122', 2: '0 0 125 124', 3: '0 0 203 263', 4: '0 0 96 36' };
+
   const key = new URLSearchParams(location.search).get('section');
   document.getElementById('sectionMount').innerHTML = SECTIONS[key] || '<p style="padding:20px">Unknown section: ' + key + '</p>';
-
   const section = document.querySelector('#sectionMount > section');
-  const decos = Array.from(document.querySelectorAll('.deco'));
 
-  // Baseline = the position style.css itself produced, read back from
-  // actual layout (getBoundingClientRect) so it doesn't matter whether
-  // the original rule anchored with top/left, bottom/left, top/right or
-  // bottom/right -- the rendered box is the same starting point either
-  // way. Captured once, used both as the "as-is" export before any drag
-  // and to power the per-element Reset (double-click).
-  function readPercent(el) {
-    const dr = el.getBoundingClientRect();
-    const sr = section.getBoundingClientRect();
-    return {
-      left: ((dr.left - sr.left) / sr.width) * 100,
-      top: ((dr.top - sr.top) / sr.height) * 100
-    };
+  let items = []; // { id, type: 'fish'|'bubble', shape (fish only, 1-4), x%, y% (center), size (px), rotation (deg) }
+  let nextId = 1;
+
+  function render() {
+    section.querySelectorAll('.deco-item').forEach((el) => el.remove());
+    items.forEach((item) => {
+      const el = document.createElement('div');
+      el.className = 'deco-item';
+      el.dataset.id = item.id;
+      el.dataset.type = item.type;
+      el.style.left = item.x + '%';
+      el.style.top = item.y + '%';
+      el.style.width = item.size + 'px';
+      el.style.transform = 'translate(-50%, -50%) rotate(' + item.rotation + 'deg)';
+
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('aria-hidden', 'true');
+      const use = document.createElementNS(svgNS, 'use');
+      if (item.type === 'fish') {
+        svg.setAttribute('viewBox', FISH_VIEWBOX[item.shape]);
+        use.setAttribute('href', '#deco-fish-' + item.shape);
+      } else {
+        svg.setAttribute('viewBox', '0 0 207 204');
+        use.setAttribute('href', '#deco-bubble-cluster');
+      }
+      svg.appendChild(use);
+      el.appendChild(svg);
+
+      const controls = document.createElement('div');
+      controls.className = 'deco-controls';
+      if (item.type === 'fish') {
+        const shapeBtn = document.createElement('button');
+        shapeBtn.textContent = '⟳';
+        shapeBtn.title = 'Đổi hình cá';
+        shapeBtn.addEventListener('click', (e) => { e.stopPropagation(); item.shape = (item.shape % 4) + 1; render(); });
+        controls.appendChild(shapeBtn);
+      }
+      const smaller = document.createElement('button');
+      smaller.textContent = '−';
+      smaller.title = 'Nhỏ lại';
+      smaller.addEventListener('click', (e) => { e.stopPropagation(); item.size = Math.max(16, item.size - 8); render(); });
+      controls.appendChild(smaller);
+      const bigger = document.createElement('button');
+      bigger.textContent = '+';
+      bigger.title = 'To ra';
+      bigger.addEventListener('click', (e) => { e.stopPropagation(); item.size = Math.min(240, item.size + 8); render(); });
+      controls.appendChild(bigger);
+      const del = document.createElement('button');
+      del.textContent = '×';
+      del.title = 'Xoá';
+      del.className = 'del';
+      del.addEventListener('click', (e) => { e.stopPropagation(); items = items.filter((it) => it.id !== item.id); render(); });
+      controls.appendChild(del);
+      el.appendChild(controls);
+
+      el.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('.deco-controls')) return;
+        dragItem = item;
+        dragEl = el;
+        el.classList.add('is-dragging');
+        el.setPointerCapture(e.pointerId);
+        dragStartPointer = { x: e.clientX, y: e.clientY };
+        dragStartPos = { x: item.x, y: item.y };
+        e.preventDefault();
+      });
+
+      section.appendChild(el);
+    });
   }
 
-  const baseline = new Map();
-  decos.forEach((el) => baseline.set(el, readPercent(el)));
-
-  function applyPercent(el, left, top) {
-    el.style.left = left.toFixed(2) + '%';
-    el.style.top = top.toFixed(2) + '%';
-    el.style.right = 'auto';
-    el.style.bottom = 'auto';
-  }
-
-  // Bake the read-back baseline into inline styles immediately so the
-  // element's visual position doesn't jump when the first drag starts
-  // (top/left replacing whatever mix of edges the stylesheet used).
-  decos.forEach((el) => {
-    const p = baseline.get(el);
-    applyPercent(el, p.left, p.top);
-  });
-
-  // -- drag --
-  let dragEl = null;
-  let dragStartPointer = null;
-  let dragStartPercent = null;
-
-  decos.forEach((el) => {
-    el.addEventListener('pointerdown', (e) => {
-      dragEl = el;
-      dragEl.classList.add('is-dragging');
-      dragEl.setPointerCapture(e.pointerId);
-      dragStartPointer = { x: e.clientX, y: e.clientY };
-      dragStartPercent = {
-        left: parseFloat(el.style.left),
-        top: parseFloat(el.style.top)
-      };
-      e.preventDefault();
-    });
-    el.addEventListener('dblclick', () => {
-      const p = baseline.get(el);
-      applyPercent(el, p.left, p.top);
-    });
-  });
+  let dragItem = null, dragEl = null, dragStartPointer = null, dragStartPos = null;
 
   window.addEventListener('pointermove', (e) => {
-    if (!dragEl) return;
+    if (!dragItem) return;
     const sr = section.getBoundingClientRect();
     const dxPct = ((e.clientX - dragStartPointer.x) / sr.width) * 100;
     const dyPct = ((e.clientY - dragStartPointer.y) / sr.height) * 100;
-    applyPercent(dragEl, dragStartPercent.left + dxPct, dragStartPercent.top + dyPct);
+    dragItem.x = dragStartPos.x + dxPct;
+    dragItem.y = dragStartPos.y + dyPct;
+    dragEl.style.left = dragItem.x + '%';
+    dragEl.style.top = dragItem.y + '%';
   });
-
   window.addEventListener('pointerup', () => {
     if (dragEl) dragEl.classList.remove('is-dragging');
-    dragEl = null;
+    dragItem = null; dragEl = null;
   });
 
-  // -- talk to the parent tool page (works across file:// too, unlike
-  // reaching into contentWindow.document directly, which some browsers
-  // block between file:// documents even when they're "the same origin") --
+  function addItem(type) {
+    const item = {
+      id: nextId++,
+      type,
+      shape: type === 'fish' ? (1 + Math.floor(Math.random() * 4)) : null,
+      x: 50 + (Math.random() * 20 - 10),
+      y: 50 + (Math.random() * 20 - 10),
+      size: type === 'fish' ? 60 : 70,
+      rotation: Math.round(Math.random() * 30 - 15)
+    };
+    items.push(item);
+    render();
+  }
+
   window.addEventListener('message', (e) => {
     if (!e.data) return;
+    if (e.data.type === 'add-item') addItem(e.data.itemType);
+    if (e.data.type === 'clear-items') { items = []; render(); }
+    if (e.data.type === 'set-color') document.documentElement.style.setProperty('--deco-color', e.data.color);
     if (e.data.type === 'export-request') {
-      const positions = {};
-      decos.forEach((el) => {
-        positions[el.dataset.decoId] = {
-          left: el.style.left,
-          top: el.style.top
-        };
-      });
-      window.parent.postMessage({ type: 'export-response', requestId: e.data.requestId, positions }, '*');
-    }
-    if (e.data.type === 'reset-all') {
-      decos.forEach((el) => {
-        const p = baseline.get(el);
-        applyPercent(el, p.left, p.top);
-      });
+      window.parent.postMessage({
+        type: 'export-response',
+        requestId: e.data.requestId,
+        items: items.map(({ id, ...rest }) => rest)
+      }, '*');
     }
   });
+
+  render();
 </script>
 </body>
 </html>

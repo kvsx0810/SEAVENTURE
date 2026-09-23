@@ -416,33 +416,11 @@ section[id] {
 }
 
 /* -------------------- small reusable decorations -------------------- */
-/* Real inline <svg>, paths from Hung's actual Figma exports (see the
-   <symbol> defs at the top of body) -- fill/opacity are baked into
-   each path already, no CSS color/opacity needed on top. */
-.deco {
-  position: absolute;
-  pointer-events: none;
-  z-index: 0;
-  display: block;
-}
-
-/* Sized down and pulled close to the true section edges (see per-section
-   rules below) -- text columns are centered with their own max-width, so
-   at common laptop widths there's only a slim margin outside that column
-   for decorations to live in without sitting on top of the text. */
-.deco-bubble {
-  width: clamp(56px, 7vw, 96px);
-  aspect-ratio: 207 / 204;
-}
-
-.deco-bubble--mini {
-  width: clamp(26px, 3.2vw, 42px);
-}
-
-.deco-fish {
-  width: clamp(46px, 5.5vw, 76px);
-  aspect-ratio: 176 / 122;
-}
+/* The old hand-placed .deco/.deco-bubble/.deco-fish rules (and every
+   per-section placement override below each section's own block) were
+   removed per feedback -- being redesigned from scratch with
+   landing/_arrange-tool.html (see that file's own header comment).
+   Re-add rules here once a new arrangement is ready to ship. */
 
 /* -------------------- team intro -------------------- */
 .intro {
@@ -456,12 +434,6 @@ section[id] {
   padding: clamp(30px, 6vw, 80px) 24px;
   text-align: center;
 }
-
-/* per the sliced Figma reference (slide 2): bubble + fish cluster
-   bottom-left. Light rays removed for now (see chat). */
-.intro .deco-bubble { bottom: 2%; left: 0%; }
-.intro .deco-bubble--intro-mini { bottom: 9%; left: 7%; }
-.intro .deco-fish--2 { aspect-ratio: 125 / 124; width: clamp(40px, 5vw, 70px); bottom: 2%; left: 22%; transform: rotate(8deg); }
 
 .intro-text {
   font-family: "Alata", sans-serif;
@@ -512,64 +484,6 @@ section[id] {
   color: var(--body-highlight);
 }
 
-/* per the master bubble/fish export: SDG is by far the densest cluster
-   in the whole page (all 4 fish variants + 2 bubble-pairs), matching
-   how it covers two Figma slides' worth of content in one section --
-   a big+mini bubble pair top-left with all 4 fish scattered around it,
-   a second small fish pair lower-left, and another bubble pair +
-   small fish "school" bottom-right. */
-/* Spread across all 4 corners, one pair per corner, well clear of the
-   vertically-centered title+description column and never overlapping
-   each other -- was all bunched into just two crowded corners before. */
-/* .sdg is itself the max-width:1100px column (it's the positioning
-   container for these absolutely-positioned decorations, same box the
-   title/desc text lives in) -- 0%/100% is the text's own edge, not the
-   page margin. Negative offsets push the decorations actually outside
-   that column into the surrounding margin instead of just touching the
-   text's edge.
-
-   That margin only exists once .sdg has actually hit its 1100px cap --
-   below that (roughly everything under ~1300-1400px, which is every
-   phone, every tablet, and plenty of narrower desktop/laptop windows)
-   .sdg spans edge-to-edge with NO margin to bleed into, so the negative
-   offsets below pushed these decorations genuinely off the right edge
-   of the viewport: real horizontal scrollable overflow, confirmed via
-   document.documentElement.clientWidth (the true content width) vs each
-   decoration's getBoundingClientRect().right -- up to ~30px of it,
-   invisible to checks that compare against window.innerWidth instead,
-   since that can include a desktop/devtools scrollbar-gutter reservation
-   large enough to mask exactly this much overflow (real phones have no
-   such reserved gutter, so nothing there hides it). This is almost
-   certainly THE swipe-reveals-a-sliver-of-space bug, and per the
-   overflow-x:hidden note above (breaking position:sticky when applied
-   to html/body to clip exactly this), it should be fixed at the actual
-   source instead of clipped after the fact. Default to flush (0%), the
-   same treatment every OTHER section's decorations already use -- only
-   .sdg was ever given the bleed-into-the-margin treatment -- and only
-   restore the bleed once min-width below guarantees the margin to
-   receive it actually exists (1400px, well past the ~1276px these
-   specific offsets/widths/rotations need, so there's no per-decoration
-   arithmetic to keep in sync if any of those values change later). */
-.sdg .deco-bubble--sdg-tl { top: 1%; left: 0%; }
-.sdg .deco-bubble--sdg-tl-mini { top: 8%; left: 0%; }
-.sdg .deco-fish--sdg-a { top: 0%; right: 2%; left: auto; transform: rotate(-18deg); }
-.sdg .deco-fish--sdg-b { aspect-ratio: 96 / 36; width: clamp(34px, 4vw, 56px); top: 11%; right: 2%; left: auto; transform: rotate(10deg) scaleX(-1); }
-.sdg .deco-fish--sdg-e { aspect-ratio: 203 / 263; width: clamp(40px, 5vw, 74px); bottom: 3%; left: 0%; transform: rotate(-6deg); }
-.sdg .deco-fish--sdg-f { aspect-ratio: 125 / 124; width: clamp(36px, 4.5vw, 64px); bottom: 12%; left: 0%; transform: rotate(4deg); }
-.sdg .deco-bubble--sdg-br { bottom: 1%; right: 0%; }
-.sdg .deco-bubble--sdg-br-mini { bottom: 8%; right: 0%; }
-
-@media (min-width: 1400px) {
-  .sdg .deco-bubble--sdg-tl { left: -8%; }
-  .sdg .deco-bubble--sdg-tl-mini { left: -4%; }
-  .sdg .deco-fish--sdg-a { right: -8%; }
-  .sdg .deco-fish--sdg-b { right: -4%; }
-  .sdg .deco-fish--sdg-e { left: -8%; }
-  .sdg .deco-fish--sdg-f { left: -4%; }
-  .sdg .deco-bubble--sdg-br { right: -8%; }
-  .sdg .deco-bubble--sdg-br-mini { right: -4%; }
-}
-
 /* -------------------- quote + CTA -------------------- */
 /* Figma reference (see chat): the quote/author are left/right-aligned
    inside a max-width column, NOT centered, and the CTA line sits
@@ -589,13 +503,6 @@ section[id] {
   text-align: center;
 }
 
-/* per the master export: a bubble pair (big + mini) top-left */
-.quote .deco-bubble--quote { top: 1%; left: 0%; }
-.quote .deco-bubble--quote-mini { top: 8%; left: 7%; }
-/* Right side, opposite the left-aligned text column and the bubble
-   cluster -- clear of both. */
-.quote .deco-fish--quote-a { aspect-ratio: 96 / 36; width: clamp(34px, 4vw, 56px); top: 2%; right: 2%; transform: rotate(8deg) scaleX(-1); }
-.quote .deco-fish--quote-b { aspect-ratio: 96 / 36; width: clamp(30px, 3.6vw, 48px); bottom: 3%; right: 6%; transform: rotate(-6deg); }
 
 .quote-text {
   font-family: "Inter", sans-serif;
@@ -626,9 +533,6 @@ section[id] {
   padding: clamp(20px, 5vw, 60px) 24px;
 }
 
-/* Tucked into the corners, clear of the centered hands+CTA text. */
-.cta-section .deco-fish--cta-a { aspect-ratio: 96 / 36; width: clamp(34px, 4vw, 56px); top: 3%; left: 1%; transform: rotate(-10deg); }
-.cta-section .deco-fish--cta-b { aspect-ratio: 96 / 36; width: clamp(30px, 3.6vw, 48px); bottom: 4%; right: 1%; transform: rotate(8deg) scaleX(-1); }
 
 /* a second, fainter wave behind the hands for a bit more background
    rhythm between the flat sections above/below it */
@@ -734,9 +638,6 @@ section[id] {
   color: transparent;
 }
 
-.explainer .deco-bubble--explainer { bottom: 2%; right: 0%; }
-.explainer .deco-bubble--explainer-mini { bottom: 9%; right: 7%; }
-.explainer .deco-fish { aspect-ratio: 176 / 122; width: clamp(36px, 4.5vw, 60px); top: 2%; left: 0%; transform: scaleX(-1); }
 
 .explainer-text .hl {
   color: var(--explainer-highlight);
@@ -760,15 +661,6 @@ section[id] {
   flex-wrap: wrap;
   text-align: left;
 }
-
-/* per the master export: the last fish pair on the page sits low,
-   left-hand side -- near the machine rather than the copy column */
-/* Both pinned right at the very bottom edge (not spread up the section)
-   -- on narrow viewports .games stacks machine-then-text and grows very
-   tall, so any larger bottom % here would land mid-way down and cut
-   through the desc paragraph instead of staying clear beneath it. */
-.games .deco-fish--games-a { aspect-ratio: 125 / 124; width: clamp(36px, 4.5vw, 60px); bottom: 1%; left: 0%; transform: rotate(-10deg); }
-.games .deco-fish--games-b { aspect-ratio: 96 / 36; width: clamp(30px, 3.6vw, 48px); bottom: 1%; left: 15%; transform: rotate(6deg) scaleX(-1); }
 
 .games-machine {
   width: clamp(187px, 23.7vw, 356px);
