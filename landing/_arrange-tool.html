@@ -78,22 +78,6 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
-  .color-field {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #35506b;
-  }
-  .color-field input[type="color"] {
-    width: 30px;
-    height: 26px;
-    padding: 0;
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    cursor: pointer;
-    background: none;
-  }
   .frames-row {
     display: flex;
     gap: 16px;
@@ -130,7 +114,7 @@
     padding: 6px;
     border-radius: 8px;
   }
-  .palette button svg { width: 100%; height: 100%; fill: #0a3f66; }
+  .palette button svg { width: 100%; height: 100%; }
 
   /* -------- inspector: fields for whichever item is selected -------- */
   .inspector {
@@ -193,10 +177,12 @@
   hình trong hàng palette dưới khung để thêm nó vào canvas. Click 1 con đã
   thêm để chọn (viền đỏ) -- panel <strong>Chỉnh</strong> bên dưới hiện ra
   cho chỉnh chính xác toạ độ X/Y%, size, góc xoay, lật ngang, hoặc xoá.
-  Kéo trực tiếp trên canvas cũng được. Mỗi section có 1 ô <strong>màu</strong>
-  áp cho toàn bộ cá/bong bóng trong section đó (2 khung Desktop/Mobile dùng
-  chung màu, số lượng/vị trí/size mỗi khung set riêng). Đây là <em>trang
-  thật</em> đang dùng <code>style.css</code> thật, không phải hình chụp.
+  Kéo trực tiếp trên canvas cũng được. Màu giữ nguyên màu gốc của từng loại
+  (cá xanh navy đậm, bong bóng xanh cyan nhạt mờ) -- không chỉnh màu được,
+  chỉ chỉnh vị trí/size/xoay/lật. Mỗi con có viền chấm mờ bao quanh dù
+  không hover -- chỉ để dễ thấy/dễ bấm trong tool này thôi, không xuất hiện
+  trên trang thật. Đây là <em>trang thật</em> đang dùng <code>style.css</code>
+  thật, không phải hình chụp.
   Xong hết thì bấm <strong>Xuất JSON</strong> rồi <strong>Copy JSON</strong>,
   gửi lại cho tui, tui áp thẳng vào trang thật.
   (File này không thuộc trang web thật -- tên bắt đầu bằng <code>_</code>
@@ -221,26 +207,30 @@
      accurate icon instead of a generic placeholder. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
+    <!-- Palette button icons only -- opacity bumped up from the real
+         0.1 (see _arrange-frame.html) purely so the bubble glyph reads
+         on a small white button; the actual placed items always use
+         the real 0.1/#BBE8FB and #042549, unaffected by this. -->
     <symbol id="p-deco-bubble-cluster" viewBox="0 0 207 204">
-      <path opacity="0.5" d="M26.891 124.047C12.7747 77.7459 35.0525 49.6528 57.903 35.5557C62.5047 32.7168 66.3402 38.7008 63.0144 42.9639C39.2566 73.4173 32.4667 112.902 29.3872 124.295C28.8274 126.366 27.5167 126.099 26.891 124.047Z"/>
-      <ellipse opacity="0.5" cx="83" cy="28" rx="9" ry="8"/>
-      <ellipse opacity="0.5" cx="103.5" cy="102" rx="103.5" ry="102"/>
+      <path opacity="0.55" d="M26.891 124.047C12.7747 77.7459 35.0525 49.6528 57.903 35.5557C62.5047 32.7168 66.3402 38.7008 63.0144 42.9639C39.2566 73.4173 32.4667 112.902 29.3872 124.295C28.8274 126.366 27.5167 126.099 26.891 124.047Z" fill="#11AEF3"/>
+      <ellipse opacity="0.55" cx="83" cy="28" rx="9" ry="8" fill="#11AEF3"/>
+      <ellipse opacity="0.55" cx="103.5" cy="102" rx="103.5" ry="102" fill="#11AEF3"/>
     </symbol>
-    <symbol id="p-deco-fish-1" viewBox="0 0 176 122"><path d="M4.359 102.549C-20.7183 48.2975 68.5127 27.3879 116.263 23.7146C185.023 -19.2348 163.339 5.819 143.902 23.7146C210.774 51.7447 157.833 44.2474 123.004 36.995C21.2117 39.2555 35.7056 170.364 4.359 102.549Z"/></symbol>
-    <symbol id="p-deco-fish-2" viewBox="0 0 125 124"><path d="M10.0942 120.655C-9.56338 112.244 -6.563 59.5342 74.6955 28.8156C135.35 -23.3723 125.034 7.07068 112.294 28.8156C142.373 62.3442 109.332 52.9902 89.0514 44.1221C37.4365 67.5342 53.0251 139.022 10.0942 120.655Z"/></symbol>
-    <symbol id="p-deco-fish-3" viewBox="0 0 203 263"><path d="M13.1364 249.455C-18.1736 192.71 2.94722 124.5 115.035 73.2152C174.27 -51.4149 168.159 10.8421 157.699 57.5494C249.654 81.5703 178.854 93.3776 131.959 96.2787C33.4473 169 44.4464 306.2 13.1364 249.455Z"/></symbol>
-    <symbol id="p-deco-fish-4" viewBox="0 0 96 36"><path d="M8.88767 14.5535C25.8091 -3.42513 48.512 1.5163 60.7694 7.61164C62.6722 8.55788 65.1827 7.45346 66.5676 5.82439C71.1449 0.440479 82.1608 -0.394834 90.6188 0.137091C93.9666 0.347634 96.639 3.39709 94.6001 6.04423C93.4961 7.47754 91.9482 8.65292 90.1921 9.60554C87.3651 11.1391 85.9416 18.1587 87.9623 20.5747C89.0155 21.834 89.9162 23.1336 90.6778 24.413C92.9847 28.2886 89.4464 32.4118 85.1174 30.9315C79.658 29.0647 75.3454 25.9604 72.3619 23.067C69.6424 20.4297 66.221 18.3065 62.3931 18.8032C58.4846 19.3104 53.841 20.2656 49.1452 21.247C37.1837 24.7821 27.5649 29.0592 21.1976 33.4282C15.6186 37.2563 -14.7515 39.6697 8.88767 14.5535Z"/></symbol>
+    <symbol id="p-deco-fish-1" viewBox="0 0 176 122"><path fill="#042549" d="M4.359 102.549C-20.7183 48.2975 68.5127 27.3879 116.263 23.7146C185.023 -19.2348 163.339 5.819 143.902 23.7146C210.774 51.7447 157.833 44.2474 123.004 36.995C21.2117 39.2555 35.7056 170.364 4.359 102.549Z"/></symbol>
+    <symbol id="p-deco-fish-2" viewBox="0 0 125 124"><path fill="#042549" d="M10.0942 120.655C-9.56338 112.244 -6.563 59.5342 74.6955 28.8156C135.35 -23.3723 125.034 7.07068 112.294 28.8156C142.373 62.3442 109.332 52.9902 89.0514 44.1221C37.4365 67.5342 53.0251 139.022 10.0942 120.655Z"/></symbol>
+    <symbol id="p-deco-fish-3" viewBox="0 0 203 263"><path fill="#042549" d="M13.1364 249.455C-18.1736 192.71 2.94722 124.5 115.035 73.2152C174.27 -51.4149 168.159 10.8421 157.699 57.5494C249.654 81.5703 178.854 93.3776 131.959 96.2787C33.4473 169 44.4464 306.2 13.1364 249.455Z"/></symbol>
+    <symbol id="p-deco-fish-4" viewBox="0 0 96 36"><path fill="#042549" d="M8.88767 14.5535C25.8091 -3.42513 48.512 1.5163 60.7694 7.61164C62.6722 8.55788 65.1827 7.45346 66.5676 5.82439C71.1449 0.440479 82.1608 -0.394834 90.6188 0.137091C93.9666 0.347634 96.639 3.39709 94.6001 6.04423C93.4961 7.47754 91.9482 8.65292 90.1921 9.60554C87.3651 11.1391 85.9416 18.1587 87.9623 20.5747C89.0155 21.834 89.9162 23.1336 90.6778 24.413C92.9847 28.2886 89.4464 32.4118 85.1174 30.9315C79.658 29.0647 75.3454 25.9604 72.3619 23.067C69.6424 20.4297 66.221 18.3065 62.3931 18.8032C58.4846 19.3104 53.841 20.2656 49.1452 21.247C37.1837 24.7821 27.5649 29.0592 21.1976 33.4282C15.6186 37.2563 -14.7515 39.6697 8.88767 14.5535Z"/></symbol>
   </defs>
 </svg>
 
 <script>
   const SECTIONS = [
-    { key: 'intro', title: 'Intro (team)', color: '#042549' },
-    { key: 'sdg', title: 'SDG 14 overview', color: '#042549' },
-    { key: 'quote', title: 'Quote', color: '#042549' },
-    { key: 'cta', title: 'CTA (change habits)', color: '#042549' },
-    { key: 'explainer', title: 'Explainer paragraph', color: '#042549' },
-    { key: 'games', title: 'Games / arcade', color: '#042549' }
+    { key: 'intro', title: 'Intro (team)' },
+    { key: 'sdg', title: 'SDG 14 overview' },
+    { key: 'quote', title: 'Quote' },
+    { key: 'cta', title: 'CTA (change habits)' },
+    { key: 'explainer', title: 'Explainer paragraph' },
+    { key: 'games', title: 'Games / arcade' }
   ];
   const VIEWPORTS = [
     { key: 'desktop', label: 'Desktop (1800px)', width: 1800, height: 900, scale: 0.48 },
@@ -257,14 +247,6 @@
 
   const sectionsEl = document.getElementById('sections');
   const frameRefs = []; // { key, sectionKey, vpKey, el: iframeElement, inspectorEl, selected: null }
-  const colorInputs = {}; // sectionKey -> <input type=color>
-
-  function broadcastColor(sectionKey) {
-    const color = colorInputs[sectionKey].value;
-    frameRefs.filter((r) => r.sectionKey === sectionKey).forEach((r) => {
-      r.el.contentWindow.postMessage({ type: 'set-color', color }, '*');
-    });
-  }
 
   function buildPalette(iframe) {
     const wrap = document.createElement('div');
@@ -364,17 +346,6 @@
     h2.textContent = sec.title;
     head.appendChild(h2);
 
-    const colorField = document.createElement('label');
-    colorField.className = 'color-field';
-    colorField.textContent = 'Màu: ';
-    const colorInput = document.createElement('input');
-    colorInput.type = 'color';
-    colorInput.value = sec.color;
-    colorField.appendChild(colorInput);
-    head.appendChild(colorField);
-    colorInputs[sec.key] = colorInput;
-    colorInput.addEventListener('input', () => broadcastColor(sec.key));
-
     block.appendChild(head);
 
     const row = document.createElement('div');
@@ -406,7 +377,6 @@
       iframe.style.transform = 'scale(' + vp.scale + ')';
       iframe.style.transformOrigin = 'top left';
       iframe.style.border = 'none';
-      iframe.addEventListener('load', () => broadcastColor(sec.key));
 
       wrap.appendChild(iframe);
       card.appendChild(wrap);
@@ -460,7 +430,7 @@
     const result = {};
     let total = 0;
     for (const sec of SECTIONS) {
-      result[sec.key] = { color: colorInputs[sec.key].value, desktop: [], mobile: [] };
+      result[sec.key] = { desktop: [], mobile: [] };
     }
     for (const ref of frameRefs) {
       const items = await requestItems(ref.el);

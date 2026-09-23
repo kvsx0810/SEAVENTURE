@@ -8,8 +8,8 @@
 <!-- Same fonts + same style.css as the real landing page (loaded relative
      to this file, which sits next to index.html on purpose) -- this frame
      is not a mockup, it IS the real CSS rendering the real section markup,
-     so drag/size/color values read off it are exactly what will end up
-     back in the real page. -->
+     so drag/size/rotation values read off it are exactly what will end
+     up back in the real page. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alata&family=Inter:wght@900&display=swap" rel="stylesheet">
@@ -30,21 +30,31 @@
      page drives via postMessage -- add/select/edit/delete all happen in
      the parent's palette + inspector panel (outside this iframe, so the
      real section preview stays uncluttered by tool chrome); this frame
-     only renders items and reports drag + click-select back up. */
-  :root { --deco-color: #042549; }
+     only renders items and reports drag + click-select back up. Colors
+     are NOT customizable -- per feedback, every fish/bubble keeps its
+     own original fill+opacity exactly as authored in the symbol defs
+     below (same RGBA as the real site used), no shared/overridable
+     color variable. */
 
   .deco-item {
     position: absolute;
     cursor: grab;
     user-select: none;
     -webkit-user-select: none;
+    /* Always-on faint guide box -- purely a tool aid so a low-opacity
+       bubble (0.1 alpha in its own defs, intentionally subtle on the
+       real page) can still be found and grabbed while editing. This
+       outline is tool-only chrome, never part of the exported item
+       data, so it has no effect on how the piece will actually look
+       once placed back on the real page. */
+    outline: 1px dashed rgba(120, 120, 120, 0.35);
+    outline-offset: 3px;
   }
   .deco-item.is-dragging { cursor: grabbing; }
   .deco-item svg {
     display: block;
     width: 100%;
     height: auto;
-    fill: var(--deco-color);
     pointer-events: all; /* SVG default hit-testing only counts painted
                              pixels -- these shapes have a lot of
                              transparent space in their own box, so the
@@ -62,21 +72,21 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="deco-bubble-cluster" viewBox="0 0 207 204">
-      <path opacity="0.1" d="M26.891 124.047C12.7747 77.7459 35.0525 49.6528 57.903 35.5557C62.5047 32.7168 66.3402 38.7008 63.0144 42.9639C39.2566 73.4173 32.4667 112.902 29.3872 124.295C28.8274 126.366 27.5167 126.099 26.891 124.047Z"/>
-      <ellipse opacity="0.1" cx="83" cy="28" rx="9" ry="8"/>
-      <ellipse opacity="0.1" cx="103.5" cy="102" rx="103.5" ry="102"/>
+      <path opacity="0.1" d="M26.891 124.047C12.7747 77.7459 35.0525 49.6528 57.903 35.5557C62.5047 32.7168 66.3402 38.7008 63.0144 42.9639C39.2566 73.4173 32.4667 112.902 29.3872 124.295C28.8274 126.366 27.5167 126.099 26.891 124.047Z" fill="#BBE8FB"/>
+      <ellipse opacity="0.1" cx="83" cy="28" rx="9" ry="8" fill="#BBE8FB"/>
+      <ellipse opacity="0.1" cx="103.5" cy="102" rx="103.5" ry="102" fill="#BBE8FB"/>
     </symbol>
     <symbol id="deco-fish-1" viewBox="0 0 176 122">
-      <path d="M4.359 102.549C-20.7183 48.2975 68.5127 27.3879 116.263 23.7146C185.023 -19.2348 163.339 5.819 143.902 23.7146C210.774 51.7447 157.833 44.2474 123.004 36.995C21.2117 39.2555 35.7056 170.364 4.359 102.549Z"/>
+      <path d="M4.359 102.549C-20.7183 48.2975 68.5127 27.3879 116.263 23.7146C185.023 -19.2348 163.339 5.819 143.902 23.7146C210.774 51.7447 157.833 44.2474 123.004 36.995C21.2117 39.2555 35.7056 170.364 4.359 102.549Z" fill="#042549"/>
     </symbol>
     <symbol id="deco-fish-2" viewBox="0 0 125 124">
-      <path d="M10.0942 120.655C-9.56338 112.244 -6.563 59.5342 74.6955 28.8156C135.35 -23.3723 125.034 7.07068 112.294 28.8156C142.373 62.3442 109.332 52.9902 89.0514 44.1221C37.4365 67.5342 53.0251 139.022 10.0942 120.655Z"/>
+      <path d="M10.0942 120.655C-9.56338 112.244 -6.563 59.5342 74.6955 28.8156C135.35 -23.3723 125.034 7.07068 112.294 28.8156C142.373 62.3442 109.332 52.9902 89.0514 44.1221C37.4365 67.5342 53.0251 139.022 10.0942 120.655Z" fill="#042549"/>
     </symbol>
     <symbol id="deco-fish-3" viewBox="0 0 203 263">
-      <path d="M13.1364 249.455C-18.1736 192.71 2.94722 124.5 115.035 73.2152C174.27 -51.4149 168.159 10.8421 157.699 57.5494C249.654 81.5703 178.854 93.3776 131.959 96.2787C33.4473 169 44.4464 306.2 13.1364 249.455Z"/>
+      <path d="M13.1364 249.455C-18.1736 192.71 2.94722 124.5 115.035 73.2152C174.27 -51.4149 168.159 10.8421 157.699 57.5494C249.654 81.5703 178.854 93.3776 131.959 96.2787C33.4473 169 44.4464 306.2 13.1364 249.455Z" fill="#042549"/>
     </symbol>
     <symbol id="deco-fish-4" viewBox="0 0 96 36">
-      <path d="M8.88767 14.5535C25.8091 -3.42513 48.512 1.5163 60.7694 7.61164C62.6722 8.55788 65.1827 7.45346 66.5676 5.82439C71.1449 0.440479 82.1608 -0.394834 90.6188 0.137091C93.9666 0.347634 96.639 3.39709 94.6001 6.04423C93.4961 7.47754 91.9482 8.65292 90.1921 9.60554C87.3651 11.1391 85.9416 18.1587 87.9623 20.5747C89.0155 21.834 89.9162 23.1336 90.6778 24.413C92.9847 28.2886 89.4464 32.4118 85.1174 30.9315C79.658 29.0647 75.3454 25.9604 72.3619 23.067C69.6424 20.4297 66.221 18.3065 62.3931 18.8032C58.4846 19.3104 53.841 20.2656 49.1452 21.247C37.1837 24.7821 27.5649 29.0592 21.1976 33.4282C15.6186 37.2563 -14.7515 39.6697 8.88767 14.5535Z"/>
+      <path d="M8.88767 14.5535C25.8091 -3.42513 48.512 1.5163 60.7694 7.61164C62.6722 8.55788 65.1827 7.45346 66.5676 5.82439C71.1449 0.440479 82.1608 -0.394834 90.6188 0.137091C93.9666 0.347634 96.639 3.39709 94.6001 6.04423C93.4961 7.47754 91.9482 8.65292 90.1921 9.60554C87.3651 11.1391 85.9416 18.1587 87.9623 20.5747C89.0155 21.834 89.9162 23.1336 90.6778 24.413C92.9847 28.2886 89.4464 32.4118 85.1174 30.9315C79.658 29.0647 75.3454 25.9604 72.3619 23.067C69.6424 20.4297 66.221 18.3065 62.3931 18.8032C58.4846 19.3104 53.841 20.2656 49.1452 21.247C37.1837 24.7821 27.5649 29.0592 21.1976 33.4282C15.6186 37.2563 -14.7515 39.6697 8.88767 14.5535Z" fill="#042549"/>
     </symbol>
   </defs>
 </svg>
@@ -236,7 +246,6 @@
     if (!e.data) return;
     if (e.data.type === 'add-item') addItem(e.data.itemType);
     if (e.data.type === 'clear-items') { items = []; selectedId = null; render(); notifySelection(); }
-    if (e.data.type === 'set-color') document.documentElement.style.setProperty('--deco-color', e.data.color);
     if (e.data.type === 'delete-item') {
       items = items.filter((it) => it.id !== e.data.id);
       if (selectedId === e.data.id) selectedId = null;
