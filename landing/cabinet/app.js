@@ -31,26 +31,6 @@ function setupResponsiveLayout() {
 }
 setupResponsiveLayout();
 
-// Background music toggle -- moved here from the landing page (per
-// feedback, this page is the arcade itself, the landing page should stay
-// quiet). No persistence across visits, same reasoning as every other
-// audio toggle in this project: the browser blocks autoplay regardless of
-// what was remembered, so there was never anything to resume unattended.
-function setupMusicToggle() {
-  const btn = document.getElementById('musicToggle');
-  const bgm = document.getElementById('bgm');
-  if (!btn || !bgm) return;
-  bgm.volume = 0.35;
-  let on = false;
-  btn.addEventListener('click', () => {
-    on = !on;
-    btn.setAttribute('aria-pressed', String(on));
-    if (on) bgm.play().catch(() => {});
-    else bgm.pause();
-  });
-}
-setupMusicToggle();
-
 // Real Fullscreen API -- the actual browser chrome (address bar, tabs)
 // only goes away in a browser that supports this at all (mainly Android
 // Chrome; iOS Safari doesn't implement it for an arbitrary element, only
@@ -100,6 +80,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const popupOverlay = document.getElementById('popupOverlay');
   const popupIframe = document.getElementById('popupIframe');
   const popupClose = document.getElementById('popupClose');
+
+  // Same new Audio() + currentTime-reset pattern used across the member
+  // games (e.g. games/pham-hoai-an/sketch.js) so a rapid double-press
+  // restarts the clip instead of being ignored while the previous play is
+  // still finishing.
+  const sfxButton = new Audio('../assets/button.wav');
+  const sfxRandom = new Audio('../assets/random-game.wav');
+  function playSfx(sound) {
+    sound.currentTime = 0;
+    sound.play().catch(() => {});
+  }
 
   const CAROUSEL = [
     { id: 'random', kind: 'random' },
@@ -213,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function confirmCarousel() {
     const item = CAROUSEL[carouselIndex];
     if (item.kind === 'exit') { window.location.href = '../index.html'; return; }
-    if (item.kind === 'random') { spinRandom(); return; }
+    if (item.kind === 'random') { playSfx(sfxRandom); spinRandom(); return; }
     openPopup(item);
   }
 
@@ -221,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mode === 'spinning') return;
     arcadeButton.classList.add('is-pressed');
     setTimeout(() => arcadeButton.classList.remove('is-pressed'), 220);
+    playSfx(sfxButton);
     confirmCarousel();
   });
 

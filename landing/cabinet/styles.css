@@ -387,52 +387,10 @@ body {
 
 .popup-close:hover { background: rgba(255, 255, 255, 0.24); }
 
-/* -------------------- music toggle -------------------- */
-/* Same speaker-glyph pattern as games/tuan-hung's #sound-toggle and the
-   toggle this used to sit on landing/index.html before moving here --
-   unmuted: waves show, X hidden; muted (the default): waves hidden, X
-   shows. Fixed to the real viewport's own top-left corner, above
-   everything else on the page (z-index above .slide's own stacking, and
-   above #rotate-prompt is unnecessary since that overlay hides .stage
-   itself, not this button). */
-.music-toggle {
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 6px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(187, 232, 251, 0.16);
-  color: #bbe8fb;
-  cursor: pointer;
-}
-
-.music-toggle:hover {
-  background: rgba(187, 232, 251, 0.28);
-}
-
-.music-toggle-icon {
-  width: 100%;
-  height: 100%;
-}
-
-.music-toggle[aria-pressed="true"] .music-mute-x {
-  display: none;
-}
-
-.music-toggle[aria-pressed="false"] .music-waves {
-  display: none;
-}
-
 /* -------------------- fullscreen toggle -------------------- */
-/* Mirrors .music-toggle exactly, just the opposite corner. Starts
-   [hidden] -- app.js only reveals it once it's confirmed the
+/* Fixed to the real viewport's own top-right corner, same reasoning as
+   the (now-removed) music toggle that used to mirror it on the left.
+   Starts [hidden] -- app.js only reveals it once it's confirmed the
    Fullscreen API actually exists in this browser, so it's simply never
    there to tap on a browser that couldn't do anything with it anyway. */
 .fullscreen-toggle {
