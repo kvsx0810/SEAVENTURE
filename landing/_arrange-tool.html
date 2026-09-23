@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEAVENTURE - Sắp xếp cá & bong bóng (tool tạm)</title>
+<style>
+  :root {
+    --ink: #021427;
+    --paper: #f4fafd;
+    --line: #d7e9f2;
+    --accent: #11aef3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 20px 20px 80px;
+  }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  .lede {
+    max-width: 780px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #35506b;
+    margin: 0 0 18px;
+  }
+  .lede code { background: #e4f2fa; padding: 1px 5px; border-radius: 4px; }
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    padding: 10px 0;
+    z-index: 5;
+    border-bottom: 1px solid var(--line);
+  }
+  button {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button:hover { filter: brightness(0.97); }
+  .status { font-size: 13px; color: #35506b; }
+
+  .section-block {
+    margin-bottom: 34px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .section-block h2 {
+    font-size: 14px;
+    margin: 0;
+    padding: 10px 14px;
+    background: #e4f2fa;
+    border-bottom: 1px solid var(--line);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .frames-row {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 16px;
+  }
+  .frame-card { flex: none; }
+  .frame-card .label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #35506b;
+  }
+  .frame-card iframe {
+    display: block;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  textarea#jsonOut {
+    width: 100%;
+    max-width: 900px;
+    height: 320px;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: #fff;
+  }
+</style>
+</head>
+<body>
+
+<h1>Sắp xếp cá &amp; bong bóng trang trí -- tool tạm</h1>
+<p class="lede">
+  Mỗi section có 2 khung: <strong>Desktop</strong> (rộng 1800px, để lộ khoảng
+  trống 2 bên nếu ông muốn thả cá/bong bóng tràn ra ngoài như hiện tại) và
+  <strong>Mobile</strong> (rộng 390px). Đây là <em>trang thật</em> đang dùng
+  <code>style.css</code> thật, không phải hình chụp -- kéo-thả trực tiếp
+  từng con cá/bong bóng tới vị trí ông muốn. Double-click một con để trả nó
+  về vị trí gốc hiện tại. Xong hết thì bấm <strong>Copy JSON</strong> và gửi
+  lại cho tui, tui sẽ áp thẳng vào <code>style.css</code>.
+  (File này không thuộc trang web thật, không cần xoá nếu ông muốn sắp lại
+  sau này -- tên bắt đầu bằng <code>_</code> để không lẫn với trang thật.)
+</p>
+
+<div class="toolbar">
+  <button class="primary" id="exportBtn">Xuất JSON</button>
+  <button id="copyBtn">Copy JSON</button>
+  <button id="resetBtn">Reset tất cả về vị trí gốc</button>
+  <span class="status" id="status"></span>
+</div>
+
+<div id="sections"></div>
+
+<h2 style="font-size:14px;margin:0 0 8px;">JSON kết quả</h2>
+<textarea id="jsonOut" readonly placeholder="Bấm &quot;Xuất JSON&quot; sau khi sắp xếp xong..."></textarea>
+
+<script>
+  const SECTIONS = [
+    { key: 'intro', title: 'Intro (team)' },
+    { key: 'sdg', title: 'SDG 14 overview' },
+    { key: 'quote', title: 'Quote' },
+    { key: 'cta', title: 'CTA (change habits)' },
+    { key: 'explainer', title: 'Explainer paragraph' },
+    { key: 'games', title: 'Games / arcade' }
+  ];
+  const VIEWPORTS = [
+    { key: 'desktop', label: 'Desktop (1800px)', width: 1800, height: 900, scale: 0.42 },
+    { key: 'mobile', label: 'Mobile (390px)', width: 390, height: 760, scale: 0.85 }
+  ];
+
+  const sectionsEl = document.getElementById('sections');
+  const frameRefs = []; // { key: 'sdg:desktop', el: iframeElement }
+
+  SECTIONS.forEach((sec) => {
+    const block = document.createElement('div');
+    block.className = 'section-block';
+    const h2 = document.createElement('h2');
+    h2.textContent = sec.title;
+    block.appendChild(h2);
+
+    const row = document.createElement('div');
+    row.className = 'frames-row';
+
+    VIEWPORTS.forEach((vp) => {
+      const card = document.createElement('div');
+      card.className = 'frame-card';
+      const label = document.createElement('div');
+      label.className = 'label';
+      label.textContent = vp.label;
+      card.appendChild(label);
+
+      // Real width/height as iframe attributes (so CSS media queries and
+      // svh/vh inside the frame evaluate against real numbers), then
+      // visually shrunk with a scaled wrapper so a 1800px frame still
+      // fits on screen -- the wrapper's own box is sized to the SCALED
+      // footprint so it doesn't leave a huge blank gap.
+      const wrap = document.createElement('div');
+      wrap.style.width = (vp.width * vp.scale) + 'px';
+      wrap.style.height = (vp.height * vp.scale) + 'px';
+      wrap.style.overflow = 'hidden';
+      wrap.style.borderRadius = '8px';
+
+      const iframe = document.createElement('iframe');
+      iframe.src = '_arrange-frame.html?section=' + sec.key;
+      iframe.width = vp.width;
+      iframe.height = vp.height;
+      iframe.style.transform = 'scale(' + vp.scale + ')';
+      iframe.style.transformOrigin = 'top left';
+      iframe.style.border = 'none';
+
+      wrap.appendChild(iframe);
+      card.appendChild(wrap);
+      row.appendChild(card);
+
+      frameRefs.push({ key: sec.key + ':' + vp.key, el: iframe });
+    });
+
+    block.appendChild(row);
+    sectionsEl.appendChild(block);
+  });
+
+  // Dragging happens INSIDE each iframe's own document (mouse coordinates
+  // there aren't affected by the CSS transform:scale() on the iframe
+  // element itself, since that scale only affects how the iframe is
+  // painted into this page, not the iframe's own internal coordinate
+  // system) -- so positions read back via postMessage are already correct
+  // percentages, no un-scaling needed here.
+
+  function requestPositions(iframeEl) {
+    return new Promise((resolve) => {
+      const requestId = Math.random().toString(36).slice(2);
+      function handler(e) {
+        if (e.source === iframeEl.contentWindow && e.data && e.data.type === 'export-response' && e.data.requestId === requestId) {
+          window.removeEventListener('message', handler);
+          resolve(e.data.positions);
+        }
+      }
+      window.addEventListener('message', handler);
+      iframeEl.contentWindow.postMessage({ type: 'export-request', requestId }, '*');
+      setTimeout(() => { window.removeEventListener('message', handler); resolve(null); }, 4000);
+    });
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', async () => {
+    document.getElementById('status').textContent = 'Đang đọc vị trí...';
+    const result = {};
+    for (const ref of frameRefs) {
+      const [sectionKey, vpKey] = ref.key.split(':');
+      const positions = await requestPositions(ref.el);
+      if (!positions) continue;
+      Object.entries(positions).forEach(([selector, pos]) => {
+        if (!result[selector]) result[selector] = {};
+        result[selector][vpKey] = pos;
+      });
+    }
+    document.getElementById('jsonOut').value = JSON.stringify(result, null, 2);
+    document.getElementById('status').textContent = 'Xong -- ' + Object.keys(result).length + ' element.';
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const text = document.getElementById('jsonOut').value;
+    if (!text) { document.getElementById('status').textContent = 'Chưa có JSON, bấm "Xuất JSON" trước đã.'; return; }
+    try {
+      await navigator.clipboard.writeText(text);
+      document.getElementById('status').textContent = 'Đã copy JSON vào clipboard.';
+    } catch (e) {
+      document.getElementById('jsonOut').select();
+      document.getElementById('status').textContent = 'Không tự copy được -- đã bôi đen sẵn, Ctrl+C thủ công.';
+    }
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    frameRefs.forEach((ref) => ref.el.contentWindow.postMessage({ type: 'reset-all' }, '*'));
+    document.getElementById('status').textContent = 'Đã reset về vị trí gốc trong style.css.';
+  });
+</script>
+</body>
+</html>
