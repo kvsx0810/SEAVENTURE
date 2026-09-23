@@ -310,10 +310,6 @@ body {
   position: relative;
   width: 82%;
   aspect-ratio: 16 / 9;
-  background: #000;
-  border-radius: 0.6cqw;
-  box-shadow: 0 0 4cqw rgba(0, 0, 0, 0.6);
-  overflow: hidden;
   transform: scale(0.92);
   opacity: 0;
   transition: transform 0.35s ease, opacity 0.35s ease;
@@ -324,7 +320,23 @@ body {
   opacity: 1;
 }
 
-.popup-frame iframe {
+/* The actual black/rounded/clipped game surface -- split out from
+   .popup-frame so .popup-close (a sibling, not a child of this) can sit
+   fully outside it instead of floating over the top-right corner of
+   whatever game is loaded, which on more than one game landed right on
+   top of that game's own top-right button (e.g. Last Catch's info
+   toggle). .popup-frame itself carries no overflow:hidden, so a
+   negatively-offset sibling isn't clipped away. */
+.popup-screen {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  border-radius: 0.6cqw;
+  box-shadow: 0 0 4cqw rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.popup-screen iframe {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -334,8 +346,11 @@ body {
 
 .popup-close {
   position: absolute;
-  top: 1.5%;
-  right: 1.5%;
+  /* fully outside .popup-screen's box (own size + a little gap), sitting
+     over the dimmed backdrop margin around the frame instead of over the
+     game itself -- see the comment on .popup-screen above */
+  top: -3.4cqw;
+  right: -3.4cqw;
   width: 2.8cqw;
   height: 2.8cqw;
   padding: 0;
@@ -534,10 +549,17 @@ body {
     width: 100vw;
     height: 100svh;
     aspect-ratio: unset;
+  }
+
+  .popup-screen {
     border-radius: 0;
     box-shadow: none;
   }
 
+  /* No backdrop margin left to float in once the frame goes fullscreen
+     (unlike the desktop -3.4cqw placement above), so this necessarily
+     sits back over the game's own corner here -- there's nowhere else
+     for it to go on a phone screen. */
   .popup-close {
     top: 12px;
     right: 12px;
