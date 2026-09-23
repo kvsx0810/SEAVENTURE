@@ -2,11 +2,11 @@
 **Version 2.0** — 21/08/2026
 
 ## Description
-*SEAVENTURE* is a group webpage built with HTML, CSS and JavaScript, designed as a virtual arcade cabinet promoting SDG 14: Life Below Water. The curved cabinet screen hosts five individually authored generative art pieces, one per team member, browsed as a carousel and launched inside the cabinet screen. Each piece is a separate p5.js sketch exploring its own angle on ocean health, sitting alongside shared framing content (SDG overview, target, quote and call to action) on the main page.
+*SEAVENTURE* is a group webpage built with HTML, CSS and JavaScript, promoting SDG 14: Life Below Water. The landing page carries the shared framing content (SDG overview, target, quote and call to action) and leads into a virtual arcade cabinet, whose curved screen hosts five individually authored generative art pieces, one per team member, browsed as a carousel and launched inside the cabinet screen. Each piece is a separate p5.js sketch exploring its own angle on ocean health.
 
 ## Usage Notes
-- Open the webpage in a browser to see the arcade cabinet and its shared SDG 14 framing content.
-- Use the on-screen joystick (left/right) to browse the deck of games, and the center arcade button to open the highlighted game inside the cabinet screen.
+- Open the webpage in a browser to see the landing page and its shared SDG 14 framing content, then press START (or a game link in the footer) to enter the arcade cabinet.
+- Inside the cabinet, use the on-screen joystick (left/right) to browse the deck of games, and the center arcade button to open the highlighted game inside the cabinet screen.
 - Each game keeps its own controls and rules once opened; see the individual game for details.
 - The `games/` folder contains one subfolder per team member, each a self-contained p5.js project:
   - `games/kieu-phuong` — *Mr. Bartholomew Fishington's Ocean Cleanup* (Kiều Phương)
@@ -18,7 +18,7 @@
 ## Installation Instructions
 1. Unzip the project folder.
 2. Start a local web server in the root directory (e.g. using VS Code's "Live Server" extension, or `python -m http.server`).
-3. Open `index.html` in your browser to view the arcade cabinet and its games.
+3. Open `index.html` in your browser to view the landing page, and follow it into the arcade cabinet (`cabinet/index.html`) to browse and play the games.
 4. No external dependencies or plugin installation is required beyond an internet connection to load the p5.js library (loaded via CDN by each game).
 
 ## Documentation
@@ -36,7 +36,7 @@ This project is licensed under the GPL 3.0 license. See the `LICENSE` file for m
 - Trịnh Tuấn Hưng
 - Tiêu Dĩnh Ngọc
 
-The shared arcade cabinet page (`index.html`, `app.js`, `styles.css`) was built by Trịnh Tuấn Hưng; each subfolder under `games/` is authored and owned by the member named above.
+The shared landing page (`index.html`, `style.css`) and arcade cabinet (`cabinet/`) were built by Trịnh Tuấn Hưng; each subfolder under `games/` is authored and owned by the member named above.
 
 ## Contact Information
 For questions, feedback, or corrections, please contact:

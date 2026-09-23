@@ -1,5 +1,5 @@
-// Shared by both landing/index.html (data-transition-mode="depart") and
-// landing/cabinet/index.html (data-transition-mode="arrive"). A plain
+// Shared by both index.html (data-transition-mode="depart") and
+// cabinet/index.html (data-transition-mode="arrive"). A plain
 // multi-page site has no real route transition, so this fakes one: the
 // landing page slides a full-screen mascot overlay UP to cover the
 // screen before navigating into the cabinet, and the cabinet's own copy

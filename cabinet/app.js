@@ -96,11 +96,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const CAROUSEL = [
     { id: 'random', kind: 'random' },
-    { id: 'fishy-situation', kind: 'game', label: 'A Fishy Situation', thumb: '../../assets/images/KieuPhuongThumbnail.png', src: 'https://kieuphuonggg.github.io/AFishySituu/' },
-    { id: 'embrace', kind: 'game', label: 'Embrace', thumb: '../../assets/images/TungPhuongThumbnail.png', src: 'https://phuongtung06.github.io/COMM2754-2026-S2-A3w12-Embrace-code/' },
-    { id: 'breath-of-the-ocean', kind: 'game', label: 'Breath of the Ocean', thumb: '../../assets/images/AnPhamThumbnail.png', src: 'https://anphamb.github.io/Breath-of-the-Ocean/' },
-    { id: 'the-last-catch', kind: 'game', label: 'The Last Catch', thumb: '../../assets/images/TuanHungThumbnail.png', src: '../../games/tuan-hung/index.html' },
-    { id: 'reeflect', kind: 'game', label: 'Reeflect', thumb: '../../assets/images/TieuDinhNgocThumbnail.png?v=3', src: 'https://ngoctieu0207.github.io/reeflect.2/' },
+    { id: 'fishy-situation', kind: 'game', label: 'A Fishy Situation', thumb: '../assets/images/KieuPhuongThumbnail.png', src: 'https://kieuphuonggg.github.io/AFishySituu/' },
+    { id: 'embrace', kind: 'game', label: 'Embrace', thumb: '../assets/images/TungPhuongThumbnail.png', src: 'https://phuongtung06.github.io/COMM2754-2026-S2-A3w12-Embrace-code/' },
+    { id: 'breath-of-the-ocean', kind: 'game', label: 'Breath of the Ocean', thumb: '../assets/images/AnPhamThumbnail.png', src: 'https://anphamb.github.io/Breath-of-the-Ocean/' },
+    { id: 'the-last-catch', kind: 'game', label: 'The Last Catch', thumb: '../assets/images/TuanHungThumbnail.png', src: '../games/tuan-hung/index.html' },
+    { id: 'reeflect', kind: 'game', label: 'Reeflect', thumb: '../assets/images/TieuDinhNgocThumbnail.png?v=3', src: 'https://ngoctieu0207.github.io/reeflect.2/' },
     { id: 'exit', kind: 'exit' }
   ];
   const ENTRY_INDEX = CAROUSEL.findIndex((it) => it.kind === 'random');

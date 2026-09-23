@@ -425,7 +425,7 @@ main {
 }
 
 /* -------------------- decorations -------------------- */
-/* Hand-arranged in landing/_arrange-tool.html (a local-only design tool,
+/* Hand-arranged in _arrange-tool.html (a local-only design tool,
    not part of the shipped site -- see its own header comment) and
    exported as JSON, one entry per fish/bubble with its own real
    top/left/size/rotation/flip. Two independent sets per section --

@@ -363,7 +363,7 @@ body {
   left: 0;
   right: 0;
   /* 100svh, not inset:0's implicit bottom -- see the matching note on
-     landing/style.css's own .page-transition for why (a phone's address
+     style.css's own .page-transition for why (a phone's address
      bar can be in a different state at the end of that page's depart
      animation vs the start of this page's arrive one, otherwise). */
   height: 100svh;
@@ -375,7 +375,7 @@ body {
   transform: translateY(0);
   pointer-events: none;
   /* NOTE: no will-change:transform here -- see the matching note on
-     landing/style.css's own .page-transition for why it was removed
+     style.css's own .page-transition for why it was removed
      (caught it causing a worse bug: this element rendering as a solid
      black rectangle mid-scroll). */
 }
@@ -477,7 +477,7 @@ body {
 }
 
 /* Same brand gradient the rest of SEAVENTURE uses on a dark ground (dark
-   mode's --brand-grad-1/2 in landing/style.css -- the cabinet has no
+   mode's --brand-grad-1/2 in style.css -- the cabinet has no
    light/dark toggle of its own, so those tokens are inlined directly
    here rather than duplicating a whole theming system for one string). */
 #rotate-text {
