@@ -415,12 +415,107 @@ section[id] {
   color: transparent;
 }
 
-/* -------------------- small reusable decorations -------------------- */
-/* The old hand-placed .deco/.deco-bubble/.deco-fish rules (and every
-   per-section placement override below each section's own block) were
-   removed per feedback -- being redesigned from scratch with
-   landing/_arrange-tool.html (see that file's own header comment).
-   Re-add rules here once a new arrangement is ready to ship. */
+/* main (not html/body -- those are ancestors of .site-header and clipping
+   them there is exactly what broke position:sticky once before, see git
+   history) clips any decoration below that bleeds past the viewport
+   before its section has margin to bleed into. See the decorations
+   block right below for the full reasoning. */
+main {
+  overflow-x: hidden;
+}
+
+/* -------------------- decorations -------------------- */
+/* Hand-arranged in landing/_arrange-tool.html (a local-only design tool,
+   not part of the shipped site -- see its own header comment) and
+   exported as JSON, one entry per fish/bubble with its own real
+   top/left/size/rotation/flip. Two independent sets per section --
+   deco--desktop and deco--mobile -- since the count and arrangement
+   genuinely differ per viewport, not just position; toggled by the same
+   640px breakpoint every other mobile-only rule in this file uses.
+
+   Several instances are deliberately centered PAST a section's own edge
+   (left below 0% or above 100%) to bleed into the page's outer margin --
+   but that margin only exists once the section has actually hit its own
+   max-width cap; below that, the exact same instance would otherwise
+   push real horizontal scroll onto the page (see git history: this bit
+   the old hand-placed .sdg decorations once already). Fixed at the
+   source instead of re-deriving a safe fallback value per instance:
+   <main> (a sibling of .site-header, not an ancestor, so this can't
+   touch its position:sticky/GPU-layer setup at all) clips its own
+   horizontal overflow, so anything bleeding past the viewport is simply
+   cropped there until real margin exists to bleed into -- the exact
+   same visual result the old min-width:1400px override achieved, but
+   correct at every width and every instance's size, not just the ones
+   someone thought to gate by hand. */
+.deco {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  display: block;
+}
+.deco--mobile { display: none; }
+@media (max-width: 640px) {
+  .deco--desktop { display: none; }
+  .deco--mobile { display: block; }
+}
+
+.intro .deco-d1 { width: 150px; aspect-ratio: 207 / 204; top: 16.1%; left: 110%; transform: translate(-50%, -50%) rotate(-4deg) scaleX(1) scaleY(1); }
+.intro .deco-d2 { width: 56px; aspect-ratio: 207 / 204; top: 29.7%; left: 118%; transform: translate(-50%, -50%) rotate(9deg) scaleX(1) scaleY(1); }
+.intro .deco-m1 { width: 70px; aspect-ratio: 207 / 204; top: 22%; left: 79.4%; transform: translate(-50%, -50%) rotate(9deg) scaleX(1) scaleY(1); }
+.intro .deco-m2 { width: 36px; aspect-ratio: 207 / 204; top: 31.9%; left: 86.5%; transform: translate(-50%, -50%) rotate(-8deg) scaleX(1) scaleY(1); }
+
+.sdg .deco-d1 { width: 198px; aspect-ratio: 207 / 204; top: 20%; left: -9.5%; transform: translate(-50%, -50%) rotate(4deg) scaleX(1) scaleY(1); }
+.sdg .deco-d2 { width: 68px; aspect-ratio: 207 / 204; top: 10.5%; left: 4.3%; transform: translate(-50%, -50%) rotate(-8deg) scaleX(1) scaleY(1); }
+.sdg .deco-d3 { width: 108px; aspect-ratio: 176 / 122; top: 8.3%; left: 100%; transform: translate(-50%, -50%) rotate(7deg) scaleX(1) scaleY(1); }
+.sdg .deco-d4 { width: 138px; aspect-ratio: 125 / 124; top: 20%; left: 96.8%; transform: translate(-50%, -50%) rotate(5deg) scaleX(1) scaleY(1); }
+.sdg .deco-d5 { width: 66px; aspect-ratio: 203 / 263; top: 24.3%; left: 110%; transform: translate(-50%, -50%) rotate(45deg) scaleX(1) scaleY(1); }
+.sdg .deco-d6 { width: 108px; aspect-ratio: 96 / 36; top: 12.4%; left: 114.4%; transform: translate(-50%, -50%) rotate(-1deg) scaleX(1) scaleY(1); }
+.sdg .deco-d7 { width: 124px; aspect-ratio: 176 / 122; top: 84.7%; left: -2.6%; transform: translate(-50%, -50%) rotate(-5deg) scaleX(-1) scaleY(-1); }
+.sdg .deco-d8 { width: 76px; aspect-ratio: 96 / 36; top: 93.8%; left: -8.7%; transform: translate(-50%, -50%) rotate(-8deg) scaleX(-1) scaleY(-1); }
+.sdg .deco-m1 { width: 96px; aspect-ratio: 207 / 204; top: 20%; left: 16.7%; transform: translate(-50%, -50%) rotate(-7deg) scaleX(1) scaleY(1); }
+.sdg .deco-m2 { width: 36px; aspect-ratio: 207 / 204; top: 11.5%; left: 35%; transform: translate(-50%, -50%) rotate(-4deg) scaleX(1) scaleY(1); }
+.sdg .deco-m3 { width: 56px; aspect-ratio: 125 / 124; top: 20.6%; left: 69.4%; transform: translate(-50%, -50%) rotate(-1deg) scaleX(1) scaleY(1); }
+.sdg .deco-m4 { width: 46px; aspect-ratio: 176 / 122; top: 12.6%; left: 72%; transform: translate(-50%, -50%) rotate(3deg) scaleX(1) scaleY(1); }
+.sdg .deco-m5 { width: 40px; aspect-ratio: 203 / 263; top: 21.9%; left: 91.6%; transform: translate(-50%, -50%) rotate(45deg) scaleX(1) scaleY(1); }
+.sdg .deco-m6 { width: 56px; aspect-ratio: 96 / 36; top: 12.1%; left: 90%; transform: translate(-50%, -50%) rotate(-9deg) scaleX(1) scaleY(1); }
+.sdg .deco-m7 { width: 72px; aspect-ratio: 176 / 122; top: 77%; left: 20%; transform: translate(-50%, -50%) rotate(-7deg) scaleX(-1) scaleY(-1); }
+.sdg .deco-m8 { width: 36px; aspect-ratio: 125 / 124; top: 85.8%; left: 10%; transform: translate(-50%, -50%) rotate(21deg) scaleX(-1) scaleY(-1); }
+
+.quote .deco-d1 { width: 124px; aspect-ratio: 203 / 263; top: 25%; left: 3.1%; transform: translate(-50%, -50%) rotate(20deg) scaleX(1) scaleY(1); }
+.quote .deco-d2 { width: 100px; aspect-ratio: 96 / 36; top: 10%; left: 10%; transform: translate(-50%, -50%) rotate(-6deg) scaleX(1) scaleY(1); }
+.quote .deco-d3 { width: 240px; aspect-ratio: 207 / 204; top: 80%; left: 106.4%; transform: translate(-50%, -50%) rotate(18deg) scaleX(1) scaleY(1); }
+.quote .deco-d4 { width: 104px; aspect-ratio: 207 / 204; top: 100%; left: 96.5%; transform: translate(-50%, -50%) rotate(-5deg) scaleX(1) scaleY(1); }
+.quote .deco-m1 { width: 70px; aspect-ratio: 203 / 263; top: 30%; left: 20%; transform: translate(-50%, -50%) rotate(16deg) scaleX(1) scaleY(1); }
+.quote .deco-m2 { width: 56px; aspect-ratio: 96 / 36; top: 20%; left: 30%; transform: translate(-50%, -50%) rotate(-9deg) scaleX(1) scaleY(1); }
+.quote .deco-m3 { width: 142px; aspect-ratio: 207 / 204; top: 73.7%; left: 93.2%; transform: translate(-50%, -50%) rotate(14deg) scaleX(1) scaleY(1); }
+.quote .deco-m4 { width: 50px; aspect-ratio: 207 / 204; top: 87.2%; left: 73.6%; transform: translate(-50%, -50%) rotate(9deg) scaleX(1) scaleY(1); }
+
+.cta-section .deco-d1 { width: 194px; aspect-ratio: 207 / 204; top: 72.2%; left: 89.8%; transform: translate(-50%, -50%) rotate(1deg) scaleX(1) scaleY(1); }
+.cta-section .deco-d2 { width: 88px; aspect-ratio: 207 / 204; top: 59.52%; left: 83.8%; transform: translate(-50%, -50%) rotate(5deg) scaleX(1) scaleY(1); }
+.cta-section .deco-d3 { width: 150px; aspect-ratio: 125 / 124; top: 13.6%; left: 18.4%; transform: translate(-50%, -50%) rotate(-40deg) scaleX(-1) scaleY(1); }
+.cta-section .deco-d4 { width: 70px; aspect-ratio: 203 / 263; top: 21.8%; left: 12.2%; transform: translate(-50%, -50%) rotate(45deg) scaleX(-1) scaleY(-1); }
+.cta-section .deco-m1 { width: 68px; aspect-ratio: 207 / 204; top: 80%; left: 79.9%; transform: translate(-50%, -50%) rotate(-6deg) scaleX(1) scaleY(1); }
+.cta-section .deco-m2 { width: 36px; aspect-ratio: 207 / 204; top: 71.3%; left: 70%; transform: translate(-50%, -50%) rotate(7deg) scaleX(1) scaleY(1); }
+.cta-section .deco-m3 { width: 60px; aspect-ratio: 125 / 124; top: 30%; left: 20.1%; transform: translate(-50%, -50%) rotate(-45deg) scaleX(-1) scaleY(1); }
+.cta-section .deco-m4 { width: 38px; aspect-ratio: 176 / 122; top: 35.7%; left: 12.7%; transform: translate(-50%, -50%) rotate(30deg) scaleX(-1) scaleY(-1); }
+
+.explainer .deco-d1 { width: 240px; aspect-ratio: 207 / 204; top: 80%; left: 1%; transform: translate(-50%, -50%) rotate(9deg) scaleX(1) scaleY(1); }
+.explainer .deco-d2 { width: 86px; aspect-ratio: 207 / 204; top: 55.9%; left: -4.8%; transform: translate(-50%, -50%) rotate(-7deg) scaleX(1) scaleY(1); }
+.explainer .deco-d3 { width: 240px; aspect-ratio: 207 / 204; top: 20%; left: 106.9%; transform: translate(-50%, -50%) rotate(31deg) scaleX(1) scaleY(1); }
+.explainer .deco-d4 { width: 50px; aspect-ratio: 207 / 204; top: 52.96%; left: 100%; transform: translate(-50%, -50%) rotate(9deg) scaleX(1) scaleY(1); }
+.explainer .deco-m1 { width: 106px; aspect-ratio: 207 / 204; top: 90%; left: 24.5%; transform: translate(-50%, -50%) rotate(0deg) scaleX(1) scaleY(1); }
+.explainer .deco-m2 { width: 36px; aspect-ratio: 207 / 204; top: 74.7%; left: 12.7%; transform: translate(-50%, -50%) rotate(8deg) scaleX(1) scaleY(1); }
+.explainer .deco-m3 { width: 158px; aspect-ratio: 207 / 204; top: 20%; left: 93.9%; transform: translate(-50%, -50%) rotate(16deg) scaleX(1) scaleY(1); }
+.explainer .deco-m4 { width: 56px; aspect-ratio: 207 / 204; top: 29%; left: 58.89%; transform: translate(-50%, -50%) rotate(4deg) scaleX(1) scaleY(1); }
+
+.games .deco-d1 { width: 126px; aspect-ratio: 176 / 122; top: 12.9%; left: 38.9%; transform: translate(-50%, -50%) rotate(-1deg) scaleX(1) scaleY(1); }
+.games .deco-d2 { width: 56px; aspect-ratio: 125 / 124; top: 3.4%; left: 43.8%; transform: translate(-50%, -50%) rotate(17deg) scaleX(1) scaleY(1); }
+.games .deco-d3 { width: 88px; aspect-ratio: 203 / 263; top: 72.2%; left: 8.2%; transform: translate(-50%, -50%) rotate(25deg) scaleX(-1) scaleY(-1); }
+.games .deco-d4 { width: 56px; aspect-ratio: 96 / 36; top: 81%; left: 4.9%; transform: translate(-50%, -50%) rotate(-10deg) scaleX(-1) scaleY(-1); }
+.games .deco-m1 { width: 46px; aspect-ratio: 203 / 263; top: 36.4%; left: 30%; transform: translate(-50%, -50%) rotate(24deg) scaleX(-1) scaleY(-1); }
+.games .deco-m2 { width: 42px; aspect-ratio: 96 / 36; top: 41.8%; left: 27.8%; transform: translate(-50%, -50%) rotate(-20deg) scaleX(-1) scaleY(-1); }
+.games .deco-m3 { width: 76px; aspect-ratio: 176 / 122; top: 4.6%; left: 77.7%; transform: translate(-50%, -50%) rotate(8deg) scaleX(1) scaleY(1); }
+.games .deco-m4 { width: 34px; aspect-ratio: 125 / 124; top: 6.8%; left: 87.1%; transform: translate(-50%, -50%) rotate(5deg) scaleX(1) scaleY(1); }
 
 /* -------------------- team intro -------------------- */
 .intro {
